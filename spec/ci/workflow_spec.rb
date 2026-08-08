@@ -33,4 +33,10 @@ RSpec.describe 'the CI workflow' do
     expect(workflow.fetch('permissions')).to eq('contents' => 'read')
     expect(job.fetch('strategy').fetch('fail-fast')).to be(false)
   end
+
+  it 'locks dependencies for both CI operating-system families' do
+    lockfile = File.read(File.expand_path('../../Gemfile.lock', __dir__))
+
+    expect(lockfile).to include("  x64-mingw-ucrt\n", "  x86_64-linux\n")
+  end
 end
