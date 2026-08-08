@@ -40,6 +40,17 @@ RSpec.describe ArchUnit::Common::Extraction::Edge do
     expect(value.import_kinds).to eq([:require])
   end
 
+  it 'normalizes identifier separators' do
+    value = described_class.new(
+      source: 'lib\\source.rb',
+      target: 'lib\\nested/target.rb',
+      external: false
+    )
+
+    expect(value.source).to eq('lib/source.rb')
+    expect(value.target).to eq('lib/nested/target.rb')
+  end
+
   it 'uses no import kinds for a self-edge by default' do
     value = described_class.new(source: 'lib/a.rb', target: 'lib/a.rb', external: false)
 

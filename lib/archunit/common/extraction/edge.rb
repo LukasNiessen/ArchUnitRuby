@@ -22,7 +22,7 @@ module ArchUnit
             raise ArgumentError, "#{attribute} must be a non-empty String"
           end
 
-          value.dup.freeze
+          value.tr('\\', '/').freeze
         end
 
         def validate_external(value)
