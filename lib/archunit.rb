@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'archunit/version'
+require_relative 'archunit/error/technical_error'
+require_relative 'archunit/error/user_error'
 require_relative 'archunit/common/pattern'
 require_relative 'archunit/common/filter'
 require_relative 'archunit/common/pattern_matching'
