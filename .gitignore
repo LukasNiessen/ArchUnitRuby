@@ -1,0 +1,5 @@
+/.bundle/
+/.rubocop_cache/
+/coverage/
+/pkg/
+/vendor/bundle/
