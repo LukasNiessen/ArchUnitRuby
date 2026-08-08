@@ -7,6 +7,8 @@ require_relative 'archunit/common/pattern_matching'
 require_relative 'archunit/common/regex_factory'
 require_relative 'archunit/common/assertion/violation'
 require_relative 'archunit/common/assertion/empty_test_violation'
+require_relative 'archunit/common/fluentapi/check_options'
+require_relative 'archunit/common/fluentapi/checkable'
 require_relative 'archunit/common/extraction/import_kind'
 require_relative 'archunit/common/extraction/edge'
 require_relative 'archunit/common/extraction/graph'
@@ -17,6 +19,8 @@ module ArchUnit
   RegexFactory = Common::RegexFactory
   Violation = Common::Assertion::Violation
   EmptyTestViolation = Common::Assertion::EmptyTestViolation
+  CheckOptions = Common::FluentApi::CheckOptions
+  Checkable = Common::FluentApi::Checkable
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
   Graph = Common::Extraction::Graph
