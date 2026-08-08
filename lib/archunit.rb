@@ -14,6 +14,8 @@ require_relative 'archunit/common/fluentapi/checkable'
 require_relative 'archunit/common/extraction/import_kind'
 require_relative 'archunit/common/extraction/edge'
 require_relative 'archunit/common/extraction/graph'
+require_relative 'archunit/extraction/locate_project'
+require_relative 'archunit/extraction/enumerate_source_files'
 
 module ArchUnit
   Filter = Common::Filter
