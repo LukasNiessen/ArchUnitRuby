@@ -40,8 +40,13 @@ module ArchUnit
         arguments = node.arguments&.arguments || []
         argument = import_argument(arguments, import_kind)
         return unless argument.is_a?(Prism::StringNode)
+        return unless valid_module_name?(argument.unescaped)
 
         @imports << [argument.unescaped, import_kind, node.location.start_line]
+      end
+
+      def valid_module_name?(module_name)
+        !module_name.empty? && !module_name.include?("\0")
       end
 
       def supported_receiver?(node, import_kind)

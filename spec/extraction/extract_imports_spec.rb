@@ -96,6 +96,16 @@ RSpec.describe ArchUnit::Extraction, '.extract_imports' do
     expect(extract).to be_empty
   end
 
+  it 'ignores empty and null-byte dependency names without aborting the file' do
+    create_file('lib/example.rb', <<~'RUBY')
+      require ''
+      require "\0"
+      require 'json'
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(['json'])
+  end
+
   it 'finds dependencies nested inside Ruby constructs' do
     create_file('lib/example.rb', <<~RUBY)
       module Example
