@@ -16,6 +16,9 @@ require_relative 'archunit/common/extraction/edge'
 require_relative 'archunit/common/extraction/graph'
 require_relative 'archunit/extraction/locate_project'
 require_relative 'archunit/extraction/enumerate_source_files'
+require_relative 'archunit/extraction/resolved_import'
+require_relative 'archunit/extraction/resolve_import'
+require_relative 'archunit/extraction/extract_imports'
 
 module ArchUnit
   Filter = Common::Filter
