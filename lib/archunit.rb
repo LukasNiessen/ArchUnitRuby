@@ -19,6 +19,7 @@ require_relative 'archunit/extraction/enumerate_source_files'
 require_relative 'archunit/extraction/resolved_import'
 require_relative 'archunit/extraction/resolve_import'
 require_relative 'archunit/extraction/extract_imports'
+require_relative 'archunit/extraction/extract_dependencies'
 
 module ArchUnit
   Filter = Common::Filter
