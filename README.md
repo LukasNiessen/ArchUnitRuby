@@ -41,6 +41,8 @@ source-to-graph path and the critical-path Files API run today.
 | Slice dependency rules and PlantUML component diagrams | Working |
 | Ruby metric extraction and count measurements | Working |
 | LCOM96a/b, LCOM1-5, and LCOM* cohesion measurements | Working |
+| Distance, coupling, and architectural zone checks | Working |
+| Custom class metrics and `should_satisfy` | Working |
 | Metric threshold rules | Planned |
 | RubyGems installation | Not published yet |
 
@@ -348,6 +350,21 @@ end
 services.lcom.lcom4.measure.each do |measurement|
   puts "#{measurement.identifier}: #{measurement.value} cohesion components"
 end
+
+services.distance.instability.measure.each do |measurement|
+  puts "#{measurement.identifier}: #{measurement.value} instability"
+end
+
+zone_rule = services.distance.not_in_zone_of_pain
+ArchUnit.assert_passes(zone_rule)
+
+focus_rule = services.custom_metric(
+  'member count',
+  'Service classes should remain focused',
+  ->(class_info) { class_info.methods.length + class_info.fields.length }
+).should_satisfy(->(value, class_info) { value < 20 && class_info.name.end_with?('Service') })
+
+ArchUnit.assert_passes(focus_rule)
 ```
 
 Count metrics cover methods and instance fields per class, plus lines of code, statements, imports,
@@ -362,9 +379,18 @@ touching the filesystem: LCOM96a, LCOM96b, LCOM1, LCOM2, LCOM3, LCOM4 connected 
 LCOM5, and LCOM*. Lower normalized values indicate stronger cohesion; LCOM4 reports the number of
 disconnected method groups, where one connected component is cohesive.
 
-This stage intentionally exposes measurements rather than pass/fail rules. The six shared
-threshold verbs (`should_be_below`, `should_be_above`, `should_be`, and their specified variants)
-arrive in the dedicated metric-threshold issue.
+Distance metrics enrich each file with distinct internal incoming and outgoing dependencies from
+the real project graph. Abstractness recognizes Ruby mixin/contract modules with instance behavior
+and classes whose abstract methods use the conventional `raise NotImplementedError` pattern;
+namespace-only modules are excluded. The available values are abstractness, instability, distance
+from the main sequence, coupling factor, and a source-size-normalized distance. Zone guards use the
+conventional low/low and high/high abstractness-instability corners and return structured
+`MetricZoneViolation` values.
+
+`custom_metric(name, description, fn)` is the class-level escape hatch. Its calculation receives
+the complete immutable `ClassInfo`; `measure` returns its values, while `should_satisfy` receives
+both `(value, class_info)` and produces structured violations. The other five shared numeric
+threshold verbs arrive in the dedicated metric-threshold issue.
 
 ## Example repository
 
@@ -380,7 +406,8 @@ executes the native RSpec matcher, a complete named-layer policy, graph queries 
 six renderers, an exported self-contained HTML report, forbidden slice dependencies, and the
 fixture's executable PlantUML architecture contract over the RAG application. Metric integration
 tests extract real RAG service methods and fields, verify count measurements, and calculate all
-eight supported LCOM variants over that source.
+eight supported LCOM variants over that source. They also validate real dependency-derived distance
+values, a zone guard, and a custom class metric end to end.
 
 ## Download tracking
 
@@ -438,9 +465,13 @@ Issues #32 and #33 add immutable Ruby class/file metric extraction, seven count 
 measurement builders, and the full requested LCOM cohesion family. Ruby's missing interface
 concept is omitted explicitly rather than approximated with modules.
 
+Issues #34 and #35 add dependency-derived abstractness, instability, main-sequence distance,
+coupling, normalized distance, executable pain/uselessness zone guards, and custom class metrics
+with their explicit `should_satisfy(value, class_info)` escape hatch.
+
 Not implemented yet:
 
-- metric threshold assertions, custom/distance metrics, and metric reports;
+- the remaining five numeric metric threshold assertions and metric reports;
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
 - additional reporting, logging, and metrics.

@@ -52,7 +52,9 @@ RSpec.describe 'the CI workflow' do
       'ArchUnit.project_slices', "defined_by('lib/(**)/')", 'contain_dependency',
       'to_plantuml', 'adhere_to_diagram', 'export_as_plantuml',
       'ArchUnit.metrics', "for_classes_matching('*MetricsBuilder')",
-      'count.classes.measure', 'lcom.lcom4.measure'
+      'count.classes.measure', 'lcom.lcom4.measure', 'distance.instability.measure',
+      'not_in_zone_of_pain.check', 'ArchUnit::MetricZoneViolation',
+      'custom_metric(', 'should_satisfy', 'ArchUnit.assert_passes(custom_rule)'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')

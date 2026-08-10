@@ -154,6 +154,15 @@ jobs:
             abort if class_counts.empty? || class_counts.none? { |item| item.value.positive? }
             cohesion = metric_scope.lcom.lcom4.measure
             abort if cohesion.empty? || cohesion.any? { |item| item.value < 1 }
+            instability = metric_scope.distance.instability.measure
+            abort if instability.empty? || instability.any? { |item| !item.value.between?(0, 1) }
+            zone_violations = metric_scope.distance.not_in_zone_of_pain.check
+            abort unless zone_violations.all? { |item| item.is_a?(ArchUnit::MetricZoneViolation) }
+            custom_rule = metric_scope.custom_metric(
+              'member count', 'Metric classes must expose members',
+              ->(info) { info.methods.length + info.fields.length }
+            ).should_satisfy(->(value, info) { value.positive? && !info.name.empty? })
+            ArchUnit.assert_passes(custom_rule)
             puts ArchUnit::VERSION
           "
 
