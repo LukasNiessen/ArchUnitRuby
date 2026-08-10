@@ -59,7 +59,7 @@ RSpec.describe 'the CI workflow' do
     command = adapter_step.fetch('run')
 
     expect(command).to include(
-      "require 'rspec/core'", 'include RSpec::Matchers', 'expect(rule).to pass',
+      "require 'rspec/expectations'", 'include RSpec::Matchers', 'expect(rule).to pass',
       "require 'minitest'", 'include Minitest::Assertions',
       'context.assert_passes(rule)', 'context.assertions == 1'
     )

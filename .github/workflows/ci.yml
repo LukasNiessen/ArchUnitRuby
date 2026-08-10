@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           bundle exec ruby -Ilib -e "
-            require 'rspec/core'
+            require 'rspec/expectations'
             require 'archunit'
             include RSpec::Matchers
             rule = Class.new {
