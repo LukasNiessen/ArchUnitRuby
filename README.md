@@ -39,7 +39,9 @@ source-to-graph path and the critical-path Files API run today.
 | Immutable named-layer dependency policies | Working |
 | Dependency graph snapshots, queries, and six report formats | Working |
 | Slice dependency rules and PlantUML component diagrams | Working |
-| Metric rules | Planned |
+| Ruby metric extraction and count measurements | Working |
+| LCOM96a/b, LCOM1-5, and LCOM* cohesion measurements | Working |
+| Metric threshold rules | Planned |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -328,6 +330,42 @@ parent directories. The HTML report is a self-contained offline document with it
 summary, dependency table, and embedded portable-source representations; it makes no network
 requests.
 
+## Source metrics and cohesion
+
+Metric scopes use the same immutable selectors as architecture rules. Calling `measure` performs
+the source scan and returns immutable measurements with the extracted subject, metric name, numeric
+value, and stable project-relative identifier:
+
+```ruby
+services = ArchUnit.metrics('/path/to/project')
+                   .in_folder('app/services')
+                   .for_classes_matching('*Service')
+
+services.count.method_count.measure.each do |measurement|
+  puts "#{measurement.identifier}: #{measurement.value} methods"
+end
+
+services.lcom.lcom4.measure.each do |measurement|
+  puts "#{measurement.identifier}: #{measurement.value} cohesion components"
+end
+```
+
+Count metrics cover methods and instance fields per class, plus lines of code, statements, imports,
+classes, and top-level method definitions per file. Ruby has no interface construct, so
+ArchUnitRuby deliberately does not invent an interface count. A "function" count means a `def`
+written at Ruby's top level; methods inside modules and classes are not counted as functions.
+
+Class extraction recognizes ordinary and singleton methods, nested class/module names,
+`attr_reader`, `attr_writer`, `attr_accessor`, and instance-variable reads and writes. It derives a
+symmetric method-to-field graph from those facts. The LCOM family is then calculated without
+touching the filesystem: LCOM96a, LCOM96b, LCOM1, LCOM2, LCOM3, LCOM4 connected components,
+LCOM5, and LCOM*. Lower normalized values indicate stronger cohesion; LCOM4 reports the number of
+disconnected method groups, where one connected component is cohesive.
+
+This stage intentionally exposes measurements rather than pass/fail rules. The six shared
+threshold verbs (`should_be_below`, `should_be_above`, `should_be`, and their specified variants)
+arrive in the dedicated metric-threshold issue.
+
 ## Example repository
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
@@ -340,7 +378,9 @@ resolution, graph assembly, internal/external classification, caching, executabl
 direct formatting/assertion of its deliberate dependency and custom-predicate violations. It also
 executes the native RSpec matcher, a complete named-layer policy, graph queries and collapsing, all
 six renderers, an exported self-contained HTML report, forbidden slice dependencies, and the
-fixture's executable PlantUML architecture contract over the RAG application.
+fixture's executable PlantUML architecture contract over the RAG application. Metric integration
+tests extract real RAG service methods and fields, verify count measurements, and calculate all
+eight supported LCOM variants over that source.
 
 ## Download tracking
 
@@ -394,9 +434,13 @@ and self-contained HTML rendering.
 Issues #30 and #31 add captured-path and regex slice projections, forbidden slice dependencies,
 PlantUML component-diagram validation, orphan/external modifiers, and reverse diagram generation.
 
+Issues #32 and #33 add immutable Ruby class/file metric extraction, seven count metrics, scoped
+measurement builders, and the full requested LCOM cohesion family. Ruby's missing interface
+concept is omitted explicitly rather than approximated with modules.
+
 Not implemented yet:
 
-- the fluent metric APIs;
+- metric threshold assertions, custom/distance metrics, and metric reports;
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
 - additional reporting, logging, and metrics.

@@ -147,6 +147,13 @@ jobs:
             plantuml_output = File.join(ENV.fetch('RUNNER_TEMP'), 'architecture.puml')
             slices.export_as_plantuml(plantuml_output)
             abort unless File.binread(plantuml_output) == plantuml
+            metric_scope = ArchUnit.metrics
+              .in_folder('lib/archunit/metrics/**')
+              .for_classes_matching('*MetricsBuilder')
+            class_counts = metric_scope.count.classes.measure
+            abort if class_counts.empty? || class_counts.none? { |item| item.value.positive? }
+            cohesion = metric_scope.lcom.lcom4.measure
+            abort if cohesion.empty? || cohesion.any? { |item| item.value < 1 }
             puts ArchUnit::VERSION
           "
 

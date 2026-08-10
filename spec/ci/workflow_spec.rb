@@ -50,7 +50,9 @@ RSpec.describe 'the CI workflow' do
       'include_external_dependencies', 'collapse_to_folder_depth',
       'ArchUnit::GraphReportSnapshot', 'JSON.parse', 'to_csv', 'export_as_html',
       'ArchUnit.project_slices', "defined_by('lib/(**)/')", 'contain_dependency',
-      'to_plantuml', 'adhere_to_diagram', 'export_as_plantuml'
+      'to_plantuml', 'adhere_to_diagram', 'export_as_plantuml',
+      'ArchUnit.metrics', "for_classes_matching('*MetricsBuilder')",
+      'count.classes.measure', 'lcom.lcom4.measure'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')
