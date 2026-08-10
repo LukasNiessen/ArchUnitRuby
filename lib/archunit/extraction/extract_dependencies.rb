@@ -10,8 +10,8 @@ module ArchUnit
   module Extraction
     module_function
 
-    def extract_dependencies(project_root)
-      source_files = enumerate_source_files(project_root)
+    def extract_dependencies(project_root, exclude_patterns: nil)
+      source_files = enumerate_source_files(project_root, exclude_patterns:)
       root = Pathname.new(path_value(project_root)).expand_path.realpath
       extract_dependencies_from(root, source_files)
     end

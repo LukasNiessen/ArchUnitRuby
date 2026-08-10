@@ -65,6 +65,50 @@ RSpec.describe ArchUnit::Extraction, '.enumerate_source_files' do
     )
   end
 
+  it 'supports custom directory and file exclusion globs' do
+    create_file('lib/generated/client.rb')
+    create_file('lib/domain/generated_model.rb')
+    create_file('lib/domain/service.rb')
+
+    files = described_class.enumerate_source_files(
+      @project_root,
+      exclude_patterns: ['lib/generated/**', '**/*_model.rb']
+    )
+
+    expect(files).to eq(['lib/domain/service.rb'])
+  end
+
+  it 'treats an explicit empty exclusion list as an override of the defaults' do
+    create_file('vendor/dependency.rb')
+
+    expect(
+      described_class.enumerate_source_files(@project_root, exclude_patterns: [])
+    ).to eq(['vendor/dependency.rb'])
+  end
+
+  it 'normalizes and deduplicates custom exclusions without mutating the caller' do
+    create_file('generated/hidden.rb')
+    create_file('lib/source.rb')
+    patterns = ['generated\\', 'generated']
+
+    expect(
+      described_class.enumerate_source_files(@project_root, exclude_patterns: patterns)
+    ).to eq(['lib/source.rb'])
+    expect(patterns).to eq(['generated\\', 'generated'])
+  end
+
+  it 'distinguishes root-anchored patterns from basename patterns' do
+    create_file('vendor/root_dependency.rb')
+    create_file('nested/vendor/nested_dependency.rb')
+
+    expect(
+      described_class.enumerate_source_files(@project_root, exclude_patterns: ['/vendor'])
+    ).to eq(['nested/vendor/nested_dependency.rb'])
+    expect(
+      described_class.enumerate_source_files(@project_root, exclude_patterns: ['vendor'])
+    ).to be_empty
+  end
+
   it 'ignores non-Ruby files and case-mismatched extensions' do
     create_file('lib/service.rb')
     create_file('lib/README.md')
@@ -98,6 +142,26 @@ RSpec.describe ArchUnit::Extraction, '.enumerate_source_files' do
       .to raise_error(ArchUnit::UserError, 'project_root must be an existing directory')
     expect { described_class.enumerate_source_files(file) }
       .to raise_error(ArchUnit::UserError, 'project_root must be an existing directory')
+  end
+
+  it 'rejects invalid custom exclusion collections' do
+    expect do
+      described_class.enumerate_source_files(@project_root, exclude_patterns: 'vendor')
+    end.to raise_error(
+      ArchUnit::UserError, 'exclude_patterns must be an Array of non-empty Strings'
+    )
+
+    expect do
+      described_class.enumerate_source_files(@project_root, exclude_patterns: [''])
+    end.to raise_error(
+      ArchUnit::UserError, 'exclude_patterns must be an Array of non-empty Strings'
+    )
+
+    expect do
+      described_class.enumerate_source_files(@project_root, exclude_patterns: ['/'])
+    end.to raise_error(
+      ArchUnit::UserError, 'exclude_patterns must be an Array of non-empty Strings'
+    )
   end
 
   it 'wraps filesystem failures as technical errors' do

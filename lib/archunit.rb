@@ -22,6 +22,7 @@ require_relative 'archunit/extraction/extract_imports'
 require_relative 'archunit/extraction/extract_dependencies'
 require_relative 'archunit/extraction/extract_graph'
 
+# Public ArchUnitRuby API and shared data types.
 module ArchUnit
   Filter = Common::Filter
   PatternMatching = Common::PatternMatching
@@ -33,4 +34,8 @@ module ArchUnit
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
   Graph = Common::Extraction::Graph
+
+  def self.clear_graph_cache
+    Extraction.clear_graph_cache
+  end
 end
