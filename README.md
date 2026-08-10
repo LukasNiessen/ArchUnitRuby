@@ -25,6 +25,7 @@ source-to-graph path runs today; the fluent rule API is the next major part of t
 | Project discovery through a directory, `Gemfile`, or gemspec | Working |
 | Ruby source enumeration with configurable exclusions | Working |
 | Static `require`, `require_relative`, `autoload`, and `load` extraction | Working |
+| Inline and next-line `# archunit: ignore` directives | Working |
 | Internal and external dependency classification | Working |
 | Self-edges and parallel-edge merging | Working |
 | Immutable graph values and graph caching | Working |
@@ -91,6 +92,16 @@ Ruby can compute dependency names dynamically, so calls such as `require depende
 `require "plugins/#{name}"` cannot be resolved reliably without executing application code. They
 are deliberately omitted rather than guessed.
 
+Known compatibility imports can be suppressed inline or on the immediately preceding line. Add
+module names to scope a directive instead of hiding every import on that line:
+
+```ruby
+require 'legacy/client' # archunit: ignore legacy/client
+
+# archunit: ignore experimental/plugin
+require 'experimental/plugin'
+```
+
 ## Target fluent API
 
 The public rule-building API is under development. Its intended shape is an English sentence read
@@ -150,9 +161,9 @@ not fit naturally.
 ## Roadmap and limitations
 
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
-Extraction and graph assembly are complete through issue #11. The next critical-path work covers an
-optional per-line ignore directive and the shared projection layer used by file, layer, and slice
-rules.
+Extraction is complete through issue #12, and issue #13 provides the shared projection values,
+edge relabeling hook, cumulation, and node views. The next critical-path work adds the standard
+per-edge mapping functions and Tarjan/Johnson cycle detection.
 
 Not implemented yet:
 
