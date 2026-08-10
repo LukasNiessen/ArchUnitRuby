@@ -119,6 +119,66 @@ RSpec.describe ArchUnit::Extraction, '.extract_imports' do
     expect(extract.map(&:module_name)).to eq(['support'])
   end
 
+  it 'ignores an import with an inline directive' do
+    create_file('lib/example.rb', <<~RUBY)
+      require 'json' # archunit: ignore
+      require 'set'
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(['set'])
+  end
+
+  it 'applies a standalone directive to the immediately following line' do
+    create_file('lib/example.rb', <<~RUBY)
+      # archunit: ignore
+      require 'json'
+      require 'set'
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(['set'])
+  end
+
+  it 'supports directives scoped to exact modules and path prefixes' do
+    create_file('lib/example.rb', <<~RUBY)
+      require 'json' # archunit: ignore set
+      require 'set' # archunit: ignore set
+      require 'sample/plugin' # archunit: ignore sample, json
+      require 'other/plugin' # archunit: ignore sample
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(%w[json other/plugin])
+  end
+
+  it 'can scope one directive across multiple imports on the same line' do
+    create_file('lib/example.rb', <<~RUBY)
+      require 'json'; require 'set' # archunit: ignore json
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(['set'])
+  end
+
+  it 'recognizes an inline directive anywhere within a multiline import call' do
+    create_file('lib/example.rb', <<~RUBY)
+      require(
+        'json' # archunit: ignore
+      )
+      require 'set'
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(['set'])
+  end
+
+  it 'does not treat lookalike comments or separated standalone comments as directives' do
+    create_file('lib/example.rb', <<~RUBY)
+      require 'json' # archunit ignore
+      # archunit: ignore
+
+      require 'set'
+    RUBY
+
+    expect(extract.map(&:module_name)).to eq(%w[json set])
+  end
+
   it 'skips a file that Prism cannot parse' do
     create_file('lib/example.rb', "require 'json'\ndef broken(\n")
 

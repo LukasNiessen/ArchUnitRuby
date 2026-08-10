@@ -10,6 +10,8 @@ require_relative 'resolved_import'
 module ArchUnit
   # Parses Ruby source without executing it and resolves literal imports.
   module Extraction
+    IGNORE_DIRECTIVE = /\A#\s*archunit:\s*ignore(?:\s+(?<modules>.+?))?\s*\z/
+
     # Collects supported dependency calls from a Prism syntax tree.
     class ImportVisitor < Prism::Visitor
       CALL_KINDS = {
@@ -42,7 +44,11 @@ module ArchUnit
         return unless argument.is_a?(Prism::StringNode)
         return unless valid_module_name?(argument.unescaped)
 
-        @imports << [argument.unescaped, import_kind, node.location.start_line]
+        @imports << located_import(argument, import_kind, node)
+      end
+
+      def located_import(argument, import_kind, node)
+        [argument.unescaped, import_kind, node.location.start_line, node.location.end_line]
       end
 
       def valid_module_name?(module_name)
@@ -97,12 +103,52 @@ module ArchUnit
 
       visitor = ImportVisitor.new
       visitor.visit(parse_result.value)
-      visitor.imports
+      reject_ignored_imports(visitor.imports, parse_result.comments)
     end
     private_class_method :parsed_imports
 
+    def reject_ignored_imports(imports, comments)
+      directives = ignore_directives(comments)
+      imports.reject do |module_name, _import_kind, start_line, end_line|
+        directives.any? do |line, trailing, modules|
+          directive_applies?(line, trailing, start_line, end_line) &&
+            (modules.empty? || modules.any? { |name| ignored_module?(module_name, name) })
+        end
+      end
+    end
+    private_class_method :reject_ignored_imports
+
+    def ignore_directives(comments)
+      comments.filter_map do |comment|
+        match = IGNORE_DIRECTIVE.match(comment.location.slice)
+        next unless match
+
+        [comment.location.start_line, comment.trailing?, directive_modules(match[:modules])]
+      end
+    end
+    private_class_method :ignore_directives
+
+    def directive_applies?(line, trailing, start_line, end_line)
+      return line.between?(start_line, end_line) if trailing
+
+      start_line == line + 1
+    end
+    private_class_method :directive_applies?
+
+    def directive_modules(value)
+      return [] if value.nil?
+
+      value.split(/[\s,]+/).reject(&:empty?)
+    end
+    private_class_method :directive_modules
+
+    def ignored_module?(module_name, scoped_name)
+      module_name == scoped_name || module_name.start_with?("#{scoped_name}/")
+    end
+    private_class_method :ignored_module?
+
     def resolved_import(located_import, source_path, root)
-      module_name, import_kind, line_number = located_import
+      module_name, import_kind, line_number, = located_import
       ResolvedImport.new(
         module_name: module_name,
         import_kind: import_kind,
