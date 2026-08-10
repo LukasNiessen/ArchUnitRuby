@@ -5,6 +5,8 @@ require_relative 'testing/test_violation'
 require_relative 'testing/test_result'
 require_relative 'testing/violation_factory'
 require_relative 'testing/result_factory'
+require_relative 'testing/assertion_failure'
+require_relative 'testing/assert_passes'
 
 # Public violation formatting entry points.
 module ArchUnit

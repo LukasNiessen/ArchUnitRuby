@@ -57,6 +57,7 @@ module ArchUnit
   ColorUtils = Testing::ColorUtils
   ViolationFactory = Testing::ViolationFactory
   ResultFactory = Testing::ResultFactory
+  AssertionFailure = Testing::AssertionFailure
 
   def self.clear_graph_cache
     Extraction.clear_graph_cache
