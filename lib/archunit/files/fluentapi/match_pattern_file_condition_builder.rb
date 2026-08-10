@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative '../../common/regex_factory'
+require_relative 'match_pattern_file_condition'
+
 module ArchUnit
   module Files
     module FluentApi
@@ -23,6 +26,24 @@ module ArchUnit
 
         def negated?
           @negated
+        end
+
+        def have_name(pattern)
+          matching(Common::RegexFactory.filename_matcher(pattern))
+        end
+
+        def be_in_folder(pattern)
+          matching(Common::RegexFactory.folder_matcher(pattern))
+        end
+
+        def be_in_path(pattern)
+          matching(Common::RegexFactory.path_matcher(pattern))
+        end
+
+        private
+
+        def matching(check_filter)
+          MatchPatternFileCondition.new(self, check_filter:)
         end
       end
     end
