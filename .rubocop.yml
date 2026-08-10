@@ -13,3 +13,8 @@ Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
     - "archunit.gemspec"
+
+Naming/PredicatePrefix:
+  AllowedMethods:
+    - have_no_cycles
+    - have_name
