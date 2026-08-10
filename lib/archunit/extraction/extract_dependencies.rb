@@ -13,6 +13,10 @@ module ArchUnit
     def extract_dependencies(project_root)
       source_files = enumerate_source_files(project_root)
       root = Pathname.new(path_value(project_root)).expand_path.realpath
+      extract_dependencies_from(root, source_files)
+    end
+
+    def extract_dependencies_from(root, source_files)
       internal_targets = internal_target_index(root, source_files)
 
       source_files.flat_map do |source|
@@ -21,6 +25,7 @@ module ArchUnit
         end
       end.freeze
     end
+    private_class_method :extract_dependencies_from
 
     def path_value(value)
       value.respond_to?(:to_path) ? value.to_path : value

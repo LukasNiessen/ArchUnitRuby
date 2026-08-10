@@ -20,6 +20,7 @@ require_relative 'archunit/extraction/resolved_import'
 require_relative 'archunit/extraction/resolve_import'
 require_relative 'archunit/extraction/extract_imports'
 require_relative 'archunit/extraction/extract_dependencies'
+require_relative 'archunit/extraction/extract_graph'
 
 module ArchUnit
   Filter = Common::Filter
