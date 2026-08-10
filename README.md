@@ -32,7 +32,8 @@ source-to-graph path and the first complete file rules run today.
 | Immutable graph values and graph caching | Working |
 | Immutable file selectors and `should` / `should_not` moods | Working |
 | Cycle, filename, folder, and path file rules | Working |
-| Dependency, layer, slice, metric, and graph-report rules | Planned |
+| Internal-file and external-module dependency rules | Working |
+| Custom file, layer, slice, metric, and graph-report rules | Planned |
 | RSpec and Minitest assertion helpers | Planned |
 | RubyGems installation | Not published yet |
 
@@ -78,6 +79,18 @@ naming_violations = ArchUnit.project_files('/path/to/project')
                             .in_folder('app/services')
                             .should.have_name('*_service.rb')
                             .check
+
+dependency_violations = ArchUnit.project_files('/path/to/project')
+                                .in_folder('app/api/**')
+                                .should_not.depend_on_files
+                                .in_folder('app/database/**')
+                                .check
+
+external_violations = ArchUnit.project_files('/path/to/project')
+                              .in_folder('app/domain/**')
+                              .should_not.depend_on_external_modules
+                              .matching('faraday')
+                              .check
 ```
 
 Graph extraction is cached because a real test suite evaluates many rules against the same project.
@@ -120,24 +133,24 @@ require 'legacy/client' # archunit: ignore legacy/client
 require 'experimental/plugin'
 ```
 
-## Target fluent API
+## Fluent dependency rules
 
-The public rule-building API is under development. Its intended shape is an English sentence read
-from left to right:
+Relational rules read as an English sentence from left to right. Object selectors on internal files
+are chainable and combined with AND. Repeated external-module `matching` selectors use OR:
 
 ```ruby
-# Preview only — this fluent API is not implemented yet.
-rule = project_files
+rule = ArchUnit.project_files('/path/to/project')
          .in_folder('app/api/**')
          .should_not
          .depend_on_files
          .in_folder('app/database/**')
 
-expect(rule).to pass
+violations = rule.check
 ```
 
-Rules will be immutable values. Building a rule will do no filesystem work; the terminal check will
-perform extraction and return structured violations rather than raising for architecture failures.
+Rules are immutable values. Building one does no filesystem work; the terminal check performs
+extraction and returns structured violations rather than raising for architecture failures. The
+RSpec `pass` matcher is a later backlog item; use `check` directly today.
 
 ## Example repository
 
@@ -148,7 +161,7 @@ own cross-platform CI workflow.
 
 The fixture proves the current prototype end to end: project discovery, source enumeration, import
 resolution, graph assembly, internal/external classification, caching, executable file rules, and
-deliberate violations.
+direct reporting of its deliberate dependency violations.
 
 ## Download tracking
 
@@ -187,17 +200,17 @@ language's design does not fit naturally.
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
 Extraction is complete through issue #12. Projection is complete through issue #15, including
 standard edge mappers, evidence-preserving relabeling, node views, and Tarjan/Johnson cycle
-detection. The Files API has immutable selectors, both moods, cycle checks, and filename/folder/path
-predicates through issue #19.
+detection. The Files API has immutable selectors, both moods, cycle/name/location predicates,
+internal file-dependency policy, and external-module policy through issue #21.
 
 Not implemented yet:
 
-- dependency-based and custom file rules;
+- custom file rules;
 - the fluent layer, slice, metric, and graph-report APIs;
 - remaining architecture assertions over the projected graph;
 - RSpec's `pass` matcher and Minitest's `assert_passes` helper;
 - RubyGems publication and stable installation instructions;
 - diagram validation, reporting, logging, and metrics.
 
-Until those pieces land, treat the gem as an actively developed prototype and use the direct graph
-API only for experimentation.
+Until those pieces land, treat the gem as an actively developed prototype and call rule `check`
+directly rather than relying on test-framework helpers.
