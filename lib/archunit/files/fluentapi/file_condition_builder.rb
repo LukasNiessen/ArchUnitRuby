@@ -32,6 +32,14 @@ module ArchUnit
           with_filter(Common::RegexFactory.exact_file_matcher(file_path))
         end
 
+        def should
+          PositiveMatchPatternFileConditionBuilder.new(self)
+        end
+
+        def should_not
+          NegatedMatchPatternFileConditionBuilder.new(self)
+        end
+
         private
 
         def with_filter(filter)

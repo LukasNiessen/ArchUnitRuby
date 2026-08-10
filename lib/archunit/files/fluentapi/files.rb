@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'file_condition_builder'
+require_relative 'positive_match_pattern_file_condition_builder'
+require_relative 'negated_match_pattern_file_condition_builder'
 
 # Public ArchUnitRuby entry points for file rules.
 module ArchUnit

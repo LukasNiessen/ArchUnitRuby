@@ -76,7 +76,7 @@ jobs:
           GEM_PATH: ${{ runner.temp }}/archunit-gem-home
         run: |
           gem install pkg/archunit.gem --no-document
-          ruby -e "require 'archunit'; puts ArchUnit::VERSION"
+          ruby -e "require 'archunit'; abort unless ArchUnit.project_files.should_not.negated?; puts ArchUnit::VERSION"
 
   rag-fixture:
     name: RAG fixture on Ruby 4.0

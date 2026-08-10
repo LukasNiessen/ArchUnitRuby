@@ -41,7 +41,7 @@ RSpec.describe 'the CI workflow' do
     expect(commands).to include(
       'bundle exec rspec', 'bundle exec rubocop',
       'gem build archunit.gemspec --strict --output pkg/archunit.gem',
-      'gem install pkg/archunit.gem', "require 'archunit'"
+      'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')

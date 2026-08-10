@@ -19,7 +19,7 @@ layers, cycles, naming conventions, diagrams, and metrics executable in CI.
 ## Current status
 
 ArchUnitRuby is a working **extraction prototype**, not a released end-user library yet. The full
-source-to-graph path runs today; the fluent rule API is the next major part of the build.
+source-to-graph path and the first immutable file-rule builder stages run today.
 
 | Capability | Status |
 | --- | --- |
@@ -30,6 +30,7 @@ source-to-graph path runs today; the fluent rule API is the next major part of t
 | Internal and external dependency classification | Working |
 | Self-edges and parallel-edge merging | Working |
 | Immutable graph values and graph caching | Working |
+| Immutable file selectors and `should` / `should_not` moods | Working |
 | File, layer, slice, metric, and graph-report rules | Planned |
 | RSpec and Minitest assertion helpers | Planned |
 | RubyGems installation | Not published yet |
@@ -61,6 +62,18 @@ graph = ArchUnit::Extraction.extract_graph(
 graph.each do |edge|
   puts "#{edge.source} -> #{edge.target} (external: #{edge.external})"
 end
+```
+
+The file-rule builder can already create and branch immutable scopes. Predicates and `check` are
+the next backlog items, so these examples deliberately stop at the mood stage:
+
+```ruby
+base = ArchUnit.project_files('/path/to/project')
+               .in_folder('lib/**')
+               .with_name('*.rb')
+
+positive_rule = base.should
+negative_rule = base.should_not
 ```
 
 Graph extraction is cached because a real test suite evaluates many rules against the same project.
@@ -169,11 +182,12 @@ language's design does not fit naturally.
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
 Extraction is complete through issue #12. Projection is complete through issue #15, including
 standard edge mappers, evidence-preserving relabeling, node views, and Tarjan/Johnson cycle
-detection.
+detection. The Files API has immutable selectors and its two moods through issue #17.
 
 Not implemented yet:
 
-- the fluent file, layer, slice, metric, and graph-report APIs;
+- file-rule predicates and terminal checks;
+- the fluent layer, slice, metric, and graph-report APIs;
 - architecture assertions over the projected graph;
 - RSpec's `pass` matcher and Minitest's `assert_passes` helper;
 - RubyGems publication and stable installation instructions;
