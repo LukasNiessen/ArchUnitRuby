@@ -98,6 +98,20 @@ RSpec.describe ArchUnit::Testing::ViolationFactory do
     )
   end
 
+  it 'formats custom metric values with their full class evidence' do
+    class_info = ArchUnit::ClassInfo.new(name: 'Order', file_path: 'lib/order.rb')
+    violation = ArchUnit::CustomMetricViolation.new(
+      class_info:, metric_name: 'member score',
+      description: 'Keep the class focused', value: 12.5
+    )
+
+    expect(described_class.from_violation(violation)).to have_attributes(
+      message: 'Custom metric violation',
+      details: "Class 'Order' in 'lib/order.rb' has member score=12.5; " \
+               'Keep the class focused.'
+    )
+  end
+
   it 'formats layer allowlist and blocklist violations with edge evidence' do
     edge = projected_edge('app/api/orders.rb', 'app/database/orders.rb')
     allowlist = ArchUnit::LayerDependencyViolation.new(

@@ -30,15 +30,18 @@ RSpec.describe ArchUnit::CountMetrics do
 
   it 'publishes immutable, typed, numeric metric definitions' do
     metric = ArchUnit::Metric.new(
-      name: :example, subject_type: ArchUnit::ClassInfo, calculation: ->(_subject) { 1.5 }
+      name: :example, description: 'An example', subject_type: ArchUnit::ClassInfo,
+      calculation: ->(_subject) { 1.5 }
     )
 
     expect(metric.calculate(class_info)).to eq(1.5)
+    expect(metric.description).to eq('An example')
+    expect(metric.description).to be_frozen
     expect(metric).to be_frozen
     expect { metric.calculate(file_info) }.to raise_error(ArgumentError, /ClassInfo/)
     expect do
-      ArchUnit::Metric.new(name: 'bad', subject_type: ArchUnit::ClassInfo, calculation: -> { 1 })
-    end.to raise_error(ArgumentError, /Symbol/)
+      ArchUnit::Metric.new(name: '', subject_type: ArchUnit::ClassInfo, calculation: -> { 1 })
+    end.to raise_error(ArgumentError, /Symbol or non-empty String/)
     expect do
       ArchUnit::Metric.new(name: :bad, subject_type: :class, calculation: -> { 1 })
     end.to raise_error(ArgumentError, /Class/)
@@ -50,5 +53,11 @@ RSpec.describe ArchUnit::CountMetrics do
         name: :bad, subject_type: ArchUnit::ClassInfo, calculation: ->(_subject) { 'one' }
       ).calculate(class_info)
     end.to raise_error(TypeError, /Numeric/)
+    expect do
+      ArchUnit::Metric.new(
+        name: 'custom', description: '', subject_type: ArchUnit::ClassInfo,
+        calculation: ->(_subject) { 1 }
+      )
+    end.to raise_error(ArgumentError, /description/)
   end
 end

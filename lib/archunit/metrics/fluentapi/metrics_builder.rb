@@ -6,6 +6,7 @@ require_relative '../../common/regex_factory'
 require_relative '../extraction/extract_project_info'
 require_relative '../extraction/extract_distance_info'
 require_relative 'count_metrics_builder'
+require_relative 'custom_metric_builder'
 require_relative 'distance_metrics_builder'
 require_relative 'lcom_metrics_builder'
 
@@ -48,6 +49,10 @@ module ArchUnit
 
         def distance
           DistanceMetricsBuilder.new(self)
+        end
+
+        def custom_metric(name, description, calculation)
+          CustomMetricBuilder.new(scope: self, name:, description:, calculation:)
         end
 
         def analyze

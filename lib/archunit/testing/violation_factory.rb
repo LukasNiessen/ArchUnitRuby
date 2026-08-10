@@ -8,6 +8,7 @@ require_relative '../files/assertion/depend_on_external_modules'
 require_relative '../files/assertion/depend_on_files'
 require_relative '../files/assertion/matching_files'
 require_relative '../layers/assertion/layer_dependency_violation'
+require_relative '../metrics/assertion/custom_metric'
 require_relative '../metrics/assertion/metric_zone'
 require_relative '../slices/assertion/slice_dependency_violation'
 require_relative 'layer_violation_formatter'
@@ -32,6 +33,7 @@ module ArchUnit
         Files::Assertion::CycleViolation => :cycle,
         Files::Assertion::CustomFileViolation => :custom_file,
         Layers::Assertion::LayerDependencyViolation => :layer_dependency,
+        Metrics::Assertion::CustomMetricViolation => :custom_metric,
         Metrics::Assertion::MetricZoneViolation => :metric_zone,
         Slices::Assertion::SliceDependencyViolation => :slice_dependency
       }.freeze

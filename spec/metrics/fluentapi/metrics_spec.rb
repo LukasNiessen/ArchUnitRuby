@@ -164,6 +164,63 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     end
   end
 
+  it 'measures a named custom metric over the selected full ClassInfo values' do
+    Dir.mktmpdir do |root|
+      build_project(root)
+      custom = ArchUnit.metrics(root).for_classes_matching('Pay*').custom_metric(
+        'member count', 'Total methods and fields',
+        ->(info) { info.methods.length + info.fields.length }
+      )
+
+      measurement = custom.measure.fetch(0)
+
+      expect(measurement).to have_attributes(
+        identifier: 'lib/services/pay.rb:PayService',
+        metric_name: 'member count', value: 2
+      )
+      expect(measurement.metric_name).to be_frozen
+    end
+  end
+
+  it 'executes a custom should_satisfy predicate with value and ClassInfo evidence' do
+    Dir.mktmpdir do |root|
+      build_project(root)
+      received = []
+      rule = ArchUnit.metrics(root).for_classes_matching('Pay*').custom_metric(
+        'member count', 'Classes should have fewer than two members',
+        ->(info) { info.methods.length + info.fields.length }
+      ).should_satisfy(lambda do |value, info|
+        received << [value, info]
+        value < 2
+      end)
+
+      expect(rule).to be_a(ArchUnit::Checkable)
+      expect(rule.check).to contain_exactly(
+        have_attributes(
+          metric_name: 'member count', value: 2,
+          class_info: have_attributes(name: 'PayService')
+        )
+      )
+      expect(received).to contain_exactly([2, an_instance_of(ArchUnit::ClassInfo)])
+    end
+  end
+
+  it 'guards empty custom metric predicates while allowing empty measurements' do
+    Dir.mktmpdir do |root|
+      build_project(root)
+      custom = ArchUnit.metrics(root).for_classes_matching('Missing*').custom_metric(
+        'methods', 'Method count', ->(info) { info.methods.length }
+      )
+      rule = custom.should_satisfy(->(_value, _info) { true })
+
+      expect(custom.measure).to be_empty
+      expect(rule.check).to contain_exactly(an_instance_of(ArchUnit::EmptyTestViolation))
+      expect(
+        rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))
+      ).to be_empty
+    end
+  end
+
   it 'validates builder, metric selection, and measurement inputs' do
     builder = ArchUnit.metrics
     metric = ArchUnit::CountMetrics.method_count
@@ -181,6 +238,14 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
       .to raise_error(ArgumentError, /MetricsBuilder/)
     expect { described_class::ZoneCondition.new(scope: builder, zone: :bad) }
       .to raise_error(ArgumentError, /unknown architectural zone/)
+    expect { builder.custom_metric('', 'description', ->(_info) { 1 }) }
+      .to raise_error(ArgumentError, /custom metric name/)
+    expect { builder.custom_metric('score', '', ->(_info) { 1 }) }
+      .to raise_error(ArgumentError, /description/)
+    custom = builder.custom_metric('score', 'description', ->(_info) { 1 })
+    expect { custom.should_satisfy(nil) }.to raise_error(ArgumentError, /predicate/)
+    expect { described_class::CustomMetricCondition.new(selection: :bad, predicate: -> {}) }
+      .to raise_error(ArgumentError, /CustomMetricBuilder/)
     expect { described_class::MetricSelection.new(scope: :bad, metric:) }
       .to raise_error(ArgumentError, /MetricsBuilder/)
     expect { described_class::MetricSelection.new(scope: builder, metric: :bad) }
@@ -189,7 +254,7 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
       described_class::MetricMeasurement.new(subject: :bad, metric_name: :count, value: 1)
     end.to raise_error(ArgumentError, /identifier/)
     expect do
-      described_class::MetricMeasurement.new(subject:, metric_name: 'count', value: 1)
+      described_class::MetricMeasurement.new(subject:, metric_name: '', value: 1)
     end.to raise_error(ArgumentError, /metric_name/)
     expect do
       described_class::MetricMeasurement.new(subject:, metric_name: :count, value: '1')

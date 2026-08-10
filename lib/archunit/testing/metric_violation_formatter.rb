@@ -6,6 +6,15 @@ module ArchUnit
     module MetricViolationFormatter
       private
 
+      def custom_metric(violation)
+        TestViolation.new(
+          message: 'Custom metric violation',
+          details: "Class '#{violation.class_info.name}' in '#{violation.class_info.file_path}' " \
+                   "has #{violation.metric_name}=#{violation.value.inspect}; " \
+                   "#{violation.description}."
+        )
+      end
+
       def metric_zone(violation)
         zone = violation.zone == :pain ? 'pain' : 'uselessness'
         TestViolation.new(

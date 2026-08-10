@@ -9,7 +9,8 @@ module ArchUnit
           unless subject.respond_to?(:identifier)
             raise ArgumentError, 'subject must expose an identifier'
           end
-          raise ArgumentError, 'metric_name must be a Symbol' unless metric_name.is_a?(Symbol)
+
+          metric_name = immutable_metric_name(metric_name)
           raise ArgumentError, 'value must be Numeric' unless value.is_a?(Numeric)
 
           super
@@ -17,6 +18,15 @@ module ArchUnit
 
         def identifier
           subject.identifier
+        end
+
+        private
+
+        def immutable_metric_name(value)
+          return value if value.is_a?(Symbol)
+          return value.dup.freeze if value.is_a?(String) && !value.empty?
+
+          raise ArgumentError, 'metric_name must be a Symbol or non-empty String'
         end
       end
     end

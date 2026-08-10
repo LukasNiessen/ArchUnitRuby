@@ -88,6 +88,7 @@ module ArchUnit
   MetricMeasurement = Metrics::FluentApi::MetricMeasurement
   MetricExtraction = Metrics::Extraction
   MetricZoneViolation = Metrics::Assertion::MetricZoneViolation
+  CustomMetricViolation = Metrics::Assertion::CustomMetricViolation
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult
   ColorUtils = Testing::ColorUtils
