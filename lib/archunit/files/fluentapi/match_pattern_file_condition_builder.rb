@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../common/regex_factory'
+require_relative 'depend_on_file_condition_builder'
 require_relative 'match_pattern_file_condition'
 
 module ArchUnit
@@ -38,6 +39,10 @@ module ArchUnit
 
         def be_in_path(pattern)
           matching(Common::RegexFactory.path_matcher(pattern))
+        end
+
+        def depend_on_files
+          DependOnFileConditionBuilder.new(self)
         end
 
         private

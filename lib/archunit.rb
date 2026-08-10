@@ -47,6 +47,7 @@ module ArchUnit
   ProjectedNode = Common::Projection::ProjectedNode
   CycleViolation = Files::Assertion::CycleViolation
   FilePatternViolation = Files::Assertion::FilePatternViolation
+  FileDependencyViolation = Files::Assertion::FileDependencyViolation
 
   def self.clear_graph_cache
     Extraction.clear_graph_cache
