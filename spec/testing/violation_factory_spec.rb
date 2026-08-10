@@ -80,6 +80,26 @@ RSpec.describe ArchUnit::Testing::ViolationFactory do
     )
   end
 
+  it 'formats layer allowlist and blocklist violations with edge evidence' do
+    edge = projected_edge('app/api/orders.rb', 'app/database/orders.rb')
+    allowlist = ArchUnit::LayerDependencyViolation.new(
+      dependency: edge, source_layer: 'api', target_layer: 'database',
+      rule: :may_only_depend_on_layers
+    )
+    blocklist = ArchUnit::LayerDependencyViolation.new(
+      dependency: edge, source_layer: 'api', target_layer: 'database',
+      rule: :may_not_depend_on_layers
+    )
+
+    expect(described_class.from_violation(allowlist)).to have_attributes(
+      message: 'Layer dependency violation',
+      details: "Layer 'api' depends on layer outside its allowlist 'database' via " \
+               "'app/api/orders.rb' -> 'app/database/orders.rb'."
+    )
+    expect(described_class.from_violation(blocklist).details)
+      .to include("Layer 'api' depends on forbidden layer 'database'")
+  end
+
   it 'formats unknown future violations without leaking object identities' do
     formatted = described_class.from_violation(ArchUnit::Violation.new)
 

@@ -7,6 +7,8 @@ require_relative '../files/assertion/cycle_free'
 require_relative '../files/assertion/depend_on_external_modules'
 require_relative '../files/assertion/depend_on_files'
 require_relative '../files/assertion/matching_files'
+require_relative '../layers/assertion/layer_dependency_violation'
+require_relative 'layer_violation_formatter'
 require_relative 'test_violation'
 
 module ArchUnit
@@ -14,13 +16,16 @@ module ArchUnit
   module Testing
     # The sole mapping from structured violation data to human-readable prose.
     class ViolationFactory
+      extend LayerViolationFormatter
+
       FORMATTERS = {
         Common::Assertion::EmptyTestViolation => :empty_test,
         Files::Assertion::FilePatternViolation => :file_pattern,
         Files::Assertion::FileDependencyViolation => :file_dependency,
         Files::Assertion::ExternalModuleDependencyViolation => :external_module_dependency,
         Files::Assertion::CycleViolation => :cycle,
-        Files::Assertion::CustomFileViolation => :custom_file
+        Files::Assertion::CustomFileViolation => :custom_file,
+        Layers::Assertion::LayerDependencyViolation => :layer_dependency
       }.freeze
 
       class << self
