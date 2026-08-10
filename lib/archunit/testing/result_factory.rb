@@ -11,18 +11,13 @@ module ArchUnit
     # Shapes a violation collection into one framework-neutral test result.
     class ResultFactory
       class << self
-        def from_violations(violations, color: nil)
+        def from_violations(violations, color: nil, expected_to_pass: true)
           validate_violations(violations)
+          validate_expected_to_pass(expected_to_pass)
           color = resolve_color(color)
-          return passing_result(color) if violations.empty?
+          return empty_result(color, expected_to_pass) if violations.empty?
 
-          test_violations = violations.map do |violation|
-            ViolationFactory.from_violation(violation)
-          end
-          TestResult.new(
-            passed: false,
-            message: failure_message(test_violations, color)
-          )
+          failing_result(violations, color, expected_to_pass)
         end
 
         private
@@ -30,6 +25,24 @@ module ArchUnit
         def passing_result(color)
           message = ColorUtils.green('No architecture violations found.', enabled: color)
           TestResult.new(passed: true, message:)
+        end
+
+        def empty_result(color, expected_to_pass)
+          return passing_result(color) if expected_to_pass
+
+          message = 'Expected architecture violations, but none were found.'
+          message = ColorUtils.bold(ColorUtils.red(message, enabled: color), enabled: color)
+          TestResult.new(passed: false, message:)
+        end
+
+        def failing_result(violations, color, expected_to_pass)
+          test_violations = violations.map do |violation|
+            ViolationFactory.from_violation(violation)
+          end
+          TestResult.new(
+            passed: !expected_to_pass,
+            message: failure_message(test_violations, color)
+          )
         end
 
         def failure_message(test_violations, color)
@@ -58,6 +71,12 @@ module ArchUnit
           return if values.is_a?(Array) && values.all?(Common::Assertion::Violation)
 
           raise ArgumentError, 'violations must be an Array of Violation values'
+        end
+
+        def validate_expected_to_pass(value)
+          return if [true, false].include?(value)
+
+          raise ArgumentError, 'expected_to_pass must be true or false'
         end
 
         def resolve_color(value)

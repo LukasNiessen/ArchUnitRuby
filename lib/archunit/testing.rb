@@ -17,9 +17,23 @@ module ArchUnit
     def format_violations(violations, color: nil)
       ResultFactory.from_violations(violations, color:).message
     end
+
+    def result_for(rule, options = nil, expected_to_pass: true)
+      unless rule.is_a?(Common::FluentApi::Checkable)
+        raise ArgumentError, 'rule must implement Checkable'
+      end
+
+      violations = rule.check(options)
+      return ResultFactory.from_violations(violations) if expected_to_pass
+
+      ResultFactory.from_violations(violations, expected_to_pass: false)
+    end
   end
 
   def self.format_violations(violations, color: nil)
     Testing.format_violations(violations, color:)
   end
 end
+
+require_relative 'testing/rspec_adapter'
+require_relative 'testing/minitest_adapter'

@@ -43,11 +43,24 @@ RSpec.describe ArchUnit::Testing::ResultFactory do
     expect(colored.gsub(/\e\[\d+m/, '')).to eq(plain)
   end
 
+  it 'shapes a negated framework expectation without adapter-owned prose' do
+    violation = ArchUnit::EmptyTestViolation.new(filters: [])
+
+    expect(described_class.from_violations(
+             [violation], color: false, expected_to_pass: false
+           )).to be_passed
+    result = described_class.from_violations([], color: false, expected_to_pass: false)
+    expect(result).to be_failed
+    expect(result.message).to eq('Expected architecture violations, but none were found.')
+  end
+
   it 'validates violation collections, colour options, and TestResult values' do
     expect { described_class.from_violations([Object.new]) }
       .to raise_error(ArgumentError, /Violation/)
     expect { described_class.from_violations([], color: :always) }
       .to raise_error(ArgumentError, /color/)
+    expect { described_class.from_violations([], expected_to_pass: nil) }
+      .to raise_error(ArgumentError, /expected_to_pass/)
     expect { ArchUnit::TestResult.new(passed: nil, message: 'message') }
       .to raise_error(ArgumentError, /passed/)
     expect { ArchUnit::TestResult.new(passed: true, message: '') }

@@ -11,11 +11,7 @@ module ArchUnit
     module_function
 
     def assert_passes(rule, options = nil)
-      unless rule.is_a?(Common::FluentApi::Checkable)
-        raise ArgumentError, 'rule must implement Checkable'
-      end
-
-      result = ResultFactory.from_violations(rule.check(options))
+      result = result_for(rule, options)
       return if result.passed?
 
       raise AssertionFailure, result
