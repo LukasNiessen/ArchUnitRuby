@@ -29,6 +29,7 @@ require_relative 'archunit/extraction/extract_imports'
 require_relative 'archunit/extraction/extract_dependencies'
 require_relative 'archunit/extraction/extract_graph'
 require_relative 'archunit/files/fluentapi/files'
+require_relative 'archunit/testing'
 
 # Public ArchUnitRuby API and shared data types.
 module ArchUnit
@@ -51,6 +52,11 @@ module ArchUnit
   ExternalModuleDependencyViolation = Files::Assertion::ExternalModuleDependencyViolation
   FileInfo = Files::Extraction::FileInfo
   CustomFileViolation = Files::Assertion::CustomFileViolation
+  TestViolation = Testing::TestViolation
+  TestResult = Testing::TestResult
+  ColorUtils = Testing::ColorUtils
+  ViolationFactory = Testing::ViolationFactory
+  ResultFactory = Testing::ResultFactory
 
   def self.clear_graph_cache
     Extraction.clear_graph_cache
