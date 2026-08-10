@@ -20,7 +20,8 @@ module ArchUnit
           visit_instance_variable_write_node
         ].freeze
 
-        attr_reader :class_infos, :statement_count, :import_count, :class_count, :function_count
+        attr_reader :class_infos, :statement_count, :import_count, :class_count, :function_count,
+                    :type_count, :abstract_type_count
 
         def initialize(file_path)
           super()
@@ -43,6 +44,8 @@ module ArchUnit
           @import_count = 0
           @class_count = 0
           @function_count = 0
+          @type_count = 0
+          @abstract_type_count = 0
         end
         private :reset_counts
 
@@ -59,10 +62,16 @@ module ArchUnit
 
         def visit_class_node(node)
           @class_count += 1
+          @type_count += 1
+          @abstract_type_count += 1 if abstract_class?(node)
           with_class(qualified_name(node.constant_path)) { super }
         end
 
         def visit_module_node(node)
+          if module_type?(node)
+            @type_count += 1
+            @abstract_type_count += 1
+          end
           with_namespace(qualified_name(node.constant_path)) { super }
         end
 
@@ -163,6 +172,47 @@ module ArchUnit
 
         def constant_receiver?(receiver)
           receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)
+        end
+
+        def abstract_class?(node)
+          direct_statements(node).any? { |statement| abstract_method?(statement) }
+        end
+
+        def module_type?(node)
+          direct_statements(node).any? do |statement|
+            instance_method?(statement) || attribute_declaration?(statement)
+          end
+        end
+
+        def direct_statements(node)
+          body = node.body
+          body.is_a?(Prism::StatementsNode) ? body.body : []
+        end
+
+        def instance_method?(node)
+          node.is_a?(Prism::DefNode) && node.receiver.nil?
+        end
+
+        def attribute_declaration?(node)
+          node.is_a?(Prism::CallNode) && node.receiver.nil? &&
+            ATTRIBUTE_METHODS.include?(node.name)
+        end
+
+        def abstract_method?(node)
+          return false unless instance_method?(node)
+
+          body = node.body
+          statements = body.is_a?(Prism::StatementsNode) ? body.body : []
+          statements.one? && raises_not_implemented?(statements.first)
+        end
+
+        def raises_not_implemented?(node)
+          return false unless node.is_a?(Prism::CallNode)
+          return false unless %i[fail raise].include?(node.name) && node.receiver.nil?
+
+          error = node.arguments&.arguments&.first
+          error.respond_to?(:full_name) &&
+            error.full_name.delete_prefix('::') == 'NotImplementedError'
         end
 
         def record_attribute_methods(node)

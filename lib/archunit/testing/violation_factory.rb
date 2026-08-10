@@ -8,8 +8,10 @@ require_relative '../files/assertion/depend_on_external_modules'
 require_relative '../files/assertion/depend_on_files'
 require_relative '../files/assertion/matching_files'
 require_relative '../layers/assertion/layer_dependency_violation'
+require_relative '../metrics/assertion/metric_zone'
 require_relative '../slices/assertion/slice_dependency_violation'
 require_relative 'layer_violation_formatter'
+require_relative 'metric_violation_formatter'
 require_relative 'slice_violation_formatter'
 require_relative 'test_violation'
 
@@ -19,6 +21,7 @@ module ArchUnit
     # The sole mapping from structured violation data to human-readable prose.
     class ViolationFactory
       extend LayerViolationFormatter
+      extend MetricViolationFormatter
       extend SliceViolationFormatter
 
       FORMATTERS = {
@@ -29,6 +32,7 @@ module ArchUnit
         Files::Assertion::CycleViolation => :cycle,
         Files::Assertion::CustomFileViolation => :custom_file,
         Layers::Assertion::LayerDependencyViolation => :layer_dependency,
+        Metrics::Assertion::MetricZoneViolation => :metric_zone,
         Slices::Assertion::SliceDependencyViolation => :slice_dependency
       }.freeze
 

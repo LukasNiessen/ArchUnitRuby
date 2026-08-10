@@ -80,11 +80,14 @@ module ArchUnit
   ClassInfo = Metrics::Extraction::ClassInfo
   MetricFileInfo = Metrics::Extraction::FileInfo
   MetricProjectInfo = Metrics::Extraction::ProjectInfo
+  DistanceInfo = Metrics::Extraction::DistanceInfo
   Metric = Metrics::Calculation::Metric
   CountMetrics = Metrics::Calculation::Count
   LCOMMetrics = Metrics::Calculation::LCOM
+  DistanceMetrics = Metrics::Calculation::Distance
   MetricMeasurement = Metrics::FluentApi::MetricMeasurement
   MetricExtraction = Metrics::Extraction
+  MetricZoneViolation = Metrics::Assertion::MetricZoneViolation
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult
   ColorUtils = Testing::ColorUtils

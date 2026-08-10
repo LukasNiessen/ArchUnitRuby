@@ -70,6 +70,7 @@ RSpec.describe ArchUnit::MetricExtraction do
       expect(info.import_count).to eq(4)
       expect(info.class_count).to eq(2)
       expect(info.function_count).to eq(1)
+      expect(info).to have_attributes(type_count: 3, abstract_type_count: 1)
       expect(info.class_infos.map(&:name)).to contain_exactly(
         'Inventory::Store', 'Inventory::Shelf'
       )
@@ -85,6 +86,49 @@ RSpec.describe ArchUnit::MetricExtraction do
         'display', 'initialize', 'name', 'name='
       )
       expect(fields.fetch('token').accessed_by).to contain_exactly('initialize', 'token')
+    end
+  end
+
+  it 'distinguishes Ruby abstractions from namespace-only modules' do
+    abstraction_source = <<~RUBY
+      module Namespace
+        class Concrete
+        end
+      end
+
+      module Contract
+        def perform
+          raise NotImplementedError
+        end
+      end
+
+      module ModuleUtility
+        def self.perform
+          :done
+        end
+      end
+
+      class AbstractBase
+        def perform
+          fail ::NotImplementedError, 'implement in a subclass'
+        end
+      end
+
+      class Concrete
+        def perform
+          :done
+        end
+      end
+    RUBY
+
+    Dir.mktmpdir do |root|
+      path = write_source(root, 'abstractions.rb', abstraction_source)
+      info = described_class.extract_file_info(path)
+
+      expect(info).to have_attributes(class_count: 3, type_count: 4, abstract_type_count: 2)
+      expect(info.class_infos.map(&:name)).to contain_exactly(
+        'Namespace::Concrete', 'AbstractBase', 'Concrete'
+      )
     end
   end
 

@@ -15,7 +15,8 @@ RSpec.describe 'metric extraction values' do
   let(:file_info) do
     ArchUnit::MetricFileInfo.new(
       path: 'lib\\store.rb', lines_of_code: 9, statement_count: 8, import_count: 1,
-      class_count: 1, function_count: 0, class_infos: [class_info]
+      class_count: 1, function_count: 0, class_infos: [class_info],
+      type_count: 2, abstract_type_count: 1
     )
   end
 
@@ -28,6 +29,7 @@ RSpec.describe 'metric extraction values' do
     expect(file_info.identifier).to eq('lib/store.rb')
     expect(method_info.accessed_fields).to be_frozen
     expect(file_info.class_infos).to be_frozen
+    expect(file_info).to have_attributes(type_count: 2, abstract_type_count: 1)
   end
 
   it 'derives all classes from immutable project files' do
@@ -51,6 +53,27 @@ RSpec.describe 'metric extraction values' do
     end.to raise_error(ArgumentError, /lines_of_code/)
     expect do
       ArchUnit::MetricProjectInfo.new(project_root: 'project', files: [class_info])
+    end.to raise_error(ArgumentError, /FileInfo/)
+    expect { file_info.with(type_count: 0) }
+      .to raise_error(ArgumentError, /abstract_type_count/)
+  end
+
+  it 'validates and delegates distance information' do
+    info = ArchUnit::DistanceInfo.new(
+      file_info:, afferent_coupling: 2, efferent_coupling: 1, project_file_count: 3
+    )
+
+    expect(info).to have_attributes(
+      identifier: 'lib/store.rb', path: 'lib/store.rb', type_count: 2,
+      abstract_type_count: 1, lines_of_code: 9
+    )
+    expect { info.with(project_file_count: 0) }.to raise_error(ArgumentError, /positive/)
+    expect { info.with(efferent_coupling: 3) }.to raise_error(ArgumentError, /other project/)
+    expect do
+      ArchUnit::DistanceInfo.new(
+        file_info: class_info, afferent_coupling: 0,
+        efferent_coupling: 0, project_file_count: 1
+      )
     end.to raise_error(ArgumentError, /FileInfo/)
   end
 end

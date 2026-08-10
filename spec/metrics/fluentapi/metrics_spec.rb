@@ -28,6 +28,30 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
   end
   # rubocop:enable Metrics/MethodLength
 
+  # rubocop:disable Metrics/MethodLength -- Four files create both distance zones.
+  def build_distance_project(root)
+    write_source(root, 'lib/stable.rb', <<~RUBY)
+      class Stable
+      end
+    RUBY
+    %w[first second].each do |name|
+      write_source(root, "lib/#{name}.rb", <<~RUBY)
+        require_relative 'stable'
+        class #{name.capitalize}
+        end
+      RUBY
+    end
+    write_source(root, 'lib/contract.rb', <<~RUBY)
+      require_relative 'stable'
+      module Contract
+        def perform
+          raise NotImplementedError
+        end
+      end
+    RUBY
+  end
+  # rubocop:enable Metrics/MethodLength
+
   it 'builds immutable selectors without touching the filesystem' do
     allow(ArchUnit::MetricExtraction).to receive(:extract_project_info).and_call_original
 
@@ -87,6 +111,59 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     end
   end
 
+  it 'measures all distance variants over selected files' do
+    Dir.mktmpdir do |root|
+      build_distance_project(root)
+      scope = ArchUnit.metrics(root).with_name('stable.rb')
+
+      measurements = ArchUnit::DistanceMetrics::CALCULATIONS.each_key.to_h do |name|
+        [name, scope.distance.public_send(name).measure.fetch(0).value]
+      end
+
+      expect(measurements).to include(
+        abstractness: 0.0, instability: 0.0,
+        distance_from_main_sequence: 1.0, coupling_factor: 0.5
+      )
+      expect(measurements[:normalized_distance]).to be_between(0.0, 1.0)
+    end
+  end
+
+  it 'executes both architectural zone guards and formats their evidence' do
+    Dir.mktmpdir do |root|
+      build_distance_project(root)
+      pain_rule = ArchUnit.metrics(root).with_name('stable.rb').distance.not_in_zone_of_pain
+      useless_rule = ArchUnit.metrics(root).with_name('contract.rb')
+                             .distance.not_in_zone_of_uselessness
+
+      expect(pain_rule).to be_a(ArchUnit::Checkable)
+      expect(pain_rule.check).to contain_exactly(
+        have_attributes(zone: :pain, distance_info: have_attributes(path: 'lib/stable.rb'))
+      )
+      expect(useless_rule.check).to contain_exactly(
+        have_attributes(
+          zone: :uselessness, distance_info: have_attributes(path: 'lib/contract.rb')
+        )
+      )
+      formatted = ArchUnit::ViolationFactory.from_violation(pain_rule.check.fetch(0))
+      expect(formatted).to have_attributes(
+        message: 'Metric zone violation',
+        details: include("File 'lib/stable.rb'", 'abstractness=0.00', 'instability=0.00')
+      )
+    end
+  end
+
+  it 'guards an empty distance scope unless explicitly allowed' do
+    Dir.mktmpdir do |root|
+      build_distance_project(root)
+      rule = ArchUnit.metrics(root).with_name('missing.rb').distance.not_in_zone_of_pain
+
+      expect(rule.check).to contain_exactly(an_instance_of(ArchUnit::EmptyTestViolation))
+      expect(
+        rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))
+      ).to be_empty
+    end
+  end
+
   it 'validates builder, metric selection, and measurement inputs' do
     builder = ArchUnit.metrics
     metric = ArchUnit::CountMetrics.method_count
@@ -100,6 +177,10 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
       .to raise_error(ArgumentError, /MetricsBuilder/)
     expect { described_class::LCOMMetricsBuilder.new(:bad) }
       .to raise_error(ArgumentError, /MetricsBuilder/)
+    expect { described_class::DistanceMetricsBuilder.new(:bad) }
+      .to raise_error(ArgumentError, /MetricsBuilder/)
+    expect { described_class::ZoneCondition.new(scope: builder, zone: :bad) }
+      .to raise_error(ArgumentError, /unknown architectural zone/)
     expect { described_class::MetricSelection.new(scope: :bad, metric:) }
       .to raise_error(ArgumentError, /MetricsBuilder/)
     expect { described_class::MetricSelection.new(scope: builder, metric: :bad) }

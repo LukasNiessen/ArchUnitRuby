@@ -80,6 +80,24 @@ RSpec.describe ArchUnit::Testing::ViolationFactory do
     )
   end
 
+  it 'formats architectural metric zone evidence' do
+    metric_file = ArchUnit::MetricFileInfo.new(
+      path: 'lib/concrete.rb', lines_of_code: 10, statement_count: 2,
+      import_count: 0, class_count: 1, function_count: 0
+    )
+    distance_info = ArchUnit::DistanceInfo.new(
+      file_info: metric_file, afferent_coupling: 1,
+      efferent_coupling: 0, project_file_count: 2
+    )
+    violation = ArchUnit::MetricZoneViolation.new(distance_info:, zone: :pain)
+
+    expect(described_class.from_violation(violation)).to have_attributes(
+      message: 'Metric zone violation',
+      details: "File 'lib/concrete.rb' is in the zone of pain " \
+               '(abstractness=0.00, instability=0.00).'
+    )
+  end
+
   it 'formats layer allowlist and blocklist violations with edge evidence' do
     edge = projected_edge('app/api/orders.rb', 'app/database/orders.rb')
     allowlist = ArchUnit::LayerDependencyViolation.new(

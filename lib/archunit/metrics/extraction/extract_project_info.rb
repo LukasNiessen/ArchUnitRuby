@@ -47,7 +47,9 @@ module ArchUnit
           import_count: visitor.import_count,
           class_count: visitor.class_count,
           function_count: visitor.function_count,
-          class_infos: visitor.class_infos
+          class_infos: visitor.class_infos,
+          type_count: visitor.type_count,
+          abstract_type_count: visitor.abstract_type_count
         }
       end
       private_class_method :visitor_counts

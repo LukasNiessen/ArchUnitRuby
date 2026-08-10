@@ -38,6 +38,12 @@ module ArchUnit
 
           raise ArgumentError, "#{attribute} must be a non-negative Integer"
         end
+
+        def positive_integer(value, attribute)
+          return value if value.is_a?(Integer) && value.positive?
+
+          raise ArgumentError, "#{attribute} must be a positive Integer"
+        end
       end
       private_constant :ValueValidation
 
@@ -90,11 +96,13 @@ module ArchUnit
         :import_count,
         :class_count,
         :function_count,
-        :class_infos
+        :class_infos,
+        :type_count,
+        :abstract_type_count
       ) do
         include ValueValidation
 
-        # rubocop:disable Metrics/ParameterLists -- The file has six independent count facts.
+        # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists -- Independent count facts.
         def initialize(
           path:,
           lines_of_code:,
@@ -102,7 +110,9 @@ module ArchUnit
           import_count:,
           class_count:,
           function_count:,
-          class_infos: []
+          class_infos: [],
+          type_count: nil,
+          abstract_type_count: 0
         )
           path = immutable_string(path, :path, normalize_path: true)
           lines_of_code = non_negative_integer(lines_of_code, :lines_of_code)
@@ -111,9 +121,17 @@ module ArchUnit
           class_count = non_negative_integer(class_count, :class_count)
           function_count = non_negative_integer(function_count, :function_count)
           class_infos = immutable_values(class_infos, ClassInfo, :class_infos)
+          type_count = non_negative_integer(type_count || class_count, :type_count)
+          abstract_type_count = non_negative_integer(
+            abstract_type_count, :abstract_type_count
+          )
+          if abstract_type_count > type_count
+            raise ArgumentError, 'abstract_type_count cannot exceed type_count'
+          end
+
           super
         end
-        # rubocop:enable Metrics/ParameterLists
+        # rubocop:enable Metrics/MethodLength, Metrics/ParameterLists
 
         def identifier
           path

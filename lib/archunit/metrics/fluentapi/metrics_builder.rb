@@ -4,7 +4,9 @@ require_relative '../../common/filter'
 require_relative '../../common/pattern_matching'
 require_relative '../../common/regex_factory'
 require_relative '../extraction/extract_project_info'
+require_relative '../extraction/extract_distance_info'
 require_relative 'count_metrics_builder'
+require_relative 'distance_metrics_builder'
 require_relative 'lcom_metrics_builder'
 
 module ArchUnit
@@ -44,6 +46,10 @@ module ArchUnit
           LCOMMetricsBuilder.new(self)
         end
 
+        def distance
+          DistanceMetricsBuilder.new(self)
+        end
+
         def analyze
           project = Extraction.extract_project_info(project_locator)
           selected_files = project.files.select { |file| file_selected?(file) }
@@ -57,6 +63,8 @@ module ArchUnit
         end
 
         def subjects_for(subject_type)
+          return distance_subjects if subject_type == Extraction::DistanceInfo
+
           project = analyze
           return project.files if subject_type == Extraction::FileInfo
           if subject_type == Extraction::ClassInfo
@@ -64,6 +72,12 @@ module ArchUnit
           end
 
           raise ArgumentError, "unsupported metric subject type: #{subject_type}"
+        end
+
+        def distance_subjects(options: nil)
+          Extraction.extract_distance_infos(project_locator, options:).select do |distance_info|
+            file_selected?(distance_info.file_info)
+          end
         end
 
         def file_selected?(file_info)
