@@ -49,6 +49,8 @@ module ArchUnit
   FilePatternViolation = Files::Assertion::FilePatternViolation
   FileDependencyViolation = Files::Assertion::FileDependencyViolation
   ExternalModuleDependencyViolation = Files::Assertion::ExternalModuleDependencyViolation
+  FileInfo = Files::Extraction::FileInfo
+  CustomFileViolation = Files::Assertion::CustomFileViolation
 
   def self.clear_graph_cache
     Extraction.clear_graph_cache

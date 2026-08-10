@@ -30,7 +30,7 @@ module ArchUnit
         private
 
         def perform_check(options)
-          graph = Extraction.extract_graph(project_locator, options:)
+          graph = ArchUnit::Extraction.extract_graph(project_locator, options:)
           nodes = FileRuleSupport.selected_nodes(graph, filters)
           empty_test = FileRuleSupport.empty_test_violation(
             nodes, filters, negated: false, options:
