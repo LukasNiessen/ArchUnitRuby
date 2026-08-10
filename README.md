@@ -32,8 +32,8 @@ source-to-graph path runs today; the fluent rule API is the next major part of t
 | RSpec and Minitest assertion helpers | Planned |
 | RubyGems installation | Not published yet |
 
-The implementation currently has 132 specifications and is tested on Ruby 3.3, 3.4, and 4.0 on
-Linux, plus Ruby 4.0 on Windows.
+The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
+Ruby 4.0 on Windows.
 
 ## Try the prototype from source
 
