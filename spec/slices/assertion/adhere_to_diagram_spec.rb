@@ -68,6 +68,12 @@ RSpec.describe ArchUnit::Slices::Assertion do
       described_class.gather_diagram_adherence_violations(edges, Object.new)
     end.to raise_error(ArgumentError, /PlantUmlDiagram/)
     expect do
+      described_class.gather_diagram_adherence_violations([Object.new], diagram)
+    end.to raise_error(ArgumentError, /ProjectedEdge/)
+    expect do
+      described_class.gather_diagram_adherence_violations(edges, diagram, Object.new)
+    end.to raise_error(ArgumentError, /DiagramAdherenceOptions/)
+    expect do
       ArchUnit::DiagramAdherenceOptions.new(ignore_orphan_slices: :yes)
     end.to raise_error(ArgumentError, /true or false/)
   end

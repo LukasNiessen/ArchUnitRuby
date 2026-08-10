@@ -72,6 +72,9 @@ RSpec.describe 'PlantUML slice diagrams' do
       ArchUnit::PlantUmlDiagram.new(dependencies: [Object.new])
     end.to raise_error(ArgumentError, /PlantUmlDependency/)
     expect do
+      ArchUnit::PlantUmlDiagram.new(components: [Object.new])
+    end.to raise_error(ArgumentError, /components/)
+    expect do
       ArchUnit::PlantUmlDependency.new(source: '', target: 'services')
     end.to raise_error(ArgumentError, /source/)
     expect { ArchUnit::PlantUmlRenderer.render([Object.new]) }

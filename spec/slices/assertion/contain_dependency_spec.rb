@@ -48,5 +48,23 @@ RSpec.describe ArchUnit::Slices::Assertion do
         rule: :unknown, is_negated: true
       )
     end.to raise_error(ArgumentError, /rule/)
+    expect do
+      ArchUnit::SliceDependencyViolation.new(
+        dependency: Object.new, source_slice: 'api', target_slice: 'database',
+        rule: :contain_dependency, is_negated: true
+      )
+    end.to raise_error(ArgumentError, /ProjectedEdge/)
+    expect do
+      ArchUnit::SliceDependencyViolation.new(
+        dependency:, source_slice: 'api', target_slice: '',
+        rule: :contain_dependency, is_negated: true
+      )
+    end.to raise_error(ArgumentError, /target_slice/)
+    expect do
+      ArchUnit::SliceDependencyViolation.new(
+        dependency:, source_slice: 'api', target_slice: 'database',
+        rule: :contain_dependency, is_negated: :yes
+      )
+    end.to raise_error(ArgumentError, /true or false/)
   end
 end

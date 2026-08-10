@@ -38,7 +38,8 @@ source-to-graph path and the critical-path Files API run today.
 | Native RSpec `pass` matcher and Minitest `assert_passes` | Working |
 | Immutable named-layer dependency policies | Working |
 | Dependency graph snapshots, queries, and six report formats | Working |
-| Slice and metric rules | Planned |
+| Slice dependency rules and PlantUML component diagrams | Working |
+| Metric rules | Planned |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -244,6 +245,57 @@ requires at least one target. Intra-layer dependencies are always allowed, edges
 endpoint are ignored, and blocklists take precedence over allowlists. Policy source layers matching
 no files produce `EmptyTestViolation` unless empty tests are explicitly allowed.
 
+## Slice policies and PlantUML
+
+Slices group files into architectural components through one captured path segment or the first
+capture of a regular expression. A forbidden dependency rule reads as a complete sentence:
+
+```ruby
+rule = ArchUnit.project_slices('/path/to/project')
+               .defined_by('lib/my_app/(**)/')
+               .should_not
+               .contain_dependency('api', 'database')
+
+expect(rule).to pass
+```
+
+`(**)` is the one slice capture; the remaining `*` and `**` characters keep their usual glob
+meaning. `defined_by_regex` uses the first capture group instead. Slice projections are also public
+for custom graph work through `ArchUnit::SliceProjections.slice_by_pattern`, `slice_by_regex`,
+`slice_by_file_suffix`, and `identity`. They preserve all concrete file edges aggregated into each
+slice dependency.
+
+An architect can make a PlantUML component diagram executable directly or from a UTF-8 file:
+
+```ruby
+rule = ArchUnit.project_slices('/path/to/project')
+               .defined_by('lib/my_app/(**)/')
+               .should
+               .ignoring_external_slices
+               .adhere_to_diagram_in_file('docs/architecture.puml')
+
+expect(rule).to pass
+```
+
+The supported line-based subset recognizes `component [Name]`, `[A] -> [B]`, `[A] --> [B]`,
+comments, and `@startuml` / `@enduml`. By default, every actual dependency must be allowed by the
+diagram. `ignoring_orphan_slices` ignores dependencies with an undeclared endpoint, while
+`ignoring_external_slices` ignores dependencies to required gems or standard-library modules.
+File-backed diagrams remain lazy: the file is read only when `check` executes.
+
+The reverse direction generates a stable diagram from the real project, including isolated slices:
+
+```ruby
+slices = ArchUnit.project_slices('/path/to/project')
+                 .defined_by('lib/my_app/(**)/')
+
+puts slices.to_plantuml
+slices.export_as_plantuml('docs/discovered-architecture.puml')
+```
+
+Like every other rule family, slice builders are immutable and a definition matching no project
+files returns `EmptyTestViolation` unless explicitly allowed.
+
 ## Dependency graph reports
 
 Graph reports separate selection from presentation. The fluent builder first creates one immutable
@@ -287,7 +339,8 @@ The fixture proves the current prototype end to end: project discovery, source e
 resolution, graph assembly, internal/external classification, caching, executable file rules, and
 direct formatting/assertion of its deliberate dependency and custom-predicate violations. It also
 executes the native RSpec matcher, a complete named-layer policy, graph queries and collapsing, all
-six renderers, and an exported self-contained HTML report over the RAG application.
+six renderers, an exported self-contained HTML report, forbidden slice dependencies, and the
+fixture's executable PlantUML architecture contract over the RAG application.
 
 ## Download tracking
 
@@ -338,9 +391,12 @@ layers with allowlist, sealed-layer, and blocklist dependency policies. Issues #
 shared dependency-graph snapshot, immutable queries and collapsing, and DOT, Mermaid, D2, CSV, JSON,
 and self-contained HTML rendering.
 
+Issues #30 and #31 add captured-path and regex slice projections, forbidden slice dependencies,
+PlantUML component-diagram validation, orphan/external modifiers, and reverse diagram generation.
+
 Not implemented yet:
 
-- the fluent slice and metric APIs;
+- the fluent metric APIs;
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
 - additional reporting, logging, and metrics.

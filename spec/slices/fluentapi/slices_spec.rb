@@ -193,6 +193,11 @@ RSpec.describe 'slice dependency rules' do
     expect do
       ArchUnit::Slices::FluentApi::NegativeSliceConditionBuilder.new(Object.new)
     end.to raise_error(ArgumentError, /SliceScopeBuilder/)
+    expect do
+      ArchUnit::Slices::FluentApi::ForbiddenSliceDependencyCondition.new(
+        Object.new, source_slice: 'api', target_slice: 'models'
+      )
+    end.to raise_error(ArgumentError, /SliceScopeBuilder/)
     expect { slices.should_not.contain_dependency('', 'models') }
       .to raise_error(ArgumentError, /source_slice/)
     expect do
@@ -200,7 +205,33 @@ RSpec.describe 'slice dependency rules' do
         slices, options: Object.new
       )
     end.to raise_error(ArgumentError, /DiagramAdherenceOptions/)
+    expect do
+      ArchUnit::Slices::FluentApi::PositiveSliceConditionBuilder.new(Object.new)
+    end.to raise_error(ArgumentError, /SliceScopeBuilder/)
     expect { slices.should.adhere_to_diagram('') }
       .to raise_error(ArgumentError, /diagram source/)
+    source = ArchUnit::Slices::FluentApi::DiagramSource.inline('@startuml\n@enduml')
+    options = ArchUnit::DiagramAdherenceOptions.new
+    expect do
+      ArchUnit::Slices::FluentApi::DiagramSliceCondition.new(
+        Object.new, source, options:
+      )
+    end.to raise_error(ArgumentError, /SliceScopeBuilder/)
+    expect do
+      ArchUnit::Slices::FluentApi::DiagramSliceCondition.new(
+        slices, Object.new, options:
+      )
+    end.to raise_error(ArgumentError, /DiagramSource/)
+    expect do
+      ArchUnit::Slices::FluentApi::DiagramSliceCondition.new(
+        slices, source, options: Object.new
+      )
+    end.to raise_error(ArgumentError, /DiagramAdherenceOptions/)
+    expect do
+      ArchUnit::Slices::FluentApi::DiagramSource.new(kind: :remote, value: 'diagram')
+    end.to raise_error(ArgumentError, /kind/)
+    expect(
+      ArchUnit::Slices::FluentApi::DiagramSource.file('architecture.puml').value
+    ).to eq('architecture.puml')
   end
 end

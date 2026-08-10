@@ -48,7 +48,9 @@ RSpec.describe 'the CI workflow' do
       'ArchUnit.project_layers', "layer('library')", "where_layer('library')",
       'may_only_depend_on_layers', 'ArchUnit.project_graph',
       'include_external_dependencies', 'collapse_to_folder_depth',
-      'ArchUnit::GraphReportSnapshot', 'JSON.parse', 'to_csv', 'export_as_html'
+      'ArchUnit::GraphReportSnapshot', 'JSON.parse', 'to_csv', 'export_as_html',
+      'ArchUnit.project_slices', "defined_by('lib/(**)/')", 'contain_dependency',
+      'to_plantuml', 'adhere_to_diagram', 'export_as_plantuml'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')

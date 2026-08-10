@@ -54,6 +54,7 @@ RSpec.describe ArchUnit::SliceProjections do
       source_label: 'controllers', target_label: 'services'
     )
     expect(projection.label_for('helper.rb')).to be_nil
+    expect(projection.label_for('order_service')).to eq('services')
   end
 
   it 'provides identity projection and stable labels including isolated files' do
@@ -73,6 +74,8 @@ RSpec.describe ArchUnit::SliceProjections do
   it 'validates patterns, suffix mappings, paths, edges, and labeler results' do
     expect { described_class.slice_by_pattern('lib/**') }
       .to raise_error(ArgumentError, /exactly one/)
+    expect { described_class.slice_by_pattern('') }
+      .to raise_error(ArgumentError, /non-empty String/)
     expect { described_class.slice_by_pattern('(**)/(**)') }
       .to raise_error(ArgumentError, /exactly one/)
     expect { described_class.slice_by_regex('not a regexp') }
@@ -87,5 +90,9 @@ RSpec.describe ArchUnit::SliceProjections do
       .to raise_error(ArgumentError, /Edge/)
     expect { ArchUnit::SliceProjection.new { 42 }.label_for('lib/a.rb') }
       .to raise_error(TypeError, /slice labelers/)
+    expect { ArchUnit::SliceProjection.new }
+      .to raise_error(ArgumentError, /labeler/)
+    expect { described_class.identity.slice_labels(Object.new) }
+      .to raise_error(ArgumentError, /enumerable/)
   end
 end
