@@ -5,6 +5,7 @@ require_relative '../../common/pattern_matching'
 require_relative '../../common/regex_factory'
 require_relative '../extraction/extract_project_info'
 require_relative 'count_metrics_builder'
+require_relative 'lcom_metrics_builder'
 
 module ArchUnit
   module Metrics
@@ -37,6 +38,10 @@ module ArchUnit
 
         def count
           CountMetricsBuilder.new(self)
+        end
+
+        def lcom
+          LCOMMetricsBuilder.new(self)
         end
 
         def analyze

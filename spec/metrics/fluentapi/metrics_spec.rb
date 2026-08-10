@@ -71,6 +71,22 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     end
   end
 
+  it 'measures every LCOM variant over extracted Ruby method-field relationships' do
+    Dir.mktmpdir do |root|
+      build_project(root)
+      scope = ArchUnit.metrics(root).for_classes_matching('Pay*')
+
+      measurements = ArchUnit::LCOMMetrics::CALCULATIONS.each_key.to_h do |name|
+        [name, scope.lcom.public_send(name).measure.fetch(0).value]
+      end
+
+      expect(measurements.keys).to eq(
+        %i[lcom96a lcom96b lcom1 lcom2 lcom3 lcom4 lcom5 lcom_star]
+      )
+      expect(measurements[:lcom4]).to eq(1)
+    end
+  end
+
   it 'validates builder, metric selection, and measurement inputs' do
     builder = ArchUnit.metrics
     metric = ArchUnit::CountMetrics.method_count
@@ -81,6 +97,8 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     expect { described_class::MetricsBuilder.new(filters: [:bad]) }
       .to raise_error(ArgumentError, /Filter/)
     expect { described_class::CountMetricsBuilder.new(:bad) }
+      .to raise_error(ArgumentError, /MetricsBuilder/)
+    expect { described_class::LCOMMetricsBuilder.new(:bad) }
       .to raise_error(ArgumentError, /MetricsBuilder/)
     expect { described_class::MetricSelection.new(scope: :bad, metric:) }
       .to raise_error(ArgumentError, /MetricsBuilder/)

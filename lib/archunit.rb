@@ -82,6 +82,7 @@ module ArchUnit
   MetricProjectInfo = Metrics::Extraction::ProjectInfo
   Metric = Metrics::Calculation::Metric
   CountMetrics = Metrics::Calculation::Count
+  LCOMMetrics = Metrics::Calculation::LCOM
   MetricMeasurement = Metrics::FluentApi::MetricMeasurement
   MetricExtraction = Metrics::Extraction
   TestViolation = Testing::TestViolation
