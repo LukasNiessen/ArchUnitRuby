@@ -100,6 +100,19 @@ RSpec.describe ArchUnit::Testing::ViolationFactory do
       .to include("Layer 'api' depends on forbidden layer 'database'")
   end
 
+  it 'formats forbidden slice dependency evidence' do
+    dependency = projected_edge('lib/api.rb', 'lib/retrieval.rb')
+    violation = ArchUnit::SliceDependencyViolation.new(
+      dependency:, source_slice: 'api', target_slice: 'retrieval',
+      rule: :contain_dependency, is_negated: true
+    )
+
+    expect(described_class.from_violation(violation)).to have_attributes(
+      message: 'Slice dependency violation',
+      details: "Slice 'api' depends on forbidden slice 'retrieval'."
+    )
+  end
+
   it 'formats unknown future violations without leaking object identities' do
     formatted = described_class.from_violation(ArchUnit::Violation.new)
 
