@@ -28,6 +28,7 @@ require_relative 'archunit/extraction/resolve_import'
 require_relative 'archunit/extraction/extract_imports'
 require_relative 'archunit/extraction/extract_dependencies'
 require_relative 'archunit/extraction/extract_graph'
+require_relative 'archunit/files/fluentapi/files'
 
 # Public ArchUnitRuby API and shared data types.
 module ArchUnit
