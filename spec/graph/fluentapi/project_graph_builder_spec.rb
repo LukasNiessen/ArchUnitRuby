@@ -94,6 +94,22 @@ RSpec.describe ArchUnit::GraphReporting::FluentApi::ProjectGraphBuilder do
     )
   end
 
+  it 'renders and exports all six formats from the public builder' do
+    report = ArchUnit.project_graph(@project_root).titled('Fixture Graph')
+
+    Dir.mktmpdir('archunit-builder-exports') do |directory|
+      ArchUnit::GraphRenderer::RENDERERS.each_key do |format|
+        rendered = report.public_send("to_#{format}")
+        path = Pathname.new(directory).join('reports', "fixture.#{format}")
+
+        expect(rendered).to be_a(String)
+        expect(rendered).not_to be_empty
+        expect(report.public_send("export_as_#{format}", path)).to be_nil
+        expect(path.read(encoding: 'UTF-8')).to eq(rendered)
+      end
+    end
+  end
+
   it 'validates builder locators, check options, queries, and collapse modifiers' do
     expect { described_class.new(project_locator: Object.new) }
       .to raise_error(ArgumentError, /project_locator/)

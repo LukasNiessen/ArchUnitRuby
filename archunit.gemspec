@@ -19,5 +19,6 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md', 'LICENSE'].select { |path| File.file?(path) }
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'csv', '>= 3.3', '< 4.0'
   spec.add_dependency 'prism', '>= 1.0', '< 2.0'
 end

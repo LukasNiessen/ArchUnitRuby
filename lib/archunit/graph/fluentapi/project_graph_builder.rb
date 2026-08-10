@@ -4,6 +4,7 @@ require_relative '../../common/fluentapi/check_options'
 require_relative '../../common/regex_factory'
 require_relative '../../extraction/extract_graph'
 require_relative '../projection/create_snapshot'
+require_relative '../rendering/graph_renderer'
 
 module ArchUnit
   module GraphReporting
@@ -64,6 +65,16 @@ module ArchUnit
 
         def summary
           snapshot.summary
+        end
+
+        Rendering::GraphRenderer::RENDERERS.each_key do |format|
+          define_method("to_#{format}") do
+            Rendering::GraphRenderer.render(snapshot, format)
+          end
+
+          define_method("export_as_#{format}") do |output_path|
+            Rendering::GraphRenderer.export(snapshot, format, output_path)
+          end
         end
 
         private

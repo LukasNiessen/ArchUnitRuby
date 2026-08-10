@@ -64,6 +64,7 @@ module ArchUnit
   GraphReportSummary = GraphReporting::Projection::GraphReportSummary
   GraphReportSnapshot = GraphReporting::Projection::GraphReportSnapshot
   GraphSnapshotFactory = GraphReporting::Projection::SnapshotFactory
+  GraphRenderer = GraphReporting::Rendering::GraphRenderer
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult
   ColorUtils = Testing::ColorUtils

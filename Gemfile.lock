@@ -2,12 +2,14 @@ PATH
   remote: .
   specs:
     archunit (0.0.1)
+      csv (>= 3.3, < 4.0)
       prism (>= 1.0, < 2.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.3)
+    csv (3.3.6)
     diff-lcs (1.6.2)
     docile (1.4.1)
     json (2.21.2)
@@ -76,6 +78,7 @@ DEPENDENCIES
 CHECKSUMS
   archunit (0.0.1)
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
+  csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   docile (1.4.1) sha256=96159be799bfa73cdb721b840e9802126e4e03dfc26863db73647204c727f21e
   json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
