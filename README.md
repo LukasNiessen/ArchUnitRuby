@@ -18,8 +18,8 @@ layers, cycles, naming conventions, diagrams, and metrics executable in CI.
 
 ## Current status
 
-ArchUnitRuby is a working **extraction prototype**, not a released end-user library yet. The full
-source-to-graph path and the first immutable file-rule builder stages run today.
+ArchUnitRuby is a working **executable prototype**, not a released end-user library yet. The full
+source-to-graph path and the first complete file rules run today.
 
 | Capability | Status |
 | --- | --- |
@@ -31,7 +31,8 @@ source-to-graph path and the first immutable file-rule builder stages run today.
 | Self-edges and parallel-edge merging | Working |
 | Immutable graph values and graph caching | Working |
 | Immutable file selectors and `should` / `should_not` moods | Working |
-| File, layer, slice, metric, and graph-report rules | Planned |
+| Cycle, filename, folder, and path file rules | Working |
+| Dependency, layer, slice, metric, and graph-report rules | Planned |
 | RSpec and Minitest assertion helpers | Planned |
 | RubyGems installation | Not published yet |
 
@@ -64,16 +65,19 @@ graph.each do |edge|
 end
 ```
 
-The file-rule builder can already create and branch immutable scopes. Predicates and `check` are
-the next backlog items, so these examples deliberately stop at the mood stage:
+File rules are immutable descriptions. Calling `check` extracts the graph and returns structured
+violations; an architecture failure is data rather than an exception:
 
 ```ruby
-base = ArchUnit.project_files('/path/to/project')
-               .in_folder('lib/**')
-               .with_name('*.rb')
+cycle_violations = ArchUnit.project_files('/path/to/project')
+                           .in_folder('lib/**')
+                           .should.have_no_cycles
+                           .check
 
-positive_rule = base.should
-negative_rule = base.should_not
+naming_violations = ArchUnit.project_files('/path/to/project')
+                            .in_folder('app/services')
+                            .should.have_name('*_service.rb')
+                            .check
 ```
 
 Graph extraction is cached because a real test suite evaluates many rules against the same project.
@@ -143,7 +147,8 @@ two intentional architecture violations, application tests, architecture extract
 own cross-platform CI workflow.
 
 The fixture proves the current prototype end to end: project discovery, source enumeration, import
-resolution, graph assembly, internal/external classification, caching, and deliberate violations.
+resolution, graph assembly, internal/external classification, caching, executable file rules, and
+deliberate violations.
 
 ## Download tracking
 
@@ -182,13 +187,14 @@ language's design does not fit naturally.
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
 Extraction is complete through issue #12. Projection is complete through issue #15, including
 standard edge mappers, evidence-preserving relabeling, node views, and Tarjan/Johnson cycle
-detection. The Files API has immutable selectors and its two moods through issue #17.
+detection. The Files API has immutable selectors, both moods, cycle checks, and filename/folder/path
+predicates through issue #19.
 
 Not implemented yet:
 
-- file-rule predicates and terminal checks;
+- dependency-based and custom file rules;
 - the fluent layer, slice, metric, and graph-report APIs;
-- architecture assertions over the projected graph;
+- remaining architecture assertions over the projected graph;
 - RSpec's `pass` matcher and Minitest's `assert_passes` helper;
 - RubyGems publication and stable installation instructions;
 - diagram validation, reporting, logging, and metrics.
