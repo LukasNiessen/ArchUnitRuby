@@ -14,6 +14,11 @@ require_relative 'archunit/common/fluentapi/checkable'
 require_relative 'archunit/common/extraction/import_kind'
 require_relative 'archunit/common/extraction/edge'
 require_relative 'archunit/common/extraction/graph'
+require_relative 'archunit/common/projection/mapped_edge'
+require_relative 'archunit/common/projection/projected_edge'
+require_relative 'archunit/common/projection/projected_node'
+require_relative 'archunit/common/projection/project_edges'
+require_relative 'archunit/common/projection/project_to_nodes'
 require_relative 'archunit/extraction/locate_project'
 require_relative 'archunit/extraction/enumerate_source_files'
 require_relative 'archunit/extraction/resolved_import'
@@ -34,6 +39,9 @@ module ArchUnit
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
   Graph = Common::Extraction::Graph
+  MappedEdge = Common::Projection::MappedEdge
+  ProjectedEdge = Common::Projection::ProjectedEdge
+  ProjectedNode = Common::Projection::ProjectedNode
 
   def self.clear_graph_cache
     Extraction.clear_graph_cache
