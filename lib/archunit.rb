@@ -30,6 +30,7 @@ require_relative 'archunit/extraction/extract_dependencies'
 require_relative 'archunit/extraction/extract_graph'
 require_relative 'archunit/files/fluentapi/files'
 require_relative 'archunit/layers/fluentapi/layers'
+require_relative 'archunit/graph/fluentapi/graph'
 require_relative 'archunit/testing'
 
 # Public ArchUnitRuby API and shared data types.
@@ -55,6 +56,14 @@ module ArchUnit
   CustomFileViolation = Files::Assertion::CustomFileViolation
   LayerDefinition = Layers::Assertion::LayerDefinition
   LayerDependencyViolation = Layers::Assertion::LayerDependencyViolation
+  FolderDepthCollapse = GraphReporting::Projection::FolderDepthCollapse
+  PatternCollapse = GraphReporting::Projection::PatternCollapse
+  GraphQueryOptions = GraphReporting::Projection::GraphQueryOptions
+  GraphReportNode = GraphReporting::Projection::GraphReportNode
+  GraphReportEdge = GraphReporting::Projection::GraphReportEdge
+  GraphReportSummary = GraphReporting::Projection::GraphReportSummary
+  GraphReportSnapshot = GraphReporting::Projection::GraphReportSnapshot
+  GraphSnapshotFactory = GraphReporting::Projection::SnapshotFactory
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult
   ColorUtils = Testing::ColorUtils
