@@ -43,7 +43,8 @@ RSpec.describe 'the CI workflow' do
       'gem build archunit.gemspec --strict --output pkg/archunit.gem',
       'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files',
       'depend_on_files', 'depend_on_external_modules', "matching('json')",
-      'adhere_to', 'file.extension', 'ArchUnit::Checkable'
+      'adhere_to', 'file.extension', 'ArchUnit::Checkable',
+      'ArchUnit.assert_passes', 'ArchUnit.format_violations'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')
