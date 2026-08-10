@@ -121,6 +121,32 @@ RSpec.describe 'named layer policies' do
       .to raise_error(ArgumentError, /at least one/)
   end
 
+  it 'rejects malformed internal builder state defensively' do
+    architecture_class = ArchUnit::Layers::FluentApi::LayeredArchitecture
+    definition_builder = ArchUnit::Layers::FluentApi::LayerDefinitionBuilder
+    dependency_builder = ArchUnit::Layers::FluentApi::LayerDependencyRuleBuilder
+    definition = sample_layers.layer_definitions.first
+
+    expect { architecture_class.new(project_locator: Object.new) }
+      .to raise_error(ArgumentError, /project_locator/)
+    expect { architecture_class.new(layer_definitions: [Object.new]) }
+      .to raise_error(ArgumentError, /LayerDefinition/)
+    expect { architecture_class.new(layer_definitions: [definition, definition]) }
+      .to raise_error(ArgumentError, /unique/)
+    expect { architecture_class.new(allowed_dependencies: Object.new) }
+      .to raise_error(ArgumentError, /Hash/)
+    expect { architecture_class.new(allowed_dependencies: { nil => [] }) }
+      .to raise_error(ArgumentError, /layer name/)
+    expect { definition_builder.new(Object.new, 'api') }
+      .to raise_error(ArgumentError, /LayeredArchitecture/)
+    expect { definition_builder.new(ArchUnit.layers, '') }
+      .to raise_error(ArgumentError, /layer_name/)
+    expect { dependency_builder.new(Object.new, 'api') }
+      .to raise_error(ArgumentError, /LayeredArchitecture/)
+    expect { dependency_builder.new(ArchUnit.layers, '') }
+      .to raise_error(ArgumentError, /layer_name/)
+  end
+
   it 'exposes project_layers and layers as equivalent public entry points' do
     expect(ArchUnit).to respond_to(:project_layers, :layers)
     expect(ArchUnit.method(:project_layers).arity).to eq(-1)

@@ -44,10 +44,25 @@ RSpec.describe 'the CI workflow' do
       'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files',
       'depend_on_files', 'depend_on_external_modules', "matching('json')",
       'adhere_to', 'file.extension', 'ArchUnit::Checkable',
-      'ArchUnit.assert_passes', 'ArchUnit.format_violations'
+      'ArchUnit.assert_passes', 'ArchUnit.format_violations',
+      'ArchUnit.project_layers', "layer('library')", "where_layer('library')",
+      'may_only_depend_on_layers'
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')
+  end
+
+  it 'smoke-tests both optional native framework integrations' do
+    adapter_step = quality_job.fetch('steps').find do |step|
+      step['name'] == 'Smoke optional framework integrations'
+    end
+    command = adapter_step.fetch('run')
+
+    expect(command).to include(
+      "require 'rspec/core'", 'include RSpec::Matchers', 'expect(rule).to pass',
+      "require 'minitest'", 'include Minitest::Assertions',
+      'context.assert_passes(rule)', 'context.assertions == 1'
+    )
   end
 
   it 'uses read-only repository permissions and non-blocking matrix failures' do

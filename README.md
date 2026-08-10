@@ -35,8 +35,9 @@ source-to-graph path and the critical-path Files API run today.
 | Internal-file and external-module dependency rules | Working |
 | Custom `FileInfo` predicates and universal empty-test guard | Working |
 | Violation formatting, result shaping, and `ArchUnit.assert_passes` | Working |
-| Layer, slice, metric, and graph-report rules | Planned |
-| Native RSpec and Minitest adapters | Planned |
+| Native RSpec `pass` matcher and Minitest `assert_passes` | Working |
+| Immutable named-layer dependency policies | Working |
+| Slice, metric, and graph-report rules | Planned |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -118,6 +119,42 @@ result = ArchUnit::ResultFactory.from_violations(rule.check, color: false)
 puts result.message unless result.passed?
 ```
 
+RSpec users get a native matcher automatically when ArchUnitRuby is loaded by an RSpec process:
+
+```ruby
+RSpec.describe 'architecture' do
+  it 'keeps the API away from the database' do
+    rule = ArchUnit.files
+                   .in_folder('app/api')
+                   .should_not.depend_on_files
+                   .in_folder('app/database')
+
+    expect(rule).to pass
+  end
+end
+```
+
+Minitest users require Minitest before ArchUnitRuby and use its native assertion helper:
+
+```ruby
+require 'minitest/autorun'
+require 'archunit'
+
+class ArchitectureTest < Minitest::Test
+  def test_api_does_not_reach_the_database
+    rule = ArchUnit.files
+                   .in_folder('app/api')
+                   .should_not.depend_on_files
+                   .in_folder('app/database')
+
+    assert_passes(rule)
+  end
+end
+```
+
+Both integrations accept an optional `CheckOptions` value and translate failures into the test
+framework's native failure type. Neither framework is a runtime dependency of the gem.
+
 Graph extraction is cached because a real test suite evaluates many rules against the same project.
 Force one fresh extraction with `CheckOptions`, or clear every cached graph globally:
 
@@ -174,14 +211,37 @@ violations = rule.check
 ```
 
 Rules are immutable values. Building one does no filesystem work; the terminal check performs
-extraction and returns structured violations rather than raising for architecture failures. The
-RSpec `pass` matcher is a later backlog item; use `ArchUnit.assert_passes` as the documented
-framework-neutral fallback today.
+extraction and returns structured violations rather than raising for architecture failures. Use the
+native RSpec matcher, Minitest helper, or `ArchUnit.assert_passes` to translate that result into a
+test failure.
 
 Custom predicates receive an immutable `FileInfo` with its project-relative `path`, filename without
 extension, extension, directory, complete source text, and non-blank line count. A selector matching
 zero files returns `EmptyTestViolation` from every terminal unless a check explicitly sets
 `allow_empty_tests: true`.
+
+## Named layer policies
+
+Layers provide a compact policy over groups of files, avoiding a matrix of pairwise file rules:
+
+```ruby
+rule = ArchUnit.project_layers('/path/to/project')
+               .layer('api').defined_by_folder('app/api')
+               .layer('services').defined_by_folder('app/services')
+               .layer('database').defined_by_folder('app/database')
+               .where_layer('api').may_only_depend_on_layers('services')
+               .where_layer('services').may_only_depend_on_layers('database')
+               .where_layer('database').may_only_depend_on_layers
+
+expect(rule).to pass
+```
+
+`defined_by` matches full project-relative paths; `defined_by_folder` matches their folders. Repeat
+`layer(name)` to add another selector to the same layer. `may_only_depend_on_layers` is an allowlist,
+and calling it with no targets seals the source layer. `may_not_depend_on_layers` is a blocklist and
+requires at least one target. Intra-layer dependencies are always allowed, edges with an unassigned
+endpoint are ignored, and blocklists take precedence over allowlists. Policy source layers matching
+no files produce `EmptyTestViolation` unless empty tests are explicitly allowed.
 
 ## Example repository
 
@@ -192,7 +252,8 @@ own cross-platform CI workflow.
 
 The fixture proves the current prototype end to end: project discovery, source enumeration, import
 resolution, graph assembly, internal/external classification, caching, executable file rules, and
-direct formatting/assertion of its deliberate dependency and custom-predicate violations.
+direct formatting/assertion of its deliberate dependency and custom-predicate violations. It also
+executes the native RSpec matcher and a complete named-layer policy over the RAG application.
 
 ## Download tracking
 
@@ -235,17 +296,18 @@ detection. The critical-path Files API is complete through issue #23: immutable 
 cycle/name/location predicates, internal/external dependency policy, custom `FileInfo` predicates,
 and the universal empty-test guard.
 
-Testing support is complete through issue #25: one violation factory owns every message, the result
-factory returns an immutable pass flag and message, ANSI colour is optional and terminal-aware, and
-`ArchUnit.assert_passes` raises `ArchUnit::AssertionFailure` without framework configuration.
+Testing support is complete through issue #26: one violation factory owns every message, the result
+factory returns an immutable pass flag and message, ANSI colour is optional and terminal-aware,
+RSpec gets `expect(rule).to pass`, Minitest gets `assert_passes(rule)`, and
+`ArchUnit.assert_passes` remains the framework-neutral fallback. Issue #27 adds immutable named
+layers with allowlist, sealed-layer, and blocklist dependency policies.
 
 Not implemented yet:
 
-- the fluent layer, slice, metric, and graph-report APIs;
+- the fluent slice, metric, and graph-report APIs;
 - remaining architecture assertions over the projected graph;
-- the native RSpec `pass` matcher and Minitest adapter;
 - RubyGems publication and stable installation instructions;
 - diagram validation, reporting, logging, and metrics.
 
-Until those pieces land, treat the gem as an actively developed prototype and call rule `check`
-directly rather than relying on test-framework helpers.
+Until those pieces land, treat the gem as an actively developed prototype rather than a stable
+release.

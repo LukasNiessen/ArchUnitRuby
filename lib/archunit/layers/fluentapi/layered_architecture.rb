@@ -57,12 +57,12 @@ module ArchUnit
         end
 
         def with_allowed_dependencies(source, targets)
-          targets = validated_target_layers(targets, allow_empty: true)
+          targets = validated_target_layers(targets)
           copy(allowed_dependencies: allowed_dependencies.merge(source => targets))
         end
 
         def with_forbidden_dependencies(source, targets)
-          targets = validated_target_layers(targets, allow_empty: false)
+          targets = validated_target_layers(targets)
           combined = [*forbidden_dependencies.fetch(source, []), *targets].uniq
           copy(forbidden_dependencies: forbidden_dependencies.merge(source => combined))
         end
@@ -118,12 +118,8 @@ module ArchUnit
           raise ArgumentError, "layer '#{name}' must be defined before it can have a policy"
         end
 
-        def validated_target_layers(values, allow_empty:)
+        def validated_target_layers(values)
           names = Array(values).map { |value| validated_layer_name(value) }.uniq
-          if names.empty? && !allow_empty
-            raise ArgumentError, 'at least one target layer is required'
-          end
-
           undefined = names.reject { |name| layer_definition(name) }
           unless undefined.empty?
             raise ArgumentError, "undefined target layer: #{undefined.join(', ')}"

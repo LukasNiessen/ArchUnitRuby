@@ -98,11 +98,17 @@ RSpec.describe ArchUnit::Layers::Assertion, '.gather_layer_dependency_violations
       dependency:, source_layer: 'services', target_layer: 'models',
       rule: :may_not_depend_on_layers
     )
+    equal_violation = ArchUnit::LayerDependencyViolation.new(
+      dependency:, source_layer: 'services', target_layer: 'models',
+      rule: :may_not_depend_on_layers
+    )
 
     expect(definition).to eq(equal_definition)
     expect(definition.hash).to eq(equal_definition.hash)
     expect(definition).to be_frozen
     expect(violation).to be_frozen
+    expect(violation).to eq(equal_violation)
+    expect(violation.hash).to eq(equal_violation.hash)
   end
 
   it 'rejects malformed pure assertion inputs and violation values' do
@@ -121,5 +127,22 @@ RSpec.describe ArchUnit::Layers::Assertion, '.gather_layer_dependency_violations
         rule: :may_only_depend_on_layers
       )
     end.to raise_error(ArgumentError, /ProjectedEdge/)
+    expect { ArchUnit::LayerDefinition.new(name: '', filters: []) }
+      .to raise_error(ArgumentError, /name/)
+    expect { ArchUnit::LayerDefinition.new(name: 'api', filters: []) }
+      .to raise_error(ArgumentError, /at least one Filter/)
+
+    dependency = projected_edge('app/services/orders.rb', 'app/models/order.rb')
+    expect do
+      ArchUnit::LayerDependencyViolation.new(
+        dependency:, source_layer: '', target_layer: 'models',
+        rule: :may_only_depend_on_layers
+      )
+    end.to raise_error(ArgumentError, /source_layer/)
+    expect do
+      ArchUnit::LayerDependencyViolation.new(
+        dependency:, source_layer: 'services', target_layer: 'models', rule: :unknown
+      )
+    end.to raise_error(ArgumentError, /rule must be/)
   end
 end

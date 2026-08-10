@@ -64,6 +64,38 @@ jobs:
       - name: Lint
         run: bundle exec rubocop
 
+      - name: Smoke optional framework integrations
+        shell: bash
+        run: |
+          bundle exec ruby -Ilib -e "
+            require 'rspec/core'
+            require 'archunit'
+            include RSpec::Matchers
+            rule = Class.new {
+              include ArchUnit::Checkable
+              private
+              define_method(:perform_check) { |_options| [] }
+            }.new
+            expect(rule).to pass
+          "
+          bundle exec ruby -Ilib -e "
+            require 'minitest'
+            require 'archunit'
+            context_class = Class.new {
+              include Minitest::Assertions
+              attr_accessor :assertions
+            }
+            context = context_class.new
+            context.assertions = 0
+            rule = Class.new {
+              include ArchUnit::Checkable
+              private
+              define_method(:perform_check) { |_options| [] }
+            }.new
+            context.assert_passes(rule)
+            abort unless context.assertions == 1
+          "
+
       - name: Build gem
         run: |
           mkdir -p pkg
@@ -83,7 +115,10 @@ jobs:
               ArchUnit.project_files.should_not.depend_on_external_modules.matching('json'),
               ArchUnit.project_files.should.adhere_to(
                 ->(file) { file.extension == '.rb' }, 'Ruby source required'
-              )
+              ),
+              ArchUnit.project_layers
+                .layer('library').defined_by(%r{\Alib/})
+                .where_layer('library').may_only_depend_on_layers
             ]
             abort unless rules.all? { |rule| rule.is_a?(ArchUnit::Checkable) }
             ArchUnit.assert_passes(rules.last)
