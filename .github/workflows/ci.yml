@@ -44,3 +44,30 @@ jobs:
 
       - name: Build gem
         run: gem build archunit.gemspec
+
+  rag-fixture:
+    name: RAG fixture on Ruby 4.0
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out ArchUnitRuby
+        uses: actions/checkout@v7
+        with:
+          path: ArchUnitRuby
+
+      - name: Check out the RAG fixture
+        uses: actions/checkout@v7
+        with:
+          repository: TristanKruse/ArchUnitRuby-TestRepo-RAG
+          path: ArchUnitRuby-TestRepo-RAG
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+          working-directory: ArchUnitRuby-TestRepo-RAG
+
+      - name: Test the RAG fixture against this revision
+        run: bundle exec rake
+        working-directory: ArchUnitRuby-TestRepo-RAG

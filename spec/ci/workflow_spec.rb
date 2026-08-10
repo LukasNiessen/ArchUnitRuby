@@ -11,6 +11,7 @@ RSpec.describe 'the CI workflow' do
   end
 
   let(:job) { workflow.fetch('jobs').fetch('test') }
+  let(:fixture_job) { workflow.fetch('jobs').fetch('rag-fixture') }
   let(:matrix) { job.fetch('strategy').fetch('matrix').fetch('include') }
   let(:steps) { job.fetch('steps') }
 
@@ -38,5 +39,16 @@ RSpec.describe 'the CI workflow' do
     lockfile = File.read(File.expand_path('../../Gemfile.lock', __dir__))
 
     expect(lockfile).to include("  x64-mingw-ucrt\n", "  x86_64-linux\n")
+  end
+
+  it 'runs the public RAG fixture against the revision under test' do
+    fixture_steps = fixture_job.fetch('steps')
+    checkout = fixture_steps.find do |step|
+      step.dig('with', 'repository') == 'TristanKruse/ArchUnitRuby-TestRepo-RAG'
+    end
+    test_step = fixture_steps.find { |step| step['run'] == 'bundle exec rake' }
+
+    expect(checkout).not_to be_nil
+    expect(test_step).to include('working-directory' => 'ArchUnitRuby-TestRepo-RAG')
   end
 end
