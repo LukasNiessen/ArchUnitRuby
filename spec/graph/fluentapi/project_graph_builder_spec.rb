@@ -105,7 +105,7 @@ RSpec.describe ArchUnit::GraphReporting::FluentApi::ProjectGraphBuilder do
         expect(rendered).to be_a(String)
         expect(rendered).not_to be_empty
         expect(report.public_send("export_as_#{format}", path)).to be_nil
-        expect(path.read(encoding: 'UTF-8')).to eq(rendered)
+        expect(path.binread.force_encoding(Encoding::UTF_8)).to eq(rendered)
       end
     end
   end

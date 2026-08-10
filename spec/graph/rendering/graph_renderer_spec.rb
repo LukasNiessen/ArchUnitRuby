@@ -119,7 +119,7 @@ RSpec.describe ArchUnit::GraphRenderer do
         rendered = described_class.public_send("to_#{format}", snapshot)
 
         expect(described_class.public_send("export_as_#{format}", snapshot, path)).to be_nil
-        expect(path.read(encoding: 'UTF-8')).to eq(rendered)
+        expect(path.binread.force_encoding(Encoding::UTF_8)).to eq(rendered)
       end
     end
   end

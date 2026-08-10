@@ -37,7 +37,8 @@ source-to-graph path and the critical-path Files API run today.
 | Violation formatting, result shaping, and `ArchUnit.assert_passes` | Working |
 | Native RSpec `pass` matcher and Minitest `assert_passes` | Working |
 | Immutable named-layer dependency policies | Working |
-| Slice, metric, and graph-report rules | Planned |
+| Dependency graph snapshots, queries, and six report formats | Working |
+| Slice and metric rules | Planned |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -243,6 +244,38 @@ requires at least one target. Intra-layer dependencies are always allowed, edges
 endpoint are ignored, and blocklists take precedence over allowlists. Policy source layers matching
 no files produce `EmptyTestViolation` unless empty tests are explicitly allowed.
 
+## Dependency graph reports
+
+Graph reports separate selection from presentation. The fluent builder first creates one immutable
+snapshot; DOT, Mermaid, D2, CSV, JSON, and HTML then render exactly those same nodes, edges, counts,
+and import kinds:
+
+```ruby
+report = ArchUnit.project_graph('/path/to/project')
+                 .include_external_dependencies
+                 .focus_on('app/services/**', 2)
+                 .collapse_to_folder_depth(2)
+                 .titled('Service dependencies')
+
+snapshot = report.snapshot
+puts "#{snapshot.summary.node_count} nodes, #{snapshot.summary.edge_count} edges"
+
+puts report.to_mermaid
+report.export_as_html('reports/service-dependencies.html')
+```
+
+Queries can focus on a pattern to a bounded neighbour depth, retain everything reachable from a
+pattern, or retain everything that depends on it. Nodes can be collapsed to a folder depth or by a
+regular-expression replacement before parallel edges are aggregated. External and self
+dependencies are opt-in. Every modifier returns a new builder, and `with_check_options` supplies
+the same cache controls used by architecture rules.
+
+Each format has `to_dot`, `to_mermaid`, `to_d2`, `to_csv`, `to_json`, or `to_html` for an in-memory
+string and a corresponding `export_as_<format>(path)` method. Exports are UTF-8 and create missing
+parent directories. The HTML report is a self-contained offline document with its own graph
+summary, dependency table, and embedded portable-source representations; it makes no network
+requests.
+
 ## Example repository
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
@@ -253,7 +286,8 @@ own cross-platform CI workflow.
 The fixture proves the current prototype end to end: project discovery, source enumeration, import
 resolution, graph assembly, internal/external classification, caching, executable file rules, and
 direct formatting/assertion of its deliberate dependency and custom-predicate violations. It also
-executes the native RSpec matcher and a complete named-layer policy over the RAG application.
+executes the native RSpec matcher, a complete named-layer policy, graph queries and collapsing, all
+six renderers, and an exported self-contained HTML report over the RAG application.
 
 ## Download tracking
 
@@ -300,14 +334,16 @@ Testing support is complete through issue #26: one violation factory owns every 
 factory returns an immutable pass flag and message, ANSI colour is optional and terminal-aware,
 RSpec gets `expect(rule).to pass`, Minitest gets `assert_passes(rule)`, and
 `ArchUnit.assert_passes` remains the framework-neutral fallback. Issue #27 adds immutable named
-layers with allowlist, sealed-layer, and blocklist dependency policies.
+layers with allowlist, sealed-layer, and blocklist dependency policies. Issues #28 and #29 add the
+shared dependency-graph snapshot, immutable queries and collapsing, and DOT, Mermaid, D2, CSV, JSON,
+and self-contained HTML rendering.
 
 Not implemented yet:
 
-- the fluent slice, metric, and graph-report APIs;
+- the fluent slice and metric APIs;
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
-- diagram validation, reporting, logging, and metrics.
+- additional reporting, logging, and metrics.
 
 Until those pieces land, treat the gem as an actively developed prototype rather than a stable
 release.

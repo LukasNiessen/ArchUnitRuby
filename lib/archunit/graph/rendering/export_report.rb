@@ -12,7 +12,7 @@ module ArchUnit
         def write(output_path, content)
           path = normalized_path(output_path)
           FileUtils.mkdir_p(File.dirname(path)) unless File.dirname(path) == '.'
-          File.write(path, content, encoding: 'UTF-8')
+          File.binwrite(path, content.encode(Encoding::UTF_8))
           nil
         end
 

@@ -3,6 +3,7 @@ PATH
   specs:
     archunit (0.0.1)
       csv (>= 3.3, < 4.0)
+      json (>= 2.7, < 3.0)
       prism (>= 1.0, < 2.0)
 
 GEM
