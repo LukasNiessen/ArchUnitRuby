@@ -43,6 +43,46 @@ RSpec.describe ArchUnit::Common::FluentApi::Checkable do
       .to raise_error(NotImplementedError, /must implement #perform_check/)
   end
 
+  it 'provides the universal empty-selection guard to terminal implementations' do
+    guarded_rule_class = Class.new do
+      include ArchUnit::Common::FluentApi::Checkable
+
+      def initialize(items)
+        @items = items
+      end
+
+      private
+
+      def perform_check(options)
+        empty_test_violation(
+          @items, filters: [], negated: true, options:
+        ) || []
+      end
+    end
+    rule = guarded_rule_class.new([])
+
+    expect(rule.check).to contain_exactly(
+      ArchUnit::EmptyTestViolation.new(filters: [], is_negated: true)
+    )
+    expect(rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))).to eq([])
+    expect(guarded_rule_class.new([Object.new]).check).to eq([])
+  end
+
+  it 'validates empty-selection guard inputs for future terminal implementations' do
+    invalid_guard_class = Class.new do
+      include ArchUnit::Common::FluentApi::Checkable
+
+      private
+
+      def perform_check(options)
+        empty_test_violation(nil, filters: [], negated: false, options:)
+      end
+    end
+
+    expect { invalid_guard_class.new.check }
+      .to raise_error(ArgumentError, /respond to empty/)
+  end
+
   it 'is exposed from the gem public surface' do
     expect(ArchUnit::Checkable).to equal(described_class)
   end
