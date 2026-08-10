@@ -113,6 +113,18 @@ RSpec.describe ArchUnit::Testing::ViolationFactory do
     )
   end
 
+  it 'formats slice dependencies rejected by a diagram' do
+    dependency = projected_edge('lib/services.rb', 'lib/database.rb')
+    violation = ArchUnit::SliceDependencyViolation.new(
+      dependency:, source_slice: 'services', target_slice: 'database',
+      rule: :adhere_to_diagram, is_negated: false
+    )
+
+    expect(described_class.from_violation(violation).details).to eq(
+      "Slice 'services' has a dependency not allowed by the diagram on 'database'."
+    )
+  end
+
   it 'formats unknown future violations without leaking object identities' do
     formatted = described_class.from_violation(ArchUnit::Violation.new)
 

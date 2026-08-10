@@ -34,6 +34,24 @@ RSpec.describe 'slice dependency rules' do
     ArchUnit.project_slices(@project_root).defined_by('lib/app/(**)/')
   end
 
+  def intended_diagram(include_retrieval: false)
+    <<~PLANTUML
+      @startuml
+        component [api]
+        component [services]
+        component [retrieval]
+        component [models]
+        component [orphan]
+        [api] --> [services]
+      #{retrieval_dependency(include_retrieval)}  [services] --> [models]
+      @enduml
+    PLANTUML
+  end
+
+  def retrieval_dependency(included)
+    included ? "  [api] --> [retrieval]\n" : ''
+  end
+
   it 'builds immutable scopes and moods without extracting the graph' do
     expect(ArchUnit::Extraction).not_to receive(:extract_graph)
 
@@ -98,6 +116,75 @@ RSpec.describe 'slice dependency rules' do
     expect(rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))).to eq([])
   end
 
+  it 'reports internal and external dependencies missing from a strict diagram' do
+    rule = slices.should.adhere_to_diagram(intended_diagram)
+
+    expect(rule.check.map(&:target_slice)).to contain_exactly('retrieval', 'json')
+    expect(rule).not_to pass
+  end
+
+  it 'ignores external slices without hiding disallowed internal dependencies' do
+    rule = slices.should
+                 .ignoring_external_slices
+                 .adhere_to_diagram(intended_diagram)
+
+    expect(rule.check).to contain_exactly(
+      have_attributes(
+        source_slice: 'api', target_slice: 'retrieval',
+        rule: :adhere_to_diagram, negated?: false
+      )
+    )
+  end
+
+  it 'ignores undeclared orphan endpoints when explicitly requested' do
+    diagram = <<~PLANTUML
+      @startuml
+        component [api]
+        component [services]
+        component [models]
+        [api] --> [services]
+        [services] --> [models]
+      @enduml
+    PLANTUML
+    rule = slices.should.ignoring_orphan_slices.adhere_to_diagram(diagram)
+
+    expect(rule).to pass
+  end
+
+  it 'loads a file-backed diagram only when check executes' do
+    path = @project_root.join('docs', 'architecture.puml')
+    rule = slices.should
+                 .ignoring_external_slices
+                 .adhere_to_diagram_in_file(path)
+
+    expect { rule }.not_to raise_error
+    expect { rule.check }.to raise_error(Errno::ENOENT)
+
+    FileUtils.mkdir_p(path.dirname)
+    path.write(intended_diagram(include_retrieval: true))
+    expect(rule).to pass
+  end
+
+  it 'generates and exports a stable PlantUML diagram from the actual slice graph' do
+    rendered = slices.to_plantuml
+
+    expect(rendered).to include(
+      'component [api]', 'component [orphan]', 'component [json]',
+      '[api] --> [retrieval]', '[api] --> [json]', '[services] --> [models]'
+    )
+    path = @project_root.join('tmp', 'architecture.puml')
+    expect(slices.export_as_plantuml(path, ArchUnit::CheckOptions.new(clear_cache: true))).to be_nil
+    expect(path.binread.force_encoding(Encoding::UTF_8)).to eq(rendered)
+  end
+
+  it 'applies the universal empty-test guard to diagram rules' do
+    rule = ArchUnit.project_slices(@project_root)
+                   .defined_by('missing/(**)/')
+                   .should.adhere_to_diagram(intended_diagram)
+
+    expect(rule.check).to contain_exactly(be_a(ArchUnit::EmptyTestViolation))
+  end
+
   it 'validates locators, projections, scopes, and slice names at build time' do
     expect { ArchUnit.project_slices(Object.new) }.to raise_error(ArgumentError, /project_locator/)
     expect do
@@ -108,5 +195,12 @@ RSpec.describe 'slice dependency rules' do
     end.to raise_error(ArgumentError, /SliceScopeBuilder/)
     expect { slices.should_not.contain_dependency('', 'models') }
       .to raise_error(ArgumentError, /source_slice/)
+    expect do
+      ArchUnit::Slices::FluentApi::PositiveSliceConditionBuilder.new(
+        slices, options: Object.new
+      )
+    end.to raise_error(ArgumentError, /DiagramAdherenceOptions/)
+    expect { slices.should.adhere_to_diagram('') }
+      .to raise_error(ArgumentError, /diagram source/)
   end
 end

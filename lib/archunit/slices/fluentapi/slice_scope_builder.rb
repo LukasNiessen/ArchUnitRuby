@@ -2,6 +2,11 @@
 
 require_relative '../projection/slicing_projections'
 require_relative 'negative_slice_condition_builder'
+require_relative 'positive_slice_condition_builder'
+require_relative '../uml/export_diagram'
+require_relative '../../common/fluentapi/check_options'
+require_relative '../../common/projection/project_edges'
+require_relative '../../extraction/extract_graph'
 
 module ArchUnit
   module Slices
@@ -29,10 +34,33 @@ module ArchUnit
           NegativeSliceConditionBuilder.new(self)
         end
 
+        def should
+          PositiveSliceConditionBuilder.new(self)
+        end
+
+        def to_plantuml(options = nil)
+          graph = extract_graph(options)
+          edges = Common::Projection.project_edges(graph, projection)
+          Uml::PlantUmlRenderer.render(edges, components: projection.slice_labels(graph))
+        end
+
+        def export_as_plantuml(output_path, options = nil)
+          graph = extract_graph(options)
+          edges = Common::Projection.project_edges(graph, projection)
+          Uml::PlantUmlRenderer.export(
+            edges, output_path, components: projection.slice_labels(graph)
+          )
+        end
+
         private
 
         def copy(projection: self.projection)
           self.class.new(project_locator:, projection:)
+        end
+
+        def extract_graph(options)
+          options = Common::FluentApi::CheckOptions.resolve(options)
+          ArchUnit::Extraction.extract_graph(project_locator, options:)
         end
 
         def immutable_project_locator(locator)

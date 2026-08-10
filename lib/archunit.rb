@@ -60,6 +60,11 @@ module ArchUnit
   SliceProjection = Slices::Projection::SliceProjection
   SliceProjections = Slices::Projection
   SliceDependencyViolation = Slices::Assertion::SliceDependencyViolation
+  DiagramAdherenceOptions = Slices::Assertion::DiagramAdherenceOptions
+  PlantUmlDependency = Slices::Uml::PlantUmlDependency
+  PlantUmlDiagram = Slices::Uml::PlantUmlDiagram
+  PlantUmlParser = Slices::Uml::PlantUmlParser
+  PlantUmlRenderer = Slices::Uml::PlantUmlRenderer
   FolderDepthCollapse = GraphReporting::Projection::FolderDepthCollapse
   PatternCollapse = GraphReporting::Projection::PatternCollapse
   GraphQueryOptions = GraphReporting::Projection::GraphQueryOptions
