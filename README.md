@@ -19,7 +19,7 @@ layers, cycles, naming conventions, diagrams, and metrics executable in CI.
 ## Current status
 
 ArchUnitRuby is a working **executable prototype**, not a released end-user library yet. The full
-source-to-graph path and the first complete file rules run today.
+source-to-graph path and the critical-path Files API run today.
 
 | Capability | Status |
 | --- | --- |
@@ -33,7 +33,8 @@ source-to-graph path and the first complete file rules run today.
 | Immutable file selectors and `should` / `should_not` moods | Working |
 | Cycle, filename, folder, and path file rules | Working |
 | Internal-file and external-module dependency rules | Working |
-| Custom file, layer, slice, metric, and graph-report rules | Planned |
+| Custom `FileInfo` predicates and universal empty-test guard | Working |
+| Layer, slice, metric, and graph-report rules | Planned |
 | RSpec and Minitest assertion helpers | Planned |
 | RubyGems installation | Not published yet |
 
@@ -91,6 +92,14 @@ external_violations = ArchUnit.project_files('/path/to/project')
                               .should_not.depend_on_external_modules
                               .matching('faraday')
                               .check
+
+custom_violations = ArchUnit.project_files('/path/to/project')
+                            .in_folder('app/services')
+                            .should.adhere_to(
+                              ->(file) { file.lines_of_code < 300 },
+                              'service files must stay below 300 non-blank lines'
+                            )
+                            .check
 ```
 
 Graph extraction is cached because a real test suite evaluates many rules against the same project.
@@ -133,7 +142,7 @@ require 'legacy/client' # archunit: ignore legacy/client
 require 'experimental/plugin'
 ```
 
-## Fluent dependency rules
+## Fluent file rules
 
 Relational rules read as an English sentence from left to right. Object selectors on internal files
 are chainable and combined with AND. Repeated external-module `matching` selectors use OR:
@@ -152,6 +161,11 @@ Rules are immutable values. Building one does no filesystem work; the terminal c
 extraction and returns structured violations rather than raising for architecture failures. The
 RSpec `pass` matcher is a later backlog item; use `check` directly today.
 
+Custom predicates receive an immutable `FileInfo` with its project-relative `path`, filename without
+extension, extension, directory, complete source text, and non-blank line count. A selector matching
+zero files returns `EmptyTestViolation` from every terminal unless a check explicitly sets
+`allow_empty_tests: true`.
+
 ## Example repository
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
@@ -161,7 +175,7 @@ own cross-platform CI workflow.
 
 The fixture proves the current prototype end to end: project discovery, source enumeration, import
 resolution, graph assembly, internal/external classification, caching, executable file rules, and
-direct reporting of its deliberate dependency violations.
+direct reporting of its deliberate dependency and custom-predicate violations.
 
 ## Download tracking
 
@@ -200,12 +214,12 @@ language's design does not fit naturally.
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
 Extraction is complete through issue #12. Projection is complete through issue #15, including
 standard edge mappers, evidence-preserving relabeling, node views, and Tarjan/Johnson cycle
-detection. The Files API has immutable selectors, both moods, cycle/name/location predicates,
-internal file-dependency policy, and external-module policy through issue #21.
+detection. The critical-path Files API is complete through issue #23: immutable selectors and moods,
+cycle/name/location predicates, internal/external dependency policy, custom `FileInfo` predicates,
+and the universal empty-test guard.
 
 Not implemented yet:
 
-- custom file rules;
 - the fluent layer, slice, metric, and graph-report APIs;
 - remaining architecture assertions over the projected graph;
 - RSpec's `pass` matcher and Minitest's `assert_passes` helper;

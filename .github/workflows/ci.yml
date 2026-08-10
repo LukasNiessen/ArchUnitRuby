@@ -80,7 +80,10 @@ jobs:
             require 'archunit'
             rules = [
               ArchUnit.project_files.should_not.depend_on_files.in_folder('lib'),
-              ArchUnit.project_files.should_not.depend_on_external_modules.matching('json')
+              ArchUnit.project_files.should_not.depend_on_external_modules.matching('json'),
+              ArchUnit.project_files.should.adhere_to(
+                ->(file) { file.extension == '.rb' }, 'Ruby source required'
+              )
             ]
             abort unless rules.all? { |rule| rule.is_a?(ArchUnit::Checkable) }
             puts ArchUnit::VERSION
