@@ -73,6 +73,14 @@ RSpec.describe ArchUnit::Files::Assertion, '.gather_file_dependency_violations' 
 
   it 'rejects invalid edges, filters, empty objects, and mood flags' do
     expect do
+      ArchUnit::FileDependencyViolation.new(dependency: Object.new)
+    end.to raise_error(ArgumentError, /ProjectedEdge/)
+    expect do
+      ArchUnit::FileDependencyViolation.new(
+        dependency: projected_edge('lib/a.rb', 'lib/b.rb'), is_negated: nil
+      )
+    end.to raise_error(ArgumentError, /true or false/)
+    expect do
       described_class.gather_file_dependency_violations(
         [Object.new], subjects, objects, is_negated: false
       )

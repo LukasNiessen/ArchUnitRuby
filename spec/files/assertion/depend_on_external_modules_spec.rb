@@ -82,6 +82,14 @@ RSpec.describe ArchUnit::Files::Assertion, '.gather_external_module_dependency_v
 
   it 'rejects invalid edges, filters, empty modules, and mood flags' do
     expect do
+      ArchUnit::ExternalModuleDependencyViolation.new(dependency: Object.new)
+    end.to raise_error(ArgumentError, /ProjectedEdge/)
+    expect do
+      ArchUnit::ExternalModuleDependencyViolation.new(
+        dependency: projected_edge('lib/a.rb', 'json'), is_negated: nil
+      )
+    end.to raise_error(ArgumentError, /true or false/)
+    expect do
       described_class.gather_external_module_dependency_violations(
         [Object.new], subjects, modules, is_negated: false
       )

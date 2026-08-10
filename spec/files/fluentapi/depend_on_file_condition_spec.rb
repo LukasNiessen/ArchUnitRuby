@@ -59,12 +59,19 @@ RSpec.describe ArchUnit::Files::FluentApi::DependOnFileCondition do
     object_stage = ArchUnit.files(@project_root).should_not.depend_on_files
     folder_rule = object_stage.in_folder('lib/services')
     named_rule = folder_rule.with_name('*_service.rb')
+    name_first_rule = object_stage.with_name('*_service.rb')
+    nested_folder_rule = folder_rule.in_folder('lib/**')
+    path_rule = folder_rule.in_path('lib/**/*.rb')
 
     expect(object_stage).to be_frozen
     expect(folder_rule).to be_frozen
     expect(named_rule).to be_frozen
+    expect(named_rule).to be_negated
     expect(folder_rule.object_filters.length).to eq(1)
     expect(named_rule.object_filters.length).to eq(2)
+    expect(name_first_rule.object_filters.length).to eq(1)
+    expect(nested_folder_rule.object_filters.length).to eq(2)
+    expect(path_rule.object_filters.length).to eq(2)
     expect(named_rule.check.length).to eq(1)
   end
 
@@ -96,5 +103,20 @@ RSpec.describe ArchUnit::Files::FluentApi::DependOnFileCondition do
     expect(positive).to respond_to(:depend_on_files)
     expect(negative).to respond_to(:depend_on_files)
     expect(positive.depend_on_files).to respond_to(:with_name, :in_folder, :in_path)
+  end
+
+  it 'rejects invalid relational builder and terminal state' do
+    builder_class = ArchUnit::Files::FluentApi::DependOnFileConditionBuilder
+    condition_class = ArchUnit::Files::FluentApi::DependOnFileCondition
+    builder = ArchUnit.files(@project_root).should.depend_on_files
+
+    expect { builder_class.new(Object.new) }
+      .to raise_error(ArgumentError, /file condition builder/)
+    expect { condition_class.new(Object.new, object_filters: []) }
+      .to raise_error(ArgumentError, /DependOnFileConditionBuilder/)
+    expect { condition_class.new(builder, object_filters: []) }
+      .to raise_error(ArgumentError, /at least one Filter/)
+    expect { condition_class.new(builder, object_filters: [Object.new]) }
+      .to raise_error(ArgumentError, /at least one Filter/)
   end
 end

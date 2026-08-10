@@ -60,6 +60,7 @@ RSpec.describe ArchUnit::Files::FluentApi::DependOnExternalModuleCondition do
     expect(module_stage).to be_frozen
     expect(json_rule).to be_frozen
     expect(combined_rule).to be_frozen
+    expect(combined_rule).to be_negated
     expect(json_rule.module_filters.length).to eq(1)
     expect(combined_rule.module_filters.length).to eq(2)
     expect(combined_rule.check.map { |violation| violation.dependency.target_label })
@@ -94,5 +95,20 @@ RSpec.describe ArchUnit::Files::FluentApi::DependOnExternalModuleCondition do
     expect(positive).to respond_to(:depend_on_external_modules)
     expect(negative).to respond_to(:depend_on_external_modules)
     expect(positive.depend_on_external_modules).to respond_to(:matching)
+  end
+
+  it 'rejects invalid external builder and terminal state' do
+    builder_class = ArchUnit::Files::FluentApi::DependOnExternalModuleConditionBuilder
+    condition_class = ArchUnit::Files::FluentApi::DependOnExternalModuleCondition
+    builder = ArchUnit.files(@project_root).should.depend_on_external_modules
+
+    expect { builder_class.new(Object.new) }
+      .to raise_error(ArgumentError, /file condition builder/)
+    expect { condition_class.new(Object.new, module_filters: []) }
+      .to raise_error(ArgumentError, /DependOnExternalModuleConditionBuilder/)
+    expect { condition_class.new(builder, module_filters: []) }
+      .to raise_error(ArgumentError, /at least one Filter/)
+    expect { condition_class.new(builder, module_filters: [Object.new]) }
+      .to raise_error(ArgumentError, /at least one Filter/)
   end
 end
