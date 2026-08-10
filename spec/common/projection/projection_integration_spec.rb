@@ -60,4 +60,20 @@ RSpec.describe 'projection integration' do
       )
     )
   end
+
+  it 'finds a concrete cycle in an extracted Ruby project' do
+    create_file('lib/first.rb', "require_relative 'second'\n")
+    create_file('lib/second.rb', "require_relative 'third'\n")
+    create_file('lib/third.rb', "require_relative 'first'\n")
+    create_file('lib/acyclic.rb')
+    graph = ArchUnit::Extraction.extract_graph(@project_root)
+
+    cycles = ArchUnit::Common::Projection.project_internal_cycles(graph)
+
+    expect(cycles.length).to eq(1)
+    expect(cycles.first.map(&:source_label)).to eq(
+      ['lib/first.rb', 'lib/second.rb', 'lib/third.rb']
+    )
+    expect(cycles.first.flat_map(&:cumulated_edges)).to all(be_a(ArchUnit::Edge))
+  end
 end
