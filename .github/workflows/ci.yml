@@ -14,8 +14,9 @@ concurrency:
 
 jobs:
   test:
-    name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
+    name: Compatibility — Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -24,8 +25,6 @@ jobs:
             ruby: "3.3"
           - os: ubuntu-latest
             ruby: "3.4"
-          - os: ubuntu-latest
-            ruby: "4.0"
           - os: windows-latest
             ruby: "4.0"
 
@@ -39,15 +38,48 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: Test and lint
-        run: bundle exec rake
+      - name: Test
+        run: bundle exec rspec
+
+  quality:
+    name: Quality and package — Ruby 4.0 on Ubuntu
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+
+      - name: Test with coverage
+        run: bundle exec rspec
+        env:
+          COVERAGE: "true"
+
+      - name: Lint
+        run: bundle exec rubocop
 
       - name: Build gem
-        run: gem build archunit.gemspec
+        run: bundle exec rake build
+
+      - name: Install and load the built gem
+        shell: bash
+        env:
+          GEM_HOME: ${{ runner.temp }}/archunit-gem-home
+          GEM_PATH: ${{ runner.temp }}/archunit-gem-home
+        run: |
+          gem install pkg/archunit-*.gem --no-document
+          ruby -e "require 'archunit'; puts ArchUnit::VERSION"
 
   rag-fixture:
     name: RAG fixture on Ruby 4.0
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Check out ArchUnitRuby

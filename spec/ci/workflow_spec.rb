@@ -11,28 +11,48 @@ RSpec.describe 'the CI workflow' do
   end
 
   let(:job) { workflow.fetch('jobs').fetch('test') }
+  let(:quality_job) { workflow.fetch('jobs').fetch('quality') }
   let(:fixture_job) { workflow.fetch('jobs').fetch('rag-fixture') }
   let(:matrix) { job.fetch('strategy').fetch('matrix').fetch('include') }
   let(:steps) { job.fetch('steps') }
 
-  it 'tests every supported CRuby line and current Ruby on Windows' do
+  it 'tests older supported CRuby lines and current Ruby on Windows' do
     expect(matrix).to contain_exactly(
       { 'os' => 'ubuntu-latest', 'ruby' => '3.3' },
       { 'os' => 'ubuntu-latest', 'ruby' => '3.4' },
-      { 'os' => 'ubuntu-latest', 'ruby' => '4.0' },
       { 'os' => 'windows-latest', 'ruby' => '4.0' }
     )
   end
 
-  it 'runs the repository gate and builds the gem' do
+  it 'runs only compatibility tests in the platform matrix' do
     commands = steps.filter_map { |step| step['run'] }
 
-    expect(commands).to include('bundle exec rake', 'gem build archunit.gemspec')
+    expect(commands).to include('bundle exec rspec')
+    expect(commands).not_to include('bundle exec rubocop', 'bundle exec rake build')
+  end
+
+  it 'runs coverage, lint, package build, and installed-gem smoke tests once' do
+    quality_steps = quality_job.fetch('steps')
+    ruby_setup = quality_steps.find { |step| step['uses'] == 'ruby/setup-ruby@v1' }
+    coverage_step = quality_steps.find { |step| step['name'] == 'Test with coverage' }
+    commands = quality_steps.filter_map { |step| step['run'] }.join("\n")
+
+    expect(coverage_step.fetch('env')).to eq('COVERAGE' => 'true')
+    expect(commands).to include(
+      'bundle exec rspec', 'bundle exec rubocop', 'bundle exec rake build',
+      'gem install pkg/archunit-*.gem', "require 'archunit'"
+    )
+    expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
+    expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')
   end
 
   it 'uses read-only repository permissions and non-blocking matrix failures' do
     expect(workflow.fetch('permissions')).to eq('contents' => 'read')
     expect(job.fetch('strategy').fetch('fail-fast')).to be(false)
+  end
+
+  it 'bounds every job so a hung runner cannot consume capacity indefinitely' do
+    expect(workflow.fetch('jobs').values).to all(include('timeout-minutes' => 10))
   end
 
   it 'locks dependencies for both CI operating-system families' do

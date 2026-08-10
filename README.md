@@ -154,21 +154,26 @@ bundle exec rake        # both
 gem build archunit.gemspec
 ```
 
-CI runs the test suite, RuboCop, and gem build on every push and pull request. The project follows
-the conventions in [`AGENTS.md`](AGENTS.md); Ruby idioms win where a sibling language's design does
-not fit naturally.
+CI runs compatibility tests on Ruby 3.3, 3.4, and 4.0 across Ubuntu and Windows. A single Ruby 4.0
+Ubuntu quality job enforces randomized specs, 98% line and 90% branch coverage, RuboCop, gem build,
+and installation from the built artifact. A separate job runs the public RAG fixture against the
+exact revision under test. Weekly Dependabot checks cover Bundler and GitHub Actions dependencies.
+There is no automatic release or documentation deployment yet.
+
+The project follows the conventions in [`AGENTS.md`](AGENTS.md); Ruby idioms win where a sibling
+language's design does not fit naturally.
 
 ## Roadmap and limitations
 
 The build backlog lives in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
-Extraction is complete through issue #12, and issue #13 provides the shared projection values,
-edge relabeling hook, cumulation, and node views. The next critical-path work adds the standard
-per-edge mapping functions and Tarjan/Johnson cycle detection.
+Extraction is complete through issue #12. Projection is complete through issue #15, including
+standard edge mappers, evidence-preserving relabeling, node views, and Tarjan/Johnson cycle
+detection.
 
 Not implemented yet:
 
 - the fluent file, layer, slice, metric, and graph-report APIs;
-- cycle projection and architecture assertions;
+- architecture assertions over the projected graph;
 - RSpec's `pass` matcher and Minitest's `assert_passes` helper;
 - RubyGems publication and stable installation instructions;
 - diagram validation, reporting, logging, and metrics.
