@@ -32,6 +32,7 @@ require_relative 'archunit/files/fluentapi/files'
 require_relative 'archunit/layers/fluentapi/layers'
 require_relative 'archunit/slices/fluentapi/slices'
 require_relative 'archunit/graph/fluentapi/graph'
+require_relative 'archunit/metrics/fluentapi/metrics'
 require_relative 'archunit/testing'
 
 # Public ArchUnitRuby API and shared data types.
@@ -74,6 +75,15 @@ module ArchUnit
   GraphReportSnapshot = GraphReporting::Projection::GraphReportSnapshot
   GraphSnapshotFactory = GraphReporting::Projection::SnapshotFactory
   GraphRenderer = GraphReporting::Rendering::GraphRenderer
+  MetricMethodInfo = Metrics::Extraction::MethodInfo
+  MetricFieldInfo = Metrics::Extraction::FieldInfo
+  ClassInfo = Metrics::Extraction::ClassInfo
+  MetricFileInfo = Metrics::Extraction::FileInfo
+  MetricProjectInfo = Metrics::Extraction::ProjectInfo
+  Metric = Metrics::Calculation::Metric
+  CountMetrics = Metrics::Calculation::Count
+  MetricMeasurement = Metrics::FluentApi::MetricMeasurement
+  MetricExtraction = Metrics::Extraction
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult
   ColorUtils = Testing::ColorUtils
