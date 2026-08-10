@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../common/regex_factory'
+require_relative 'depend_on_external_module_condition_builder'
 require_relative 'depend_on_file_condition_builder'
 require_relative 'match_pattern_file_condition'
 
@@ -43,6 +44,10 @@ module ArchUnit
 
         def depend_on_files
           DependOnFileConditionBuilder.new(self)
+        end
+
+        def depend_on_external_modules
+          DependOnExternalModuleConditionBuilder.new(self)
         end
 
         private
