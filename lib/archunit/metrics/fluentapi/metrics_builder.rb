@@ -57,7 +57,7 @@ module ArchUnit
 
         def analyze
           project = Extraction.extract_project_info(project_locator)
-          selected_files = project.files.select { |file| file_selected?(file) }
+          selected_files = project.files.filter_map { |file| selected_file_info(file) }
           Extraction::ProjectInfo.new(project_root: project.project_root, files: selected_files)
         end
 
@@ -67,14 +67,12 @@ module ArchUnit
           self.class.new(project_locator:, filters: [*filters, filter])
         end
 
-        def subjects_for(subject_type)
-          return distance_subjects if subject_type == Extraction::DistanceInfo
+        def subjects_for(subject_type, options: nil)
+          return distance_subjects(options:) if subject_type == Extraction::DistanceInfo
 
           project = analyze
           return project.files if subject_type == Extraction::FileInfo
-          if subject_type == Extraction::ClassInfo
-            return project.classes.select { |class_info| class_selected?(class_info) }
-          end
+          return project.classes if subject_type == Extraction::ClassInfo
 
           raise ArgumentError, "unsupported metric subject type: #{subject_type}"
         end
@@ -86,22 +84,31 @@ module ArchUnit
         end
 
         def file_selected?(file_info)
-          path_filters, class_filters = filters.partition { |filter| filter.target != :classname }
-          matches_path = Common::PatternMatching.matches_all_patterns?(file_info.path, path_filters)
-          return false unless matches_path
-          return true if class_filters.empty?
+          !selected_file_info(file_info).nil?
+        end
 
-          file_info.class_infos.any? do |class_info|
+        def selected_file_info(file_info)
+          path_filters, class_filters = partitioned_filters
+          matches_path = Common::PatternMatching.matches_all_patterns?(file_info.path, path_filters)
+          return unless matches_path
+          return file_info if class_filters.empty?
+
+          selected_classes = matching_classes(file_info, class_filters)
+          return if selected_classes.empty?
+
+          file_info.with(class_infos: selected_classes)
+        end
+
+        def matching_classes(file_info, class_filters)
+          file_info.class_infos.select do |class_info|
             Common::PatternMatching.matches_all_patterns?(
               file_info.path, class_filters, class_name: class_info.name
             )
           end
         end
 
-        def class_selected?(class_info)
-          Common::PatternMatching.matches_all_patterns?(
-            class_info.file_path, filters, class_name: class_info.name
-          )
+        def partitioned_filters
+          filters.partition { |filter| filter.target != :classname }
         end
 
         def immutable_project_locator(locator)

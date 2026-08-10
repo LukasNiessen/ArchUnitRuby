@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../calculation/numeric_value'
+
 module ArchUnit
   module Metrics
     module FluentApi
@@ -11,7 +13,7 @@ module ArchUnit
           end
 
           metric_name = immutable_metric_name(metric_name)
-          raise ArgumentError, 'value must be Numeric' unless value.is_a?(Numeric)
+          value = Calculation::NumericValue.validate(value)
 
           super
         end

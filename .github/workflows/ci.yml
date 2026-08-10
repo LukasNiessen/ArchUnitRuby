@@ -64,6 +64,9 @@ jobs:
       - name: Lint
         run: bundle exec rubocop
 
+      - name: Load public API with Ruby warnings enabled
+        run: bundle exec ruby -w -Ilib -e "require 'archunit'"
+
       - name: Smoke optional framework integrations
         shell: bash
         run: |
@@ -163,6 +166,27 @@ jobs:
               ->(info) { info.methods.length + info.fields.length }
             ).should_satisfy(->(value, info) { value.positive? && !info.name.empty? })
             ArchUnit.assert_passes(custom_rule)
+            threshold_rules = [
+              metric_scope.count.method_count.should_be_above(0),
+              metric_scope.count.method_count.should_be_above_or_equal(1),
+              metric_scope.lcom.lcom4.should_satisfy(
+                ->(value, info) { value >= 1 && info.name.end_with?('Builder') }
+              )
+            ]
+            threshold_rules.each { |rule| ArchUnit.assert_passes(rule) }
+            metric_report_options = ArchUnit::MetricsExportOptions.new(
+              title: 'Installed Gem Metrics', include_timestamp: false,
+              custom_css: 'body { color: #222; }'
+            )
+            metrics_output = File.join(ENV.fetch('RUNNER_TEMP'), 'metrics', 'report')
+            metric_scope.distance.export_as_html(metrics_output, metric_report_options)
+            metric_report = File.read(metrics_output + '.html')
+            abort unless metric_report.include?('Installed Gem Metrics')
+            summary_report = ArchUnit::MetricsExporter.export_as_html(
+              { 'Measured classes' => class_counts.length }, metric_report_options
+            )
+            abort unless summary_report.include?('Measured classes')
+            abort if summary_report.include?('Generated:')
             puts ArchUnit::VERSION
           "
 

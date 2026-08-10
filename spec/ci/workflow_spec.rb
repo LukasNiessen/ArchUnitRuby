@@ -40,6 +40,7 @@ RSpec.describe 'the CI workflow' do
     expect(coverage_step.fetch('env')).to eq('COVERAGE' => 'true')
     expect(commands).to include(
       'bundle exec rspec', 'bundle exec rubocop',
+      "bundle exec ruby -w -Ilib -e \"require 'archunit'\"",
       'gem build archunit.gemspec --strict --output pkg/archunit.gem',
       'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files',
       'depend_on_files', 'depend_on_external_modules', "matching('json')",
@@ -54,7 +55,10 @@ RSpec.describe 'the CI workflow' do
       'ArchUnit.metrics', "for_classes_matching('*MetricsBuilder')",
       'count.classes.measure', 'lcom.lcom4.measure', 'distance.instability.measure',
       'not_in_zone_of_pain.check', 'ArchUnit::MetricZoneViolation',
-      'custom_metric(', 'should_satisfy', 'ArchUnit.assert_passes(custom_rule)'
+      'custom_metric(', 'should_satisfy', 'ArchUnit.assert_passes(custom_rule)',
+      'should_be_above(0)', 'should_be_above_or_equal(1)', 'threshold_rules.each',
+      'ArchUnit::MetricsExportOptions', 'metric_scope.distance.export_as_html',
+      'ArchUnit::MetricsExporter.export_as_html', "include?('Generated:')"
     )
     expect(quality_job.fetch('runs-on')).to eq('ubuntu-latest')
     expect(ruby_setup.fetch('with').fetch('ruby-version')).to eq('4.0')
@@ -71,6 +75,16 @@ RSpec.describe 'the CI workflow' do
       "require 'minitest'", 'include Minitest::Assertions',
       'context.assert_passes(rule)', 'context.assertions == 1'
     )
+  end
+
+  it 'keeps the installed-gem smoke program syntactically valid Ruby' do
+    install_step = quality_job.fetch('steps').find do |step|
+      step['name'] == 'Install and load the built gem'
+    end
+    match = install_step.fetch('run').match(/ruby -e "\n(?<code>.*)\n\s*"\s*\z/m)
+
+    expect(match).not_to be_nil
+    expect { RubyVM::InstructionSequence.compile(match[:code]) }.not_to raise_error
   end
 
   it 'uses read-only repository permissions and non-blocking matrix failures' do

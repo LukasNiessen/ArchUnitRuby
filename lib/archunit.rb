@@ -86,8 +86,12 @@ module ArchUnit
   LCOMMetrics = Metrics::Calculation::LCOM
   DistanceMetrics = Metrics::Calculation::Distance
   MetricMeasurement = Metrics::FluentApi::MetricMeasurement
+  MetricsExportOptions = Metrics::Reporting::MetricsExportOptions
+  MetricsExporter = Metrics::Reporting::MetricsExporter
   MetricExtraction = Metrics::Extraction
   MetricZoneViolation = Metrics::Assertion::MetricZoneViolation
+  MetricThresholdViolation = Metrics::Assertion::MetricThresholdViolation
+  MetricPredicateViolation = Metrics::Assertion::MetricPredicateViolation
   CustomMetricViolation = Metrics::Assertion::CustomMetricViolation
   TestViolation = Testing::TestViolation
   TestResult = Testing::TestResult

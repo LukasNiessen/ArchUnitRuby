@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'numeric_value'
+
 module ArchUnit
   module Metrics
     module Calculation
@@ -22,10 +24,11 @@ module ArchUnit
             raise ArgumentError, "subject must be a #{subject_type.name.split('::').last}"
           end
 
-          value = calculation.call(subject)
-          return value if value.is_a?(Numeric)
-
-          raise TypeError, 'metric calculations must return a Numeric value'
+          NumericValue.validate(
+            calculation.call(subject),
+            attribute: 'metric calculations',
+            error_class: TypeError
+          )
         end
 
         private

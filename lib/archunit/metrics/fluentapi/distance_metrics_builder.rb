@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../calculation/distance'
+require_relative 'metric_report_builder'
 require_relative 'metric_selection'
 require_relative 'zone_condition'
 
@@ -9,6 +10,8 @@ module ArchUnit
     module FluentApi
       # Fluent distance metric names and architectural zone guards.
       class DistanceMetricsBuilder
+        include MetricReportBuilder
+
         attr_reader :scope
 
         def initialize(scope)
@@ -30,6 +33,14 @@ module ArchUnit
 
         def not_in_zone_of_uselessness
           ZoneCondition.new(scope:, zone: :uselessness)
+        end
+
+        private
+
+        def report_metrics
+          Calculation::Distance::CALCULATIONS.each_key.map do |name|
+            Calculation::Distance.public_send(name)
+          end
         end
       end
     end

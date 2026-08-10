@@ -43,7 +43,8 @@ source-to-graph path and the critical-path Files API run today.
 | LCOM96a/b, LCOM1-5, and LCOM* cohesion measurements | Working |
 | Distance, coupling, and architectural zone checks | Working |
 | Custom class metrics and `should_satisfy` | Working |
-| Metric threshold rules | Planned |
+| Six metric threshold predicates | Working |
+| Self-contained metrics HTML reports | Working |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -355,6 +356,12 @@ services.distance.instability.measure.each do |measurement|
   puts "#{measurement.identifier}: #{measurement.value} instability"
 end
 
+size_rule = services.count.method_count.should_be_below_or_equal(20)
+cohesion_rule = services.lcom.lcom4.should_be(1)
+distance_rule = services.distance.distance_from_main_sequence.should_be_below(0.5)
+
+[size_rule, cohesion_rule, distance_rule].each { |rule| ArchUnit.assert_passes(rule) }
+
 zone_rule = services.distance.not_in_zone_of_pain
 ArchUnit.assert_passes(zone_rule)
 
@@ -365,6 +372,11 @@ focus_rule = services.custom_metric(
 ).should_satisfy(->(value, class_info) { value < 20 && class_info.name.end_with?('Service') })
 
 ArchUnit.assert_passes(focus_rule)
+
+report_options = ArchUnit::MetricsExportOptions.new(
+  title: 'Service Architecture Metrics', include_timestamp: false
+)
+services.count.export_as_html('reports/service-counts', report_options)
 ```
 
 Count metrics cover methods and instance fields per class, plus lines of code, statements, imports,
@@ -389,8 +401,21 @@ conventional low/low and high/high abstractness-instability corners and return s
 
 `custom_metric(name, description, fn)` is the class-level escape hatch. Its calculation receives
 the complete immutable `ClassInfo`; `measure` returns its values, while `should_satisfy` receives
-both `(value, class_info)` and produces structured violations. The other five shared numeric
-threshold verbs arrive in the dedicated metric-threshold issue.
+both `(value, class_info)` and produces structured violations.
+
+Every metric selection exposes exactly six predicates: `should_be_below`, `should_be_above`,
+`should_be`, `should_be_below_or_equal`, `should_be_above_or_equal`, and `should_satisfy`. Numeric
+boundaries are exact: a value equal to the argument fails the strict `below` and `above` forms but
+passes the corresponding inclusive form. `should_satisfy` receives `(value, subject)`, where the
+subject is the complete immutable `ClassInfo`, `MetricFileInfo`, or `DistanceInfo`. Empty selections
+produce `EmptyTestViolation` unless `allow_empty_tests` is enabled, just like every other rule.
+
+Count, LCOM, and distance builders can export all their scoped measurements as offline HTML with
+`export_as_html(path, options)`. Missing directories and a missing `.html` extension are added
+automatically. `MetricsExporter.export_as_html(data, options)` renders an arbitrary metric map and
+returns the HTML string; `MetricsExportOptions` controls the title, UTC timestamp, custom CSS, and
+optional output path. Titles, labels, and values are HTML-escaped, while reports contain no external
+assets or network dependencies.
 
 ## Example repository
 
@@ -469,9 +494,11 @@ Issues #34 and #35 add dependency-derived abstractness, instability, main-sequen
 coupling, normalized distance, executable pain/uselessness zone guards, and custom class metrics
 with their explicit `should_satisfy(value, class_info)` escape hatch.
 
+Issues #36 and #37 add the exact shared threshold vocabulary, structured threshold/predicate
+violations, and self-contained HTML reporting for arbitrary metric maps and scoped metric families.
+
 Not implemented yet:
 
-- the remaining five numeric metric threshold assertions and metric reports;
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
 - additional reporting, logging, and metrics.

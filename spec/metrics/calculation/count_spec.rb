@@ -52,7 +52,15 @@ RSpec.describe ArchUnit::CountMetrics do
       ArchUnit::Metric.new(
         name: :bad, subject_type: ArchUnit::ClassInfo, calculation: ->(_subject) { 'one' }
       ).calculate(class_info)
-    end.to raise_error(TypeError, /Numeric/)
+    end.to raise_error(TypeError, /finite real Numeric/)
+    [Float::NAN, Float::INFINITY, Complex(1, 1)].each do |value|
+      expect do
+        ArchUnit::Metric.new(
+          name: :bad, subject_type: ArchUnit::ClassInfo,
+          calculation: ->(_subject) { value }
+        ).calculate(class_info)
+      end.to raise_error(TypeError, /finite real Numeric/)
+    end
     expect do
       ArchUnit::Metric.new(
         name: 'custom', description: '', subject_type: ArchUnit::ClassInfo,
