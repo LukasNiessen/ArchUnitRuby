@@ -6,7 +6,7 @@ for each programming language.
 [![CI](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml/badge.svg)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-e4493f)](https://lukasniessen.github.io/ArchUnitRuby/)
 [![Gem version](https://img.shields.io/gem/v/archunit.svg)](https://rubygems.org/gems/archunit)
-[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://rubygems.org/gems/archunit)
+[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit)
 [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)
@@ -52,6 +52,12 @@ bundle install
 ```
 
 Or install it directly with `gem install archunit`.
+
+[ClickGems download analytics](https://clickgems.clickhouse.com/dashboard/archunit) show trends by
+date, gem version, Ruby version, system, and country. Download totals count package fetches rather
+than unique users, so repeated installs and automated clients may contribute to the total. The
+[RubyGems API](https://rubygems.org/api/v1/gems/archunit.json) provides the
+current raw count and ClickGems provides the historical breakdown.
 
 RSpec and Minitest integrations are optional; ArchUnitRuby does not install either test framework
 for you.
