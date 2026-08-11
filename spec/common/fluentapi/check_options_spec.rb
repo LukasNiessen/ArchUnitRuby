@@ -15,7 +15,7 @@ RSpec.describe ArchUnit::Common::FluentApi::CheckOptions do
   end
 
   it 'accepts explicit cross-cutting options' do
-    logging = Object.new.freeze
+    logging = ArchUnit::LoggingOptions.new(io: nil)
     options = described_class.new(
       allow_empty_tests: true,
       logging:,
@@ -41,9 +41,12 @@ RSpec.describe ArchUnit::Common::FluentApi::CheckOptions do
       .to raise_error(ArgumentError, 'allow_empty_tests must be true or false')
     expect { described_class.new(clear_cache: nil) }
       .to raise_error(ArgumentError, 'clear_cache must be true or false')
+    expect { described_class.new(logging: Object.new) }
+      .to raise_error(ArgumentError, 'logging must be a LoggingOptions value or nil')
   end
 
   it 'is exposed from the gem public surface' do
     expect(ArchUnit::CheckOptions).to equal(described_class)
+    expect(ArchUnit::LoggingOptions).to equal(ArchUnit::Common::Logging::LoggingOptions)
   end
 end

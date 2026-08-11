@@ -69,6 +69,21 @@ RSpec.describe 'slice dependency rules' do
     expect(rule).to be_negated
   end
 
+  it 'excludes paths from pattern and regular-expression slice selectors' do
+    create_file('lib/app/generated/legacy.rb', "require_relative '../models/item'\n")
+    pattern = ArchUnit.project_slices(@project_root).defined_by(
+      'lib/app/(**)/', except: { in_folder: 'lib/app/generated' }
+    )
+    regexp = ArchUnit.project_slices(@project_root).defined_by_regex(
+      %r{\Alib/app/([^/]+)/}, except: 'lib/app/generated/**'
+    )
+
+    expect(pattern.projection.label_for('lib/app/api/entry.rb')).to eq('api')
+    expect(pattern.projection.label_for('lib/app/generated/legacy.rb')).to be_nil
+    expect(regexp.projection.label_for('lib/app/generated/legacy.rb')).to be_nil
+    expect(pattern.to_plantuml).not_to include('generated')
+  end
+
   it 'reports a forbidden slice dependency with every concrete edge as evidence' do
     rule = slices.should_not.contain_dependency('api', 'retrieval')
 

@@ -28,17 +28,19 @@ module ArchUnit
           with_options(options.with(include_self_dependencies: true))
         end
 
-        def focus_on(pattern, depth = 1)
-          filter = Common::RegexFactory.path_matcher(pattern)
+        def focus_on(pattern, depth = 1, except: nil)
+          filter = Common::RegexFactory.path_matcher(pattern, except:)
           with_options(options.with(focus: filter, focus_depth: depth))
         end
 
-        def reachable_from(pattern)
-          with_options(options.with(reachable_from: Common::RegexFactory.path_matcher(pattern)))
+        def reachable_from(pattern, except: nil)
+          filter = Common::RegexFactory.path_matcher(pattern, except:)
+          with_options(options.with(reachable_from: filter))
         end
 
-        def dependents_of(pattern)
-          with_options(options.with(dependents_of: Common::RegexFactory.path_matcher(pattern)))
+        def dependents_of(pattern, except: nil)
+          filter = Common::RegexFactory.path_matcher(pattern, except:)
+          with_options(options.with(dependents_of: filter))
         end
 
         def collapse_to_folder_depth(depth)

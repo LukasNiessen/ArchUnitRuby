@@ -116,7 +116,8 @@ RSpec.describe ArchUnit::Extraction, 'graph cache' do
   it 'does not let non-analysis check options fragment the cache' do
     create_file('lib/source.rb')
     first = described_class.extract_graph(@project_root)
-    options = ArchUnit::CheckOptions.new(allow_empty_tests: true, logging: Object.new)
+    logging = ArchUnit::LoggingOptions.new(io: nil)
+    options = ArchUnit::CheckOptions.new(allow_empty_tests: true, logging:)
 
     expect(described_class.extract_graph(@project_root, options:)).to equal(first)
   end

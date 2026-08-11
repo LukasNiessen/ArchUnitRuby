@@ -73,6 +73,19 @@ RSpec.describe ArchUnit::GraphReporting::FluentApi::ProjectGraphBuilder do
       .to all(be_frozen)
   end
 
+  it 'threads exclusions through graph focus and traversal selectors' do
+    report = ArchUnit.project_graph(@project_root)
+                     .focus_on('lib/**', 1, except: { with_name: 'orphan.rb' })
+                     .reachable_from('lib/**', except: 'orphan.rb')
+                     .dependents_of('lib/**', except: { in_path: 'lib/orphan.rb' })
+
+    expect(report.options.focus.exclusions.map(&:target)).to eq([:filename])
+    expect(report.options.reachable_from.exclusions.map(&:target)).to contain_exactly(
+      :path, :filename
+    )
+    expect(report.options.dependents_of.exclusions.map(&:target)).to eq([:path])
+  end
+
   it 'passes an immutable CheckOptions value to extraction unchanged' do
     check_options = ArchUnit::CheckOptions.new(clear_cache: true)
     report = ArchUnit.project_graph(@project_root).with_check_options(check_options)

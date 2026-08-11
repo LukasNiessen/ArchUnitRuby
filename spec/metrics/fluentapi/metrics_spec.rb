@@ -77,6 +77,22 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     end
   end
 
+  it 'applies file and class exclusions before measuring a scope' do
+    Dir.mktmpdir do |root|
+      build_project(root)
+
+      files = ArchUnit.metrics(root)
+                      .in_path('lib/**/*.rb', except: { in_folder: 'lib/services' })
+                      .count.classes.measure
+      classes = ArchUnit.metrics(root)
+                        .for_classes_matching('*', except: 'Sales::*')
+                        .count.method_count.measure
+
+      expect(files.map(&:identifier)).to eq(['lib/models/order.rb'])
+      expect(classes.map(&:identifier)).to eq(['lib/services/pay.rb:PayService'])
+    end
+  end
+
   it 'does not retain non-matching classes from a selected multi-class file' do
     Dir.mktmpdir do |root|
       write_source(root, 'lib/mixed.rb', <<~RUBY)

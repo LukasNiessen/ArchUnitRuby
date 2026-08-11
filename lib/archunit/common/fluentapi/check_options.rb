@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../logging/logging_options'
+
 module ArchUnit
   module Common
     module FluentApi
@@ -14,6 +16,7 @@ module ArchUnit
 
         def initialize(allow_empty_tests: false, logging: nil, clear_cache: false)
           validate_boolean(allow_empty_tests, :allow_empty_tests)
+          validate_logging(logging)
           validate_boolean(clear_cache, :clear_cache)
           super
         end
@@ -32,6 +35,12 @@ module ArchUnit
           return if [true, false].include?(value)
 
           raise ArgumentError, "#{attribute} must be true or false"
+        end
+
+        def validate_logging(value)
+          return if value.nil? || value.is_a?(Logging::LoggingOptions)
+
+          raise ArgumentError, 'logging must be a LoggingOptions value or nil'
         end
       end
     end

@@ -7,6 +7,8 @@ require_relative 'archunit/common/pattern'
 require_relative 'archunit/common/filter'
 require_relative 'archunit/common/pattern_matching'
 require_relative 'archunit/common/regex_factory'
+require_relative 'archunit/common/logging/logging_options'
+require_relative 'archunit/common/logging/check_logger'
 require_relative 'archunit/common/assertion/violation'
 require_relative 'archunit/common/assertion/empty_test_violation'
 require_relative 'archunit/common/fluentapi/check_options'
@@ -40,6 +42,8 @@ module ArchUnit
   Filter = Common::Filter
   PatternMatching = Common::PatternMatching
   RegexFactory = Common::RegexFactory
+  LoggingOptions = Common::Logging::LoggingOptions
+  CheckLogger = Common::Logging::CheckLogger
   Violation = Common::Assertion::Violation
   EmptyTestViolation = Common::Assertion::EmptyTestViolation
   CheckOptions = Common::FluentApi::CheckOptions

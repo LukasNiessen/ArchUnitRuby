@@ -22,12 +22,12 @@ module ArchUnit
           freeze
         end
 
-        def defined_by(pattern)
-          copy(projection: Projection.slice_by_pattern(pattern))
+        def defined_by(pattern, except: nil)
+          copy(projection: Projection.slice_by_pattern(pattern, except:))
         end
 
-        def defined_by_regex(regexp)
-          copy(projection: Projection.slice_by_regex(regexp))
+        def defined_by_regex(regexp, except: nil)
+          copy(projection: Projection.slice_by_regex(regexp, except:))
         end
 
         def should_not

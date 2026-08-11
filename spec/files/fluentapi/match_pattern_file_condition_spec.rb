@@ -28,6 +28,17 @@ RSpec.describe ArchUnit::Files::FluentApi::MatchPatternFileCondition do
     create_file('spec/order_service_spec.rb')
   end
 
+  it 'excludes files from a selector in the same fluent call' do
+    create_file('lib/generated/legacy_client.rb')
+    rule = ArchUnit.files(@project_root)
+                   .in_path('lib/**/*.rb', except: { in_folder: 'lib/generated' })
+                   .should.have_name('*_service.rb')
+
+    expect(rule.check.map { |violation| violation.projected_node.label }).to eq(
+      ['lib/repositories/order_repository.rb']
+    )
+  end
+
   it 'checks positive and negated filename predicates with one shared terminal' do
     scope = ArchUnit.project_files(@project_root).in_path('lib/**/*.rb')
     positive = scope.should.have_name('*_service.rb')

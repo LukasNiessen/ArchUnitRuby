@@ -23,20 +23,20 @@ module ArchUnit
           freeze
         end
 
-        def with_name(pattern)
-          with_filter(Common::RegexFactory.filename_matcher(pattern))
+        def with_name(pattern, except: nil)
+          with_filter(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
-        def in_folder(pattern)
-          with_filter(Common::RegexFactory.folder_matcher(pattern))
+        def in_folder(pattern, except: nil)
+          with_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
-        def in_path(pattern)
-          with_filter(Common::RegexFactory.path_matcher(pattern))
+        def in_path(pattern, except: nil)
+          with_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
-        def for_classes_matching(pattern)
-          with_filter(Common::RegexFactory.classname_matcher(pattern))
+        def for_classes_matching(pattern, except: nil)
+          with_filter(Common::RegexFactory.classname_matcher(pattern, except:))
         end
 
         def count

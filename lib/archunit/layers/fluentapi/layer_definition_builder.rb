@@ -15,12 +15,12 @@ module ArchUnit
           freeze
         end
 
-        def defined_by(pattern)
-          add_filter(Common::RegexFactory.path_matcher(pattern))
+        def defined_by(pattern, except: nil)
+          add_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
-        def defined_by_folder(pattern)
-          add_filter(Common::RegexFactory.folder_matcher(pattern))
+        def defined_by_folder(pattern, except: nil)
+          add_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
         private

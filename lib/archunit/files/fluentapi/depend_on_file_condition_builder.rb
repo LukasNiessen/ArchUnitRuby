@@ -26,16 +26,16 @@ module ArchUnit
           is_negated
         end
 
-        def with_name(pattern)
-          condition(Common::RegexFactory.filename_matcher(pattern))
+        def with_name(pattern, except: nil)
+          condition(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
-        def in_folder(pattern)
-          condition(Common::RegexFactory.folder_matcher(pattern))
+        def in_folder(pattern, except: nil)
+          condition(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
-        def in_path(pattern)
-          condition(Common::RegexFactory.path_matcher(pattern))
+        def in_path(pattern, except: nil)
+          condition(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
         private

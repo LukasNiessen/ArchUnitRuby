@@ -113,6 +113,7 @@ jobs:
           gem install pkg/archunit.gem --no-document
           ruby -e "
             require 'json'
+            require 'stringio'
             require 'archunit'
             rules = [
               ArchUnit.project_files.should_not.depend_on_files.in_folder('lib'),
@@ -129,6 +130,24 @@ jobs:
             ]
             abort unless rules.all? { |rule| rule.is_a?(ArchUnit::Checkable) }
             ArchUnit.assert_passes(rules[-2])
+            excluded_logging = ArchUnit.project_files
+              .in_path(
+                'lib/archunit/common/**/*.rb',
+                except: { in_folder: 'lib/archunit/common/logging' }
+              )
+              .should.have_name('*.rb')
+            abort if excluded_logging.filters.first.exclusions.empty?
+            ArchUnit.assert_passes(excluded_logging)
+            log_stream = StringIO.new
+            log_directory = File.join(ENV.fetch('RUNNER_TEMP'), 'archunit-logs')
+            logging = ArchUnit::LoggingOptions.new(
+              level: :debug, io: log_stream, output_directory: log_directory
+            )
+            abort unless rules[-2].check(ArchUnit::CheckOptions.new(logging:)).empty?
+            abort unless log_stream.string.include?('start check:')
+            abort unless log_stream.string.include?('end check:')
+            log_files = Dir[File.join(log_directory, 'archunit-*.log')]
+            abort unless log_files.one? && File.read(log_files.first).include?('log progress:')
             abort unless ArchUnit.format_violations([], color: false) ==
               'No architecture violations found.'
             report = ArchUnit.project_graph

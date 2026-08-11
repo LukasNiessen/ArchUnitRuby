@@ -45,6 +45,8 @@ source-to-graph path and the critical-path Files API run today.
 | Custom class metrics and `should_satisfy` | Working |
 | Six metric threshold predicates | Working |
 | Self-contained metrics HTML reports | Working |
+| Pattern exclusions on every selector | Working |
+| Opt-in per-check logging with file output | Working |
 | RubyGems installation | Not published yet |
 
 The implementation has a growing RSpec suite and is tested on Ruby 3.3, 3.4, and 4.0 on Linux, plus
@@ -226,6 +228,35 @@ Custom predicates receive an immutable `FileInfo` with its project-relative `pat
 extension, extension, directory, complete source text, and non-blank line count. A selector matching
 zero files returns `EmptyTestViolation` from every terminal unless a check explicitly sets
 `allow_empty_tests: true`.
+
+## Pattern exclusions
+
+Every file, dependency, layer, slice, graph, and metric selector accepts `except:` in the same call.
+A plain pattern or array uses the parent selector's context, including the useful filename form for
+path and folder selectors:
+
+```ruby
+services = ArchUnit.project_files('/path/to/project').in_path(
+  'app/**/*.rb',
+  except: ['app/generated/**', 'schema.rb']
+)
+```
+
+Use a hash when the target should be explicit. The supported keys are `in_path`, `in_folder`,
+`with_name`, and `for_classes_matching`:
+
+```ruby
+services = ArchUnit.metrics('/path/to/project').in_path(
+  'app/**/*.rb',
+  except: {
+    in_folder: 'app/generated',
+    with_name: '*_spec.rb'
+  }
+)
+```
+
+Exclusions are immutable nested filters and are evaluated by the shared pattern matcher, so the
+same semantics apply across all rule families and graph projections.
 
 ## Named layer policies
 
@@ -417,6 +448,27 @@ returns the HTML string; `MetricsExportOptions` controls the title, UTC timestam
 optional output path. Titles, labels, and values are HTML-escaped, while reports contain no external
 assets or network dependencies.
 
+## Per-check logging
+
+Logging is off by default and configured only through the `CheckOptions` supplied to one rule. This
+keeps concurrent test runs independent and avoids process-global logger state:
+
+```ruby
+logging = ArchUnit::LoggingOptions.new(
+  level: :debug,
+  output_directory: 'tmp/archunit-logs',
+  append: false
+)
+
+violations = rule.check(ArchUnit::CheckOptions.new(logging: logging))
+```
+
+The levels are `debug`, `info`, `warn`, and `error`. A check records a stable vocabulary of start,
+progress, violation, metric, and end events; the configured level filters lower-priority events.
+`io:` defaults to `$stderr` and can be any writable stream or `nil`. Setting `output_directory:`
+adds a timestamped `archunit-*.log` file, creates missing directories, and uses `append:` to choose
+append or overwrite behavior if a timestamped path already exists.
+
 ## Example repository
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
@@ -497,11 +549,14 @@ with their explicit `should_satisfy(value, class_info)` escape hatch.
 Issues #36 and #37 add the exact shared threshold vocabulary, structured threshold/predicate
 violations, and self-contained HTML reporting for arbitrary metric maps and scoped metric families.
 
+Issues #38 and #39 add exclusions to every fluent selector and opt-in logging scoped to an
+individual check, including four levels, fixed lifecycle events, and timestamped file output.
+
 Not implemented yet:
 
 - remaining architecture assertions over the projected graph;
 - RubyGems publication and stable installation instructions;
-- additional reporting, logging, and metrics.
+- additional reporting and metrics.
 
 Until those pieces land, treat the gem as an actively developed prototype rather than a stable
 release.

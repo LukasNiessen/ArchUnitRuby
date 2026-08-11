@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'stringio'
+
 RSpec.describe ArchUnit::Common::FluentApi::Checkable do
   def rule_class(&implementation)
     Class.new do
@@ -27,6 +29,52 @@ RSpec.describe ArchUnit::Common::FluentApi::Checkable do
     rule = rule_class { |received| [violation] if received.equal?(options) }.new
 
     expect(rule.check(options)).to eq([violation])
+  end
+
+  it 'logs lifecycle, violations, and metric evidence through per-check options' do
+    output = StringIO.new
+    metric_violation = Class.new(ArchUnit::Violation) do
+      def metric_name = :method_count
+      def value = 7
+      def identifier = 'lib/example.rb:Example'
+    end.new
+    rule = rule_class { |_options| [metric_violation] }.new
+    logging = ArchUnit::LoggingOptions.new(level: :debug, io: output)
+
+    expect(rule.check(ArchUnit::CheckOptions.new(logging:))).to eq([metric_violation])
+    expect(output.string).to include(
+      'start check:', 'log progress:', 'log violation:',
+      'log metric: method_count=7 [lib/example.rb:Example]', 'end check:'
+    )
+  end
+
+  it 'keeps logging sinks isolated between checks' do
+    first_output = StringIO.new
+    second_output = StringIO.new
+    first = rule_class { |_options| [] }.new
+    second = rule_class { |_options| [ArchUnit::Violation.new] }.new
+
+    first.check(ArchUnit::CheckOptions.new(
+                  logging: ArchUnit::LoggingOptions.new(io: first_output)
+                ))
+    second.check(ArchUnit::CheckOptions.new(
+                   logging: ArchUnit::LoggingOptions.new(io: second_output)
+                 ))
+
+    expect(first_output.string).to include('(0 violations)')
+    expect(first_output.string).not_to include('log violation:')
+    expect(second_output.string).to include('(1 violations)', 'log violation:')
+  end
+
+  it 'logs a failed check at error level and preserves the original exception' do
+    output = StringIO.new
+    rule = rule_class { |_options| raise 'extraction failed' }.new
+    options = ArchUnit::CheckOptions.new(
+      logging: ArchUnit::LoggingOptions.new(level: :error, io: output)
+    )
+
+    expect { rule.check(options) }.to raise_error(RuntimeError, 'extraction failed')
+    expect(output.string).to include('[ERROR] end check:', 'RuntimeError: extraction failed')
   end
 
   it 'rejects non-violation and non-list results' do

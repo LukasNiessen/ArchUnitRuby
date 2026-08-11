@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'slice_projection'
+require_relative '../../common/pattern_matching'
+require_relative '../../common/regex_factory'
 
 module ArchUnit
   module Slices
@@ -14,14 +16,17 @@ module ArchUnit
         SliceProjection.new { |path| path }
       end
 
-      def slice_by_pattern(pattern)
+      def slice_by_pattern(pattern, except: nil)
         regexp = slice_pattern_regexp(pattern)
-        slice_by_regex(regexp)
+        slice_by_regex(regexp, except:)
       end
 
-      def slice_by_regex(regexp)
+      def slice_by_regex(regexp, except: nil)
         regexp = immutable_regexp(regexp)
+        selector = Common::RegexFactory.path_matcher('**', except:)
         SliceProjection.new do |path|
+          next unless Common::PatternMatching.matches_pattern?(path, selector)
+
           match = regexp.match(path)
           match && non_empty_capture(match[1])
         end

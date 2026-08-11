@@ -31,16 +31,16 @@ module ArchUnit
           @negated
         end
 
-        def have_name(pattern)
-          matching(Common::RegexFactory.filename_matcher(pattern))
+        def have_name(pattern, except: nil)
+          matching(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
-        def be_in_folder(pattern)
-          matching(Common::RegexFactory.folder_matcher(pattern))
+        def be_in_folder(pattern, except: nil)
+          matching(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
-        def be_in_path(pattern)
-          matching(Common::RegexFactory.path_matcher(pattern))
+        def be_in_path(pattern, except: nil)
+          matching(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
         def depend_on_files
