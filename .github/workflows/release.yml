@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version from lib/archunit/version.rb, without a leading v
+        required: true
+        type: string
+
+concurrency:
+  group: rubygems-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish archunit ${{ inputs.version }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+
+      - name: Verify requested version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          ruby -Ilib -rarchunit/version -e '
+            expected = ArchUnit::VERSION
+            actual = ENV.fetch("RELEASE_VERSION")
+            abort "Requested #{actual}, but the gem version is #{expected}" unless actual == expected
+            puts "Releasing archunit #{expected}"
+          '
+
+      - name: Test and lint
+        run: bundle exec rake
+
+      - name: Build and validate documentation
+        run: bundle exec rake docs
+
+      - name: Validate gem strictly
+        run: gem build archunit.gemspec --strict --output "${RUNNER_TEMP}/archunit.gem"
+
+      - name: Publish to RubyGems
+        uses: rubygems/release-gem@v1

@@ -15,9 +15,13 @@ Gem::Specification.new do |spec|
 
   spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['documentation_uri'] = 'https://lukasniessen.github.io/ArchUnitRuby/'
+  spec.metadata['bug_tracker_uri'] = "#{spec.homepage}/issues"
+  spec.metadata['changelog_uri'] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+  spec.metadata['allowed_push_host'] = 'https://rubygems.org'
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.files = Dir['lib/**/*', 'README.md', 'LICENSE'].select { |path| File.file?(path) }
+  packaged_files = ['lib/**/*', 'README.md', 'CHANGELOG.md', 'LICENSE']
+  spec.files = Dir[*packaged_files].select { |path| File.file?(path) }
   spec.require_paths = ['lib']
 
   spec.add_dependency 'csv', '>= 3.3', '< 4.0'
