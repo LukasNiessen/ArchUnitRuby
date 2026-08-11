@@ -1,0 +1,11 @@
+--title ArchUnitRuby
+--readme README.md
+--markup markdown
+--markup-provider kramdown
+--output-dir docs
+--no-private
+--no-stats
+--asset docs-assets/custom.css:css/archunit.css
+lib/**/*.rb
+-
+README.md

@@ -61,8 +61,14 @@ jobs:
         env:
           COVERAGE: "true"
 
+      - name: Dogfood architecture rules
+        run: bundle exec rspec spec/architecture_spec.rb --format documentation
+
       - name: Lint
         run: bundle exec rubocop
+
+      - name: Build documentation
+        run: bundle exec rake docs
 
       - name: Load public API with Ruby warnings enabled
         run: bundle exec ruby -w -Ilib -e "require 'archunit'"

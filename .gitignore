@@ -1,5 +1,7 @@
 /.bundle/
 /.rubocop_cache/
 /coverage/
+/docs/
+/.yardoc/
 /pkg/
 /vendor/bundle/

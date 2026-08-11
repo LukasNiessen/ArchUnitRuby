@@ -4,6 +4,7 @@ Architecture testing for Ruby. Part of **ArchUnitEverything**: one recognizable 
 for each programming language.
 
 [![CI](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml/badge.svg)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-e4493f)](https://lukasniessen.github.io/ArchUnitRuby/)
 [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)
@@ -24,6 +25,12 @@ so use the GitHub source until the first release.
 
 Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
 [ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython).
+
+## Documentation
+
+The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide with a
+searchable, source-generated API reference for every public module, class, and method. The same
+site is rebuilt in CI and deployed from `main`, so the published reference follows the repository.
 
 ## Install
 
@@ -340,13 +347,15 @@ git clone https://github.com/LukasNiessen/ArchUnitRuby.git
 cd ArchUnitRuby
 bundle install
 bundle exec rake
+bundle exec rake docs
 gem build archunit.gemspec --strict
 ```
 
 `bundle exec rake` runs the randomized RSpec suite and RuboCop. CI additionally enforces 98% line
-and 90% branch coverage, loads the public API with Ruby warnings, tests optional RSpec/Minitest
-integrations, builds and installs the gem artifact, runs the external RAG fixture, and checks Ruby
-3.3, 3.4, and 4.0 across Ubuntu and Windows.
+and 90% branch coverage, runs the dogfooding rules explicitly, builds the documentation, loads the
+public API with Ruby warnings, tests optional RSpec/Minitest integrations, builds and installs the
+gem artifact, runs the external RAG fixture, and checks Ruby 3.3, 3.4, and 4.0 across Ubuntu and
+Windows.
 
 The implementation conventions and intended dependency directions live in [`AGENTS.md`](AGENTS.md).
 
@@ -356,7 +365,7 @@ The implementation conventions and intended dependency directions live in [`AGEN
 - Ruby constants are not modeled as a separate graph. Files are the primary dependency vocabulary.
 - Dynamic `require`, `autoload`, and `load` arguments cannot be resolved statically.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
-- There is no documentation site or automated release/deployment workflow yet.
+- There is no automated RubyGems release workflow yet.
 - The API is still pre-release and may change before the first stable gem version.
 
 ## License
