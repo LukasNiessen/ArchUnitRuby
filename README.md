@@ -5,6 +5,8 @@ for each programming language.
 
 [![CI](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml/badge.svg)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-e4493f)](https://lukasniessen.github.io/ArchUnitRuby/)
+[![Gem version](https://img.shields.io/gem/v/archunit.svg)](https://rubygems.org/gems/archunit)
+[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://rubygems.org/gems/archunit)
 [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)
@@ -20,8 +22,8 @@ ArchUnit.project_files
 ```
 
 It is a working executable prototype with file, layer, slice, graph-reporting, and metric APIs. It
-is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. The gem is not on RubyGems yet,
-so use the GitHub source until the first release.
+is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Version 0.0.1 is available as
+[`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
 
 Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
 [ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython).
@@ -34,12 +36,12 @@ site is rebuilt in CI and deployed from `main`, so the published reference follo
 
 ## Install
 
-ArchUnitRuby requires Ruby 3.3 or newer. Add the current prototype to your test dependencies:
+ArchUnitRuby requires Ruby 3.3 or newer. Add it to your test dependencies:
 
 ```ruby
 # Gemfile
 group :test do
-  gem 'archunit', github: 'LukasNiessen/ArchUnitRuby', branch: 'main'
+  gem 'archunit', '~> 0.0.1'
 end
 ```
 
@@ -48,6 +50,8 @@ Then install it:
 ```bash
 bundle install
 ```
+
+Or install it directly with `gem install archunit`.
 
 RSpec and Minitest integrations are optional; ArchUnitRuby does not install either test framework
 for you.
@@ -361,11 +365,9 @@ The implementation conventions and intended dependency directions live in [`AGEN
 
 ## Current limitations
 
-- The `archunit` gem is not published to RubyGems yet; install it from GitHub.
 - Ruby constants are not modeled as a separate graph. Files are the primary dependency vocabulary.
 - Dynamic `require`, `autoload`, and `load` arguments cannot be resolved statically.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
-- There is no automated RubyGems release workflow yet.
 - The API is still pre-release and may change before the first stable gem version.
 
 ## License
