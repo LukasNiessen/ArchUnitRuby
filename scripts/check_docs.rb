@@ -27,6 +27,10 @@ broken = pages.flat_map do |page|
   unless content.include?('data-archunit-theme')
     raise "Custom theme is missing from #{page.relative_path_from(OUTPUT)}"
   end
+  if page.basename.to_s.match?(/\A(?:class|method|file)_list\.html\z/) &&
+     !content.include?('<body class="archunit-list">')
+    raise "Navigation theme hook is missing from #{page.relative_path_from(OUTPUT)}"
+  end
 
   content.scan(/\bhref=(["'])(.*?)\1/).filter_map do |(_, href)|
     target = internal_target(page, href)

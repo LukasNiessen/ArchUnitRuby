@@ -1,6 +1,7 @@
 :root {
   color-scheme: dark;
   --au-bg: #0b0e14;
+  --au-sidebar: #090c12;
   --au-panel: #121722;
   --au-panel-raised: #191f2c;
   --au-border: #2b3445;
@@ -9,6 +10,10 @@
   --au-faint: #737d8f;
   --au-ruby: #e4493f;
   --au-ruby-dark: #b92822;
+  --au-ruby-soft: #ff928b;
+  --au-link: #ff817a;
+  --au-link-hover: #ffaaa5;
+  --au-blue: #8bbcff;
   --au-gold: #f2b84b;
   --au-code: #090c12;
   --au-radius: 12px;
@@ -30,17 +35,25 @@ body {
   color: var(--au-text);
   font-family: var(--au-sans);
   font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
 }
 
 a,
-a:visited {
-  color: #ff766e;
+a:visited,
+#content a,
+#content a:visited {
+  color: var(--au-link);
   text-decoration-color: rgb(255 118 110 / 45%);
   text-underline-offset: 0.18em;
 }
 
-a:hover {
-  color: #ff9b95;
+a:hover,
+#content a:hover,
+#content .summary_signature:hover a,
+#content .summary_signature:hover a:visited {
+  background: transparent;
+  color: var(--au-link-hover);
   text-decoration-color: currentcolor;
 }
 
@@ -56,7 +69,7 @@ input:focus-visible {
     radial-gradient(circle at 78% -10%, rgb(228 73 63 / 14%), transparent 34rem),
     var(--au-bg);
   color: var(--au-text);
-  padding: 0 2.5rem 4rem;
+  padding: 0 3rem 4rem;
 }
 
 .archunit-topbar {
@@ -67,8 +80,8 @@ input:focus-visible {
   display: flex;
   gap: 2rem;
   justify-content: space-between;
-  margin: 0 -2.5rem 2.5rem;
-  padding: 1rem 2.5rem;
+  margin: 0 -3rem 2.75rem;
+  padding: 1rem 3rem;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -123,52 +136,178 @@ input:focus-visible {
 }
 
 .nav_wrap {
-  background: #080a0f;
+  background: var(--au-sidebar);
   border-right: 1px solid var(--au-border);
-  min-width: 240px;
-  width: 23%;
+  min-width: 260px;
+  width: clamp(260px, 22vw, 310px);
 }
 
 #nav {
+  background: var(--au-sidebar);
   border-right: 0;
 }
 
-body.full_list {
-  background: #080a0f;
+/* YARD renders this page inside the left-hand iframe. The class is added by
+   prepare_docs.rb so the legacy full-list theme can be overridden reliably. */
+body.archunit-list {
+  background: var(--au-sidebar);
   color: var(--au-text);
   display: block;
+  font-family: var(--au-sans);
+  font-size: 14px;
+  height: 100%;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+body.archunit-list #content,
+body.archunit-list #search,
+body.archunit-list #noresults {
+  background: transparent;
+  color: var(--au-text);
+}
+
+body.archunit-list .fixed_header {
+  backdrop-filter: blur(18px);
+  background: rgb(9 12 18 / 94%);
+  border-bottom: 1px solid var(--au-border);
+  height: 126px;
   padding: 1rem;
 }
 
-.full_list #content,
-.full_list #search {
-  background: transparent;
+body.archunit-list #full_list_header {
+  border: 0;
+  color: var(--au-faint);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+body.archunit-list #full_list_nav {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0 0 0.7rem;
+}
+
+body.archunit-list #full_list_nav span::after {
+  content: none;
+}
+
+body.archunit-list #full_list_nav a,
+body.archunit-list #full_list_nav a:visited {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--au-muted);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.48rem;
+}
+
+body.archunit-list #full_list_nav a:hover {
+  background: var(--au-panel);
+  border-color: var(--au-border);
   color: var(--au-text);
 }
 
-.full_list #search input {
+body.archunit-list #search {
+  color: var(--au-faint);
+  font-size: 0.68rem;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body.archunit-list #search label {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+body.archunit-list #search input {
   background: var(--au-panel);
   border: 1px solid var(--au-border);
-  border-radius: 8px;
+  border-radius: 7px;
   color: var(--au-text);
   font-family: var(--au-sans);
-  padding: 0.65rem 0.75rem;
+  outline: none;
+  padding: 0.45rem 0.6rem;
+  width: 100%;
 }
 
-.full_list ul,
-.full_list li {
+body.archunit-list #search input:focus {
+  border-color: var(--au-ruby-soft);
+  box-shadow: 0 0 0 3px rgb(228 73 63 / 14%);
+}
+
+body.archunit-list #full_list {
+  margin: 127px 0 0;
+  padding: 0.75rem 0.55rem 2rem;
+}
+
+body.archunit-list #full_list ul,
+body.archunit-list #full_list li,
+body.archunit-list #full_list li.odd,
+body.archunit-list #full_list li.even {
   background: transparent;
 }
 
-.full_list a,
-.full_list a:visited {
-  color: var(--au-muted);
+body.archunit-list #full_list li {
+  color: var(--au-faint);
 }
 
-.full_list .item:hover,
-.full_list li:hover {
+body.archunit-list #full_list .item {
+  border-radius: 6px;
+  min-height: 30px;
+  padding-block: 0.35rem;
+}
+
+body.archunit-list #full_list a,
+body.archunit-list #full_list a:visited {
+  color: var(--au-muted);
+  font-weight: 550;
+}
+
+body.archunit-list #full_list .item:hover {
   background: var(--au-panel);
+}
+
+body.archunit-list #full_list .item:hover a {
   color: var(--au-text);
+}
+
+body.archunit-list #full_list li.clicked > .item {
+  background: linear-gradient(90deg, rgb(228 73 63 / 24%), rgb(228 73 63 / 8%));
+  box-shadow: inset 2px 0 var(--au-ruby);
+}
+
+body.archunit-list #full_list li.clicked > .item a {
+  color: var(--au-text);
+}
+
+body.archunit-list #full_list li a.toggle {
+  align-items: center;
+  background: none !important;
+  color: var(--au-faint);
+  display: flex;
+  font-size: 1rem;
+  height: 18px;
+  justify-content: center;
+  left: -4px;
+  margin-left: -14px;
+  text-indent: 0;
+  top: 1px;
+  width: 14px;
+}
+
+body.archunit-list #full_list li a.toggle::before {
+  content: "⌄";
+}
+
+body.archunit-list #full_list li.collapsed a.toggle::before {
+  content: "›";
 }
 
 #filecontents,
@@ -182,7 +321,7 @@ body.full_list {
 
 #filecontents {
   margin: 0 auto;
-  max-width: 980px;
+  max-width: 1040px;
 }
 
 #filecontents > h1:first-child {
@@ -190,10 +329,10 @@ body.full_list {
   background-clip: text;
   border: 0;
   color: transparent;
-  font-size: clamp(2.7rem, 7vw, 5.5rem);
-  letter-spacing: -0.065em;
-  line-height: 0.95;
-  margin: 4.5rem 0 1.5rem;
+  font-size: clamp(3rem, 6vw, 4.8rem);
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  margin: 3.75rem 0 1.5rem;
   max-width: 12ch;
   padding: 0;
 }
@@ -232,6 +371,10 @@ td {
 
 strong {
   color: var(--au-text);
+}
+
+hr {
+  border-color: var(--au-border);
 }
 
 *:not(pre) > code,
@@ -274,6 +417,18 @@ table {
   width: 100%;
 }
 
+.docstring table tr:nth-child(odd),
+#filecontents table tr:nth-child(odd) {
+  background: rgb(255 255 255 / 2.5%);
+}
+
+.docstring table tr:nth-child(even),
+#filecontents table tr:nth-child(even),
+.docstring table th,
+#filecontents table th {
+  background: var(--au-panel);
+}
+
 th {
   background: var(--au-panel-raised);
   color: var(--au-text);
@@ -303,6 +458,52 @@ tr:nth-child(even) td {
   color: var(--au-muted);
 }
 
+.box_info dl:nth-child(odd) > *,
+.box_info dl:nth-child(even) > * {
+  background: var(--au-panel) !important;
+  border-color: var(--au-border) !important;
+}
+
+.box_info dl > dt {
+  color: var(--au-muted);
+}
+
+.box_info dl > dd {
+  color: var(--au-text);
+}
+
+.summary_signature,
+.summary_signature:hover,
+.summary_signature.deprecated,
+.tags .overload .overload_item .signature {
+  background: var(--au-panel) !important;
+  border-color: var(--au-border) !important;
+  color: var(--au-muted);
+}
+
+.summary_signature:hover {
+  box-shadow: inset 2px 0 var(--au-ruby);
+}
+
+.inheritanceTree,
+.toggleDefines,
+h2 small a,
+#search a {
+  background: var(--au-panel) !important;
+  border-color: var(--au-border) !important;
+  color: var(--au-muted) !important;
+  fill: var(--au-muted) !important;
+}
+
+.inheritanceTree:hover,
+.toggleDefines:hover,
+h2 small a:hover,
+#search a:hover {
+  background: var(--au-panel-raised) !important;
+  color: var(--au-text) !important;
+  fill: var(--au-text) !important;
+}
+
 .signature {
   color: #ffd1ce !important;
   font-family: var(--au-mono);
@@ -317,6 +518,124 @@ tr:nth-child(even) td {
   background: var(--au-panel);
   border: 1px solid var(--au-border);
   border-radius: 8px;
+}
+
+#menu .title,
+#menu a,
+#menu a:visited,
+#footer a,
+#footer a:visited {
+  color: var(--au-muted);
+}
+
+#header .title,
+#header .title .name,
+#header .title .object_link a {
+  color: var(--au-text);
+}
+
+#toc {
+  background: rgb(18 23 34 / 96%);
+  border: 1px solid var(--au-border);
+  border-radius: var(--au-radius);
+  box-shadow: var(--au-shadow);
+  color: var(--au-muted);
+  max-width: 270px;
+  padding: 1.1rem 1.25rem;
+}
+
+#toc.hidden,
+#toc.hidden:hover {
+  background: var(--au-panel);
+}
+
+#toc .title {
+  color: var(--au-text);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#toc li {
+  line-height: 1.5;
+}
+
+#toc li::marker {
+  color: var(--au-faint);
+}
+
+#content #toc a,
+#content #toc a:visited {
+  color: var(--au-muted);
+}
+
+#content #toc a:hover {
+  color: var(--au-link-hover);
+}
+
+.docstring dl,
+#filecontents dl {
+  border-color: var(--au-border);
+}
+
+.docstring dl dt,
+#filecontents dt {
+  background: var(--au-panel-raised);
+  color: var(--au-text);
+}
+
+pre.code .info.file,
+.source_code .lines,
+.showSource a,
+.showSource a:visited,
+#method_missing_details .notice.this {
+  color: var(--au-faint);
+}
+
+pre.code .val,
+pre.code .tstring_content,
+pre.code .heredoc_beg,
+pre.code .heredoc_end,
+pre.code .qwords_beg,
+pre.code .qwords_end,
+pre.code .qwords_sep,
+pre.code .words_beg,
+pre.code .words_end,
+pre.code .words_sep,
+pre.code .qsymbols_beg,
+pre.code .qsymbols_end,
+pre.code .qsymbols_sep,
+pre.code .symbols_beg,
+pre.code .symbols_end,
+pre.code .symbols_sep,
+pre.code .tstring,
+pre.code .dstring,
+pre.code .regexp,
+.dregexp {
+  color: #9bd49b;
+}
+
+pre.code .comment {
+  color: #75839a;
+}
+
+pre.code .const,
+pre.code .constant,
+#content .summary_desc pre.code .const > .object_link a,
+#content .docstring pre.code .const > .object_link a {
+  color: #c8a8ff;
+}
+
+pre.code .label,
+pre.code .symbol {
+  color: #ffaaa5;
+}
+
+pre.code .kw,
+pre.code .rubyid_require,
+pre.code .rubyid_extend,
+pre.code .rubyid_include {
+  color: var(--au-blue);
 }
 
 .breadcrumb {

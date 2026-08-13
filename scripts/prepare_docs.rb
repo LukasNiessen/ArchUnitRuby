@@ -47,6 +47,9 @@ def prepare_page(path)
 
   content.gsub!('href="LICENSE"', "href=\"#{SOURCE_URL}LICENSE\"")
   content.gsub!('href="AGENTS.md"', "href=\"#{SOURCE_URL}AGENTS.md\"")
+  if page.basename.to_s.match?(/\A(?:class|method|file)_list\.html\z/)
+    content.sub!('<body>', '<body class="archunit-list">')
+  end
   content.sub!('</head>', "#{page_head(page)}</head>")
   content.sub!(/(<div id="main"[^>]*>)/, "\\1#{navigation(page)}")
   page.binwrite(content)
