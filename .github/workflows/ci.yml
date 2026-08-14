@@ -67,6 +67,12 @@ jobs:
       - name: Lint
         run: bundle exec rubocop
 
+      - name: Extraction performance smoke benchmark
+        run: >-
+          bundle exec ruby benchmark/extraction.rb
+          --files 200 --gems 4 --imports-per-file 3
+          --max-cold-seconds 30 --max-warm-seconds 2
+
       - name: Build documentation
         run: bundle exec rake docs
 

@@ -8,8 +8,8 @@ module ArchUnit
   module Extraction
     module_function
 
-    def resolve_import(module_name, source_file:, project_root:, import_kind:)
-      roots = import_search_roots(source_file, project_root, import_kind)
+    def resolve_import(module_name, source_file:, project_root:, import_kind:, load_paths: nil)
+      roots = import_search_roots(source_file, project_root, import_kind, load_paths)
       resolved = if import_kind == Common::Extraction::ImportKind::LOAD
                    resolve_load(module_name, roots, import_kind)
                  else
@@ -19,9 +19,11 @@ module ArchUnit
       resolved&.tr('\\', '/')&.freeze
     end
 
-    def import_search_roots(source_file, project_root, import_kind)
+    def import_search_roots(source_file, project_root, import_kind, load_paths)
       if import_kind == Common::Extraction::ImportKind::REQUIRE_RELATIVE
         [File.dirname(File.expand_path(source_file))]
+      elsif load_paths
+        load_paths
       else
         root = File.expand_path(project_root)
         [File.join(root, 'lib'), root]

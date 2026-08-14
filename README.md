@@ -339,6 +339,25 @@ require 'experimental/plugin'
 Dynamic imports such as `require dependency_name` or `require "plugins/#{name}"` are omitted rather
 than guessed because resolving them would require executing application code.
 
+Repositories containing multiple gems are discovered statically: every `*.gemspec` beneath the
+project root contributes its adjacent existing `lib` directory to feature resolution. Gemspecs are
+never evaluated. Add non-standard source roots explicitly through the per-check options bag; paths
+are relative to the project root, must remain inside it, and use the order given after the normal
+top-level `lib` and project-root search locations:
+
+```ruby
+options = ArchUnit::CheckOptions.new(
+  load_paths: ['components/billing/source', 'plugins/search/lib']
+)
+
+violations = rule.check(options)
+report = ArchUnit.project_graph.with_check_options(options)
+```
+
+Load-path choices affect graph caching. Equivalent normalized choices reuse a cached graph, while a
+different set builds a separate graph. Use `clear_cache: true` after changing files or gemspec
+layout within one process.
+
 ## Executable examples
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
@@ -366,6 +385,17 @@ and 90% branch coverage, runs the dogfooding rules explicitly, builds the docume
 public API with Ruby warnings, tests optional RSpec/Minitest integrations, builds and installs the
 gem artifact, runs the external RAG fixture, and checks Ruby 3.3, 3.4, and 4.0 across Ubuntu and
 Windows.
+
+Cold and warm extraction can be profiled independently with a generated multi-gem corpus. The
+benchmark reports stage timings, resolution-cache effectiveness, Ruby heap growth, and peak RSS on
+platforms that expose it:
+
+```bash
+bundle exec ruby benchmark/extraction.rb
+```
+
+See the [benchmark guide](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/benchmark/README.md)
+for corpus controls, JSON output, and CI limits.
 
 The implementation conventions and intended dependency directions live in [`AGENTS.md`](AGENTS.md).
 

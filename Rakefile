@@ -15,4 +15,11 @@ task :docs do
   ruby 'scripts/check_docs.rb'
 end
 
+namespace :benchmark do
+  desc 'Profile cold and warm extraction on a deterministic synthetic monorepo'
+  task :extraction do
+    ruby 'benchmark/extraction.rb'
+  end
+end
+
 task default: %i[spec rubocop]
