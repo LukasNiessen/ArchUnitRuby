@@ -3,16 +3,13 @@
 <div align="center" name="top">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Build & tests](https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&label=build%20%26%20tests)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml) [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)<br>
-[![Gem version](https://img.shields.io/gem/v/archunit.svg)](https://rubygems.org/gems/archunit) [![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit) [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit) [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 
 </div>
 
 Enforce architecture rules in Ruby projects. Check dependency directions, detect circular
 dependencies, enforce naming and location conventions, measure code quality, and generate
 architecture reports as ordinary Ruby tests.
-
-ArchUnitRuby is part of **ArchUnitEverything**: one recognizable architecture-testing library for
-each programming language.
 
 _Inspired by the amazing ArchUnit library, but not affiliated with ArchUnit._
 
