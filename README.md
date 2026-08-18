@@ -433,6 +433,15 @@ The implementation conventions and intended dependency directions live in [`AGEN
 
 ## 💟 Community
 
+### Maintainers
+
+- **[Tristan Kruse](https://github.com/TristanKruse)** — Tech Lead & Maintainer
+- **[Lukas Niessen](https://github.com/LukasNiessen)** — Maintainer
+
+### Contributors
+
+See everyone who has contributed on the [GitHub contributors page](https://github.com/LukasNiessen/ArchUnitRuby/graphs/contributors).
+
 Questions and feature ideas are welcome in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
 
 ### Star History
