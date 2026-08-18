@@ -1,15 +1,19 @@
-# ArchUnitRuby
+# ArchUnitRuby - Architecture Testing
 
-Architecture testing for Ruby. Part of **ArchUnitEverything**: one recognizable testing library
-for each programming language.
+<div align="center" name="top">
 
-[![CI](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml/badge.svg)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-e4493f)](https://lukasniessen.github.io/ArchUnitRuby/)
-[![Gem version](https://img.shields.io/gem/v/archunit.svg)](https://rubygems.org/gems/archunit)
-[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit)
-[![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Build & tests](https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&label=build%20%26%20tests)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml) [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)<br>
+[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit) [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+
+</div>
+
+Enforce architecture rules in Ruby projects. Check dependency directions, detect circular
+dependencies, enforce naming and location conventions, measure code quality, and generate
+architecture reports as ordinary Ruby tests.
+
+_Inspired by the amazing ArchUnit library, but not affiliated with ArchUnit._
+
+[Setup](#-setup) · [Use Cases](#-use-cases) · [Features](#-features) · [Documentation](https://lukasniessen.github.io/ArchUnitRuby/) · [Sponsor](https://github.com/sponsors/LukasNiessen) · [Contributing](#-contributing)
 
 ArchUnitRuby turns a Ruby codebase into a dependency graph and lets you test that graph with rules
 that read like English:
@@ -28,13 +32,13 @@ is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Version 0.
 Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
 [ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython).
 
-## Documentation
-
 The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide with a
 searchable, source-generated API reference for every public module, class, and method. The same
 site is rebuilt in CI and deployed from `main`, so the published reference follows the repository.
 
-## Install
+## ⚡ 5 min Quickstart
+
+### Installation
 
 ArchUnitRuby requires Ruby 3.3 or newer. Add it to your test dependencies:
 
@@ -62,7 +66,7 @@ current raw count and ClickGems provides the historical breakdown.
 RSpec and Minitest integrations are optional; ArchUnitRuby does not install either test framework
 for you.
 
-## Your first rule
+### Add tests
 
 Create `spec/architecture_spec.rb`:
 
@@ -85,6 +89,21 @@ Run it like any other specification:
 bundle exec rspec spec/architecture_spec.rb
 ```
 
+### CI Integration
+
+Architecture specifications run with the rest of the test suite, so no dedicated CI integration
+is required:
+
+```yaml
+# GitHub Actions
+- name: Run architecture tests
+  run: bundle exec rspec spec/architecture_spec.rb
+```
+
+## 🚐 Setup
+
+### Project Location
+
 The project locator is optional. With no argument, ArchUnitRuby searches from the current directory
 for a `Gemfile` or gemspec. Pass a directory or either marker file when analyzing another project:
 
@@ -93,7 +112,7 @@ ArchUnit.project_files('/workspace/my_app')
 ArchUnit.project_files('/workspace/my_app/Gemfile')
 ```
 
-## The fluent grammar
+### Fluent Grammar
 
 Every rule is built left to right from the same small grammar:
 
@@ -128,7 +147,9 @@ when an empty result is genuinely valid:
 rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))
 ```
 
-## Files
+## 🐣 Features
+
+### File Rules
 
 File rules cover cycles, naming, location, internal dependencies, external modules, and custom
 source predicates:
@@ -156,7 +177,7 @@ rule = ArchUnit.project_files.in_folder('app/services/**')
                )
 ```
 
-## Layers
+### Layer Dependencies
 
 Named layers express an allowlist or blocklist over groups of files:
 
@@ -176,7 +197,7 @@ Dependencies within one layer are always allowed. Edges with an unassigned endpo
 Calling `may_only_depend_on_layers` without targets seals a layer; `may_not_depend_on_layers`
 requires at least one forbidden target.
 
-## Slices and PlantUML
+### Architecture Slices and PlantUML
 
 Slices group files by one captured path segment and preserve every concrete dependency as evidence:
 
@@ -202,7 +223,7 @@ expect(rule).to pass
 The supported subset recognizes components, directed dependencies, comments, and `@startuml` /
 `@enduml`. Use `to_plantuml` or `export_as_plantuml(path)` to generate a diagram from the real graph.
 
-## Dependency graph reports
+### Dependency Graph Reports
 
 Graph reporting builds one immutable snapshot and renders it consistently as DOT, Mermaid, D2, CSV,
 JSON, or self-contained HTML:
@@ -222,7 +243,7 @@ Queries include `focus_on`, `reachable_from`, and `dependents_of`. Collapse by f
 regular-expression replacement. Every format has an in-memory `to_<format>` and an
 `export_as_<format>(path)` terminal.
 
-## Metrics
+### Code Metrics
 
 Metric scopes select files and Ruby classes before measurement or assertion:
 
@@ -253,7 +274,7 @@ services.count.export_as_html('reports/service-counts')
 The threshold vocabulary is intentionally limited to `should_be_below`, `should_be_above`,
 `should_be`, `should_be_below_or_equal`, `should_be_above_or_equal`, and `should_satisfy`.
 
-## Pattern exclusions
+### Pattern Exclusions
 
 Every selector accepts `except:` in the same call. A plain pattern or array uses the parent
 selector's context, including filenames for path and folder selectors:
@@ -275,7 +296,9 @@ scope = ArchUnit.metrics.in_path(
 )
 ```
 
-## Results and test frameworks
+## 🐹 Use Cases
+
+### Results and Test Frameworks
 
 `check` returns an array of structured violations. Architecture disagreement is data, not an
 exception:
@@ -296,7 +319,7 @@ ArchUnit.assert_passes(rule)      # Framework-neutral
 `ArchUnit.format_violations` and `ResultFactory` provide stable human-readable output. All
 violations retain the concrete dependency, file, layer, slice, or metric evidence that caused them.
 
-## Per-check logging
+## 📝 Debug Logging & Configuration
 
 Logging is off by default and belongs to one check; there is no process-global configuration:
 
@@ -314,7 +337,9 @@ Levels are `debug`, `info`, `warn`, and `error`. The fixed events cover check st
 violations, and metric evidence. `io:` defaults to `$stderr`, accepts any writable stream, and may be
 `nil`. File output creates missing directories and writes timestamped `archunit-*.log` files.
 
-## What ArchUnitRuby extracts
+## 🕵️ Technical Deep Dive
+
+### What ArchUnitRuby Extracts
 
 ArchUnitRuby uses Prism and statically recognizes:
 
@@ -358,7 +383,7 @@ Load-path choices affect graph caching. Equivalent normalized choices reuse a ca
 different set builds a separate graph. Use `clear_cache: true` after changing files or gemspec
 layout within one process.
 
-## Executable examples
+## 🐲 Example Repository
 
 The [ArchUnitRuby RAG test repository](https://github.com/TristanKruse/ArchUnitRuby-TestRepo-RAG)
 is a small layered retrieval-augmented-generation application with two deliberate architecture
@@ -369,7 +394,7 @@ ArchUnitRuby also dogfoods itself in `spec/architecture_spec.rb`: `common` is is
 modules cannot depend on one another, implementation files cannot depend on the public surface, and
 the complete library graph must remain cycle-free.
 
-## Development
+## 🦊 Contributing
 
 ```bash
 git clone https://github.com/LukasNiessen/ArchUnitRuby.git
@@ -399,13 +424,36 @@ for corpus controls, JSON output, and CI limits.
 
 The implementation conventions and intended dependency directions live in [`AGENTS.md`](AGENTS.md).
 
-## Current limitations
+## 📅 Plans and Current Limitations
 
 - Ruby constants are not modeled as a separate graph. Files are the primary dependency vocabulary.
 - Dynamic `require`, `autoload`, and `load` arguments cannot be resolved statically.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
 - The API is still pre-release and may change before the first stable gem version.
 
-## License
+## 💟 Community
+
+### Maintainers
+
+- **[Tristan Kruse](https://github.com/TristanKruse)** — Tech Lead & Maintainer
+- **[Lukas Niessen](https://github.com/LukasNiessen)** — Maintainer
+
+### Contributors
+
+See everyone who has contributed on the [GitHub contributors page](https://github.com/LukasNiessen/ArchUnitRuby/graphs/contributors).
+
+Questions and feature ideas are welcome in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=LukasNiessen/ArchUnitRuby&type=Date)](https://star-history.com/#LukasNiessen/ArchUnitRuby&Date)
+
+## 📄 License
 
 [MIT](LICENSE)
+
+<div align="right">
+
+[Go back to the top](#top)
+
+</div>
