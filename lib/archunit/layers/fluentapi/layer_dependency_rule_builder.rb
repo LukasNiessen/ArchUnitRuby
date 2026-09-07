@@ -13,10 +13,14 @@ module ArchUnit
           freeze
         end
 
+        # Allows only the listed target layers; no targets seals the source layer.
+        # @return [LayeredArchitecture]
         def may_only_depend_on_layers(*layer_names)
           architecture.__send__(:with_allowed_dependencies, layer_name, layer_names)
         end
 
+        # Forbids dependencies on the listed target layers.
+        # @return [LayeredArchitecture]
         def may_not_depend_on_layers(*layer_names)
           if layer_names.empty?
             raise ArgumentError, 'may_not_depend_on_layers requires at least one layer name'

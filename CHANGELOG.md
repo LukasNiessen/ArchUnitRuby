@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Make trailing folder globs such as `app/api/**` include the named folder itself.
+- Validate the README quickstart as a passing and failing end-to-end architecture test.
+- Add a curated API guide, reliable Markdown rendering, responsive documentation navigation, and
+  documentation quality checks.
+- Add the ArchUnitRuby family logo, social preview, and repository community health files.
 - Discover adjacent `lib` directories in multi-gemspec repositories without evaluating gemspecs.
 - Support validated, project-local custom load paths through `CheckOptions`.
 - Add cold/warm extraction profiling, a reproducible benchmark, and resolution caching.

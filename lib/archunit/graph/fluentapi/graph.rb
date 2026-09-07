@@ -9,6 +9,8 @@ module ArchUnit
     module FluentApi
       module_function
 
+      # Starts an immutable dependency-graph report.
+      # @return [ProjectGraphBuilder]
       def project_graph(project_locator = nil)
         ProjectGraphBuilder.new(project_locator:)
       end
@@ -19,6 +21,9 @@ module ArchUnit
     end
   end
 
+  # Starts an immutable dependency-graph report.
+  # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+  # @return [GraphReporting::FluentApi::ProjectGraphBuilder]
   def self.project_graph(project_locator = nil)
     GraphReporting::FluentApi.project_graph(project_locator)
   end

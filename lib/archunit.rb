@@ -107,6 +107,9 @@ module ArchUnit
   ResultFactory = Testing::ResultFactory
   AssertionFailure = Testing::AssertionFailure
 
+  # Clears every cached dependency graph in the current process.
+  # Use this after changing analyzed source files between checks.
+  # @return [nil]
   def self.clear_graph_cache
     Extraction.clear_graph_cache
   end

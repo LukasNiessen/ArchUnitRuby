@@ -37,17 +37,27 @@ module ArchUnit
 
       def compile_fragment(characters, index)
         case characters[index]
-        when '*'
-          compile_star(characters, index)
-        when '?'
-          ['[^/]', index + 1]
-        when '['
-          compile_character_class(characters, index)
-        else
-          [Regexp.escape(characters[index]), index + 1]
+        when '*' then compile_star(characters, index)
+        when '/' then compile_slash(characters, index)
+        when '?' then ['[^/]', index + 1]
+        when '[' then compile_character_class(characters, index)
+        else [Regexp.escape(characters[index]), index + 1]
         end
       end
       private_class_method :compile_fragment
+
+      def compile_slash(characters, index)
+        globstar_index = index + 1
+        globstar = characters[globstar_index] == '*' && characters[globstar_index + 1] == '*'
+        return ['/', globstar_index] unless globstar
+
+        tail_index = globstar_index + 2
+        tail_index += 1 while characters[tail_index] == '*'
+        return ['/', globstar_index] unless tail_index == characters.length
+
+        ['(?:/.*)?', tail_index]
+      end
+      private_class_method :compile_slash
 
       def compile_star(characters, index)
         return ['[^/]*', index + 1] unless characters[index + 1] == '*'

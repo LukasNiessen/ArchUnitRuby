@@ -34,14 +34,20 @@ module ArchUnit
           is_negated
         end
 
+        # Adds another allowed or forbidden basename using OR semantics.
+        # @return [DependOnFileCondition]
         def with_name(pattern, except: nil)
           with_filter(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
+        # Adds another allowed or forbidden folder using OR semantics.
+        # @return [DependOnFileCondition]
         def in_folder(pattern, except: nil)
           with_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
+        # Adds another allowed or forbidden path using OR semantics.
+        # @return [DependOnFileCondition]
         def in_path(pattern, except: nil)
           with_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end

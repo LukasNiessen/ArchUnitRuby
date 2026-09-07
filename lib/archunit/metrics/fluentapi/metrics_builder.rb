@@ -23,38 +23,52 @@ module ArchUnit
           freeze
         end
 
+        # Selects metric source files by basename.
+        # @return [MetricsBuilder]
         def with_name(pattern, except: nil)
           with_filter(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
+        # Selects metric source files by containing folder.
+        # @return [MetricsBuilder]
         def in_folder(pattern, except: nil)
           with_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
+        # Selects metric source files by complete path.
+        # @return [MetricsBuilder]
         def in_path(pattern, except: nil)
           with_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
+        # Selects classes within the selected source files.
+        # @return [MetricsBuilder]
         def for_classes_matching(pattern, except: nil)
           with_filter(Common::RegexFactory.classname_matcher(pattern, except:))
         end
 
+        # @return [CountMetricsBuilder] count metric vocabulary
         def count
           CountMetricsBuilder.new(self)
         end
 
+        # @return [LCOMMetricsBuilder] cohesion metric vocabulary
         def lcom
           LCOMMetricsBuilder.new(self)
         end
 
+        # @return [DistanceMetricsBuilder] dependency-distance metric vocabulary
         def distance
           DistanceMetricsBuilder.new(self)
         end
 
+        # Defines a custom numeric calculation over ClassInfo.
+        # @return [CustomMetricBuilder]
         def custom_metric(name, description, calculation)
           CustomMetricBuilder.new(scope: self, name:, description:, calculation:)
         end
 
+        # @return [MetricProjectInfo] extracted files and classes in this scope
         def analyze
           project = Extraction.extract_project_info(project_locator)
           selected_files = project.files.filter_map { |file| selected_file_info(file) }

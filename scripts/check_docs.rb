@@ -6,7 +6,8 @@ require 'uri'
 ROOT = Pathname.new(__dir__).join('..').expand_path
 OUTPUT = ROOT.join('docs')
 REQUIRED_FILES = %w[
-  index.html class_list.html css/archunit.css .nojekyll robots.txt sitemap.xml
+  index.html file.API.html class_list.html css/archunit.css assets/logo-rounded.png
+  assets/social-preview.png .nojekyll robots.txt sitemap.xml
 ].freeze
 
 def internal_target(page, href)
@@ -40,4 +41,20 @@ end
 
 raise "Broken documentation links:\n#{broken.join("\n")}" unless broken.empty?
 
-puts "Validated #{pages.length} documentation pages and their internal links"
+guide = OUTPUT.join('index.html').binread.force_encoding(Encoding::UTF_8)
+unrendered = {
+  'GitHub badge Markdown' => '[![',
+  'backtick code fence' => "#{96.chr * 3}ruby"
+}.filter_map { |label, marker| label if guide.include?(marker) }
+raise "Documentation guide contains unrendered #{unrendered.join(' and ')}" unless unrendered.empty?
+
+api_guide = OUTPUT.join('file.API.html').binread.force_encoding(Encoding::UTF_8)
+required_api_terms = %w[
+  project_files project_layers project_slices project_graph metrics CheckOptions LoggingOptions
+].freeze
+missing_api_terms = required_api_terms.reject { |term| api_guide.include?(term) }
+unless missing_api_terms.empty?
+  raise "API guide is missing public entry points: #{missing_api_terms.join(', ')}"
+end
+
+puts "Validated #{pages.length} documentation pages, public API coverage, and internal links"

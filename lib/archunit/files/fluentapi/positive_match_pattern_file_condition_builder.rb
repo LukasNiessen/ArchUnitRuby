@@ -12,6 +12,8 @@ module ArchUnit
           super(scope, negated: false)
         end
 
+        # Requires the selected internal dependency graph to be cycle-free.
+        # @return [CycleFreeFileCondition]
         def have_no_cycles
           CycleFreeFileCondition.new(self)
         end

@@ -34,10 +34,14 @@ module ArchUnit
           freeze
         end
 
+        # Starts or extends the definition of a named layer.
+        # @return [LayerDefinitionBuilder]
         def layer(name)
           LayerDefinitionBuilder.new(self, validated_layer_name(name))
         end
 
+        # Selects a defined source layer for a dependency policy.
+        # @return [LayerDependencyRuleBuilder]
         def where_layer(name)
           name = validated_layer_name(name)
           ensure_defined_layer!(name)
