@@ -20,7 +20,9 @@ Gem::Specification.new do |spec|
   spec.metadata['allowed_push_host'] = 'https://rubygems.org'
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  packaged_files = ['lib/**/*', 'README.md', 'CHANGELOG.md', 'LICENSE']
+  packaged_files = [
+    'lib/**/*', 'assets/logo-rounded.png', 'README.md', 'API.md', 'CHANGELOG.md', 'LICENSE'
+  ]
   spec.files = Dir[*packaged_files].select { |path| File.file?(path) }
   spec.require_paths = ['lib']
 

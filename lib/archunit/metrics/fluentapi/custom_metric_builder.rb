@@ -21,6 +21,8 @@ module ArchUnit
           super(scope:, metric:)
         end
 
+        # Creates a custom-metric rule retaining the configured description.
+        # @return [CustomMetricCondition]
         def should_satisfy(predicate)
           CustomMetricCondition.new(selection: self, predicate:)
         end

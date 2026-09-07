@@ -8,6 +8,8 @@ module ArchUnit
     module FluentApi
       # Shared HTML export terminal for one family of scoped metrics.
       module MetricReportBuilder
+        # Writes an offline HTML report for all metrics in this family.
+        # @return [nil]
         def export_as_html(output_path, options = nil)
           options = Reporting::MetricsExportOptions.resolve(options).with(output_path:)
           Reporting::MetricsExporter.export_as_html(metric_report_data, options)

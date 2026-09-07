@@ -10,6 +10,9 @@ module ArchUnit
     module FluentApi
       # The shared execution contract implemented by every terminal rule.
       module Checkable
+        # Executes the rule and returns every architecture disagreement as structured data.
+        # @param options [CheckOptions, nil]
+        # @return [Array<ArchUnit::Violation>]
         def check(options = nil)
           resolved_options = CheckOptions.resolve(options)
           logger = Logging::CheckLogger.new(resolved_options.logging)

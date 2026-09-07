@@ -24,18 +24,26 @@ module ArchUnit
           freeze
         end
 
+        # Ignores slices that are absent from the diagram and have no dependency edge.
+        # @return [PositiveSliceConditionBuilder]
         def ignoring_orphan_slices
           copy(options.with(ignore_orphan_slices: true))
         end
 
+        # Ignores dependencies to external modules during diagram comparison.
+        # @return [PositiveSliceConditionBuilder]
         def ignoring_external_slices
           copy(options.with(ignore_external_slices: true))
         end
 
+        # Requires the slice graph to match inline PlantUML.
+        # @return [DiagramSliceCondition]
         def adhere_to_diagram(text)
           DiagramSliceCondition.new(scope, DiagramSource.inline(text), options:)
         end
 
+        # Requires the slice graph to match a PlantUML file.
+        # @return [DiagramSliceCondition]
         def adhere_to_diagram_in_file(path)
           DiagramSliceCondition.new(scope, DiagramSource.file(path), options:)
         end

@@ -20,6 +20,12 @@ RSpec.describe 'the ArchUnitRuby gem specification' do
     expect(specification.files).to include(*expected_sources)
   end
 
+  it 'packages the user guide, API guide, and family logo' do
+    expect(specification.files).to include(
+      'README.md', 'API.md', 'assets/logo-rounded.png'
+    )
+  end
+
   it 'declares every library needed by a clean installed graph renderer' do
     dependencies = specification.runtime_dependencies.to_h do |dependency|
       [dependency.name, dependency.requirement.to_s]

@@ -11,6 +11,9 @@ module ArchUnit
     module FluentApi
       module_function
 
+      # Starts an immutable file-rule sentence.
+      # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+      # @return [FileConditionBuilder]
       def project_files(project_locator = nil)
         FileConditionBuilder.new(project_locator:)
       end
@@ -21,6 +24,9 @@ module ArchUnit
     end
   end
 
+  # Starts an immutable file-rule sentence.
+  # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+  # @return [Files::FluentApi::FileConditionBuilder]
   def self.project_files(project_locator = nil)
     Files::FluentApi.project_files(project_locator)
   end

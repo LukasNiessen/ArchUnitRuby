@@ -34,6 +34,8 @@ module ArchUnit
           is_negated
         end
 
+        # Adds another external module pattern using OR semantics.
+        # @return [DependOnExternalModuleCondition]
         def matching(module_name, except: nil)
           filter = Common::RegexFactory.path_matcher(module_name, except:)
           self.class.new(builder, module_filters: [*module_filters, filter])

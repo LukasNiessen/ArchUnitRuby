@@ -10,6 +10,8 @@ module ArchUnit
   module Testing
     module_function
 
+    # Raises AssertionFailure when a rule returns violations.
+    # @return [nil]
     def assert_passes(rule, options = nil)
       result = result_for(rule, options)
       return if result.passed?
@@ -18,6 +20,8 @@ module ArchUnit
     end
   end
 
+  # Raises AssertionFailure when a rule returns violations.
+  # @return [nil]
   def self.assert_passes(rule, options = nil)
     Testing.assert_passes(rule, options)
   end
