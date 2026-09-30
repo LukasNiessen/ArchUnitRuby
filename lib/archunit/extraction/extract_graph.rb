@@ -4,6 +4,7 @@ require 'pathname'
 require_relative '../common/extraction/edge'
 require_relative '../common/extraction/graph'
 require_relative '../common/fluentapi/check_options'
+require_relative '../common/logging/inspection'
 require_relative 'enumerate_source_files'
 require_relative 'extract_dependencies'
 require_relative 'extraction_profile'
@@ -29,9 +30,9 @@ module ArchUnit
           Pathname.new(locate_project(locator, working_directory:))
         end
         patterns = resolve_exclude_patterns(exclude_patterns)
-        cache_key = graph_cache_key(root, exclude_patterns: patterns, options:)
+        key = graph_cache_key(root, exclude_patterns: patterns, options:)
 
-        fetch_graph(root, patterns, options, cache_key, profile)
+        Common::Logging::Inspection.graph(fetch_graph(root, patterns, options, key, profile), root:)
       end
     end
 

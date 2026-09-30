@@ -71,6 +71,7 @@ module ArchUnit
           graph = ArchUnit::Extraction.extract_graph(project_locator, options:)
           nodes = Common::Projection.project_to_nodes(graph)
           edges = Common::Projection.project_edges(graph, Common::Projection.per_internal_edge)
+          Common::Logging::Inspection.projection(edges)
 
           empty_policy_violations(nodes, options) +
             Assertion.gather_layer_dependency_violations(

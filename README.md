@@ -26,7 +26,7 @@ ArchUnit.project_files
 ```
 
 It is a working executable prototype with file, layer, slice, graph-reporting, and metric APIs. It
-is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Version 0.0.1 is available as
+is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Install the latest release as
 [`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
 
 Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
@@ -336,6 +336,45 @@ violations = rule.check(ArchUnit::CheckOptions.new(logging: logging))
 Levels are `debug`, `info`, `warn`, and `error`. The fixed events cover check start/end, progress,
 violations, and metric evidence. `io:` defaults to `$stderr`, accepts any writable stream, and may be
 `nil`. File output creates missing directories and writes timestamped `archunit-*.log` files.
+
+At `:debug`, inspection includes the project root, each discovered file, every dependency with
+its import kind and external flag, selected files, and all metric calculations (including passing
+values). It observes the same graph on both cold and cached checks. Custom metrics run once.
+Check options and returned violations retain their existing behavior.
+
+| Level | Included output |
+| --- | --- |
+| `:debug` | Graph inspection, selections, metric values, and everything below |
+| `:info` | Check lifecycle and progress, violations, technical errors |
+| `:warn` | Violations and technical errors |
+| `:error` | Technical errors |
+
+Example debug lines (timestamp prefixes omitted):
+
+```text
+[DEBUG] inspect: discovered file: "lib/service.rb"
+[DEBUG] inspect: dependency: "lib/service.rb" -> "json" (external=true, kinds=[:require])
+[DEBUG] inspect: selected file: "lib/service.rb"
+[DEBUG] log metric: method_count=3 [lib/service.rb:Service]
+```
+
+For file-only CI artifacts, use `io: nil` with `output_directory:` and archive that directory.
+Logging sink errors still propagate. Debug details are produced lazily; checks with logging
+disabled create no output or log files.
+
+### Readable, colored failure reports
+
+The same formatted, numbered reports work with RSpec, Minitest, or standalone checks:
+
+```ruby
+puts ArchUnit.format_violations(violations)               # Detect terminal support
+puts ArchUnit.format_violations(violations, color: true)  # Force ANSI colors
+puts ArchUnit.format_violations(violations, color: false) # Plain CI/file output
+```
+
+Failure headings are bold red, violation headings yellow, and successful results green. Reports
+include dependency, file, or metric evidence. Automatic color detection respects `NO_COLOR`,
+`TERM=dumb`, and non-terminal output. Log files remain plain text for searching and CI artifacts.
 
 ## 🕵️ Technical Deep Dive
 

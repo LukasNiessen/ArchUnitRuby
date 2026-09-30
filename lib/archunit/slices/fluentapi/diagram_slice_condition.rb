@@ -39,6 +39,7 @@ module ArchUnit
 
           diagram = Uml::PlantUmlParser.parse(diagram_source.read)
           edges = Common::Projection.project_edges(graph, projection)
+          Common::Logging::Inspection.projection(edges)
           Assertion.gather_diagram_adherence_violations(edges, diagram, options)
         end
 

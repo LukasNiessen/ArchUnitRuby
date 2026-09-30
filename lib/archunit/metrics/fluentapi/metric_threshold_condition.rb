@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../common/fluentapi/checkable'
+require_relative 'logged_metric'
 require_relative '../assertion/metric_threshold'
 
 module ArchUnit
@@ -38,7 +39,7 @@ module ArchUnit
           return empty_test if empty_test
 
           Assertion.gather_metric_threshold_violations(
-            subjects, selection.metric, comparison, threshold
+            subjects, LoggedMetric.wrap(selection.metric), comparison, threshold
           )
         end
       end
