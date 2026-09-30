@@ -30,17 +30,11 @@ module ArchUnit
           Pathname.new(locate_project(locator, working_directory:))
         end
         patterns = resolve_exclude_patterns(exclude_patterns)
-        cache_key = graph_cache_key(root, exclude_patterns: patterns, options:)
+        key = graph_cache_key(root, exclude_patterns: patterns, options:)
 
-        inspected_graph(root, patterns, options, cache_key, profile)
+        Common::Logging::Inspection.graph(fetch_graph(root, patterns, options, key, profile), root:)
       end
     end
-
-    def inspected_graph(root, patterns, options, cache_key, profile)
-      graph = fetch_graph(root, patterns, options, cache_key, profile)
-      Common::Logging::Inspection.graph(graph, root:)
-    end
-    private_class_method :inspected_graph
 
     def clear_graph_cache
       GRAPH_CACHE_MUTEX.synchronize { graph_cache.clear }
