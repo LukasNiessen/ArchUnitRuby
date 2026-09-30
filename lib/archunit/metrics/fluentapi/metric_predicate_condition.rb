@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../common/fluentapi/checkable'
+require_relative 'logged_metric'
 require_relative '../assertion/metric_predicate'
 
 module ArchUnit
@@ -34,7 +35,9 @@ module ArchUnit
           )
           return empty_test if empty_test
 
-          Assertion.gather_metric_predicate_violations(subjects, selection.metric, predicate)
+          Assertion.gather_metric_predicate_violations(
+            subjects, LoggedMetric.wrap(selection.metric), predicate
+          )
         end
       end
     end

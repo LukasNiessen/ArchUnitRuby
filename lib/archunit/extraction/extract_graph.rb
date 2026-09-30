@@ -4,6 +4,7 @@ require 'pathname'
 require_relative '../common/extraction/edge'
 require_relative '../common/extraction/graph'
 require_relative '../common/fluentapi/check_options'
+require_relative '../common/logging/inspection'
 require_relative 'enumerate_source_files'
 require_relative 'extract_dependencies'
 require_relative 'extraction_profile'
@@ -31,9 +32,15 @@ module ArchUnit
         patterns = resolve_exclude_patterns(exclude_patterns)
         cache_key = graph_cache_key(root, exclude_patterns: patterns, options:)
 
-        fetch_graph(root, patterns, options, cache_key, profile)
+        inspected_graph(root, patterns, options, cache_key, profile)
       end
     end
+
+    def inspected_graph(root, patterns, options, cache_key, profile)
+      graph = fetch_graph(root, patterns, options, cache_key, profile)
+      Common::Logging::Inspection.graph(graph, root:)
+    end
+    private_class_method :inspected_graph
 
     def clear_graph_cache
       GRAPH_CACHE_MUTEX.synchronize { graph_cache.clear }

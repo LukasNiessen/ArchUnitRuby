@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.0.2 - 2026-09-30
+
+- Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
+- Log passing metric values without repeating custom calculations.
+- Document verbosity, CI log artifacts, and existing colored violation reports.
 
 - Discover adjacent `lib` directories in multi-gemspec repositories without evaluating gemspecs.
 - Support validated, project-local custom load paths through `CheckOptions`.
