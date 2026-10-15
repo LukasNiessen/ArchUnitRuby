@@ -22,7 +22,7 @@ RSpec.describe ArchUnit::Extraction::LoadPaths do
   end
 
   def dependency(source, target)
-    ArchUnit::Edge.new(
+    have_attributes(
       source:, target:, external: false, import_kinds: [:require]
     )
   end

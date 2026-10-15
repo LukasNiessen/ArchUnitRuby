@@ -6,7 +6,9 @@ module ArchUnit
   module Common
     module FluentApi
       # Immutable options shared by every terminal rule check.
-      CheckOptions = Data.define(:allow_empty_tests, :logging, :clear_cache, :load_paths) do
+      CheckOptions = Data.define(
+        :allow_empty_tests, :logging, :clear_cache, :load_paths, :dependency_analysis
+      ) do
         def self.resolve(value)
           return new if value.nil?
           return value if value.is_a?(self)
@@ -14,11 +16,18 @@ module ArchUnit
           raise ArgumentError, 'options must be a CheckOptions value or nil'
         end
 
-        def initialize(allow_empty_tests: false, logging: nil, clear_cache: false, load_paths: [])
+        def initialize(
+          allow_empty_tests: false, logging: nil, clear_cache: false, load_paths: [],
+          dependency_analysis: :imports
+        )
           validate_boolean(allow_empty_tests, :allow_empty_tests)
           validate_logging(logging)
           validate_boolean(clear_cache, :clear_cache)
           load_paths = immutable_load_paths(load_paths)
+          unless %i[imports imports_and_constants].include?(dependency_analysis)
+            raise ArgumentError, 'dependency_analysis must be :imports or :imports_and_constants'
+          end
+
           super
         end
 
@@ -28,6 +37,10 @@ module ArchUnit
 
         def clear_cache?
           clear_cache
+        end
+
+        def constant_references?
+          dependency_analysis == :imports_and_constants
         end
 
         private

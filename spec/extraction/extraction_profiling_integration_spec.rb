@@ -61,4 +61,14 @@ RSpec.describe ArchUnit::Extraction, 'profiling' do
     expect { described_class.extract_graph(@project_root, profile: Object.new) }
       .to raise_error(ArgumentError, /ExtractionProfile/)
   end
+
+  it 'counts unresolved runtime import paths without executing them' do
+    create_file('lib/source.rb', "path = ENV.fetch('UNKNOWN_PLUGIN')\nrequire path\n")
+    profile = ArchUnit::Extraction::ExtractionProfile.new
+
+    graph = described_class.extract_graph(@project_root, profile:)
+
+    expect(graph.length).to eq(1)
+    expect(profile.counters).to include(imports: 0, unresolved_imports: 1)
+  end
 end

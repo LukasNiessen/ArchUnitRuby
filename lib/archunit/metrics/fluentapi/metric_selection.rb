@@ -29,8 +29,9 @@ module ArchUnit
           freeze
         end
 
-        def measure
-          scope.__send__(:subjects_for, metric.subject_type).map do |subject|
+        def measure(options = nil)
+          options = Common::FluentApi::CheckOptions.resolve(options)
+          scope.__send__(:subjects_for, metric.subject_type, options:).map do |subject|
             MetricMeasurement.new(
               subject:,
               metric_name: metric.name,

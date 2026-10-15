@@ -53,6 +53,7 @@ module ArchUnit
   Checkable = Common::FluentApi::Checkable
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
+  DependencyEvidence = Common::Extraction::DependencyEvidence
   Graph = Common::Extraction::Graph
   MappedEdge = Common::Projection::MappedEdge
   ProjectedEdge = Common::Projection::ProjectedEdge

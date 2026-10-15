@@ -70,7 +70,7 @@ RSpec.describe ArchUnit::Extraction, '.extract_graph' do
     dependencies = extract.reject { |edge| edge.source == edge.target }
 
     expect(dependencies).to contain_exactly(
-      ArchUnit::Edge.new(
+      have_attributes(
         source: 'lib/source.rb',
         target: 'lib/target.rb',
         external: false,
@@ -83,7 +83,7 @@ RSpec.describe ArchUnit::Extraction, '.extract_graph' do
     create_file('lib/source.rb', "require_relative 'source'\n")
 
     expect(extract).to contain_exactly(
-      ArchUnit::Edge.new(
+      have_attributes(
         source: 'lib/source.rb',
         target: 'lib/source.rb',
         external: false,

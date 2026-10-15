@@ -10,6 +10,16 @@ Run the default 1,000-file corpus:
 bundle exec ruby benchmark/extraction.rb
 ```
 
+The corpus includes a declared class and a cross-file constant use per generated source. Compare
+import-only extraction against expanded indexing on identical source with:
+
+```bash
+bundle exec ruby benchmark/extraction.rb --constants
+```
+
+Both runs report cold/warm timing and memory. Expanded runs also report `constant_indexing`,
+unresolved/ambiguous-reference counters, and the same-process graph cache reuse result.
+
 Use a smaller CI smoke corpus with deliberately generous, non-flaky limits:
 
 ```bash
@@ -28,6 +38,28 @@ output includes Ruby heap growth on every platform and process peak RSS where `/
 `--output path.json` also saves the complete result. Hosted CI only uses the smoke corpus and broad
 regression ceilings; performance decisions should use several local runs of the default corpus or a
 non-blocking real-world canary.
+
+## Constant-analysis measurement
+
+On 2026-10-15, Ruby 4.0.6 on Windows x64, three fresh-process runs per mode on the updated
+1,000-file / 10-gem corpus produced these medians:
+
+| Measurement | Imports | Imports and constants |
+| --- | ---: | ---: |
+| Cold graph build | 1.959 s | 2.019 s |
+| Warm graph lookup | 3.23 ms | 2.62 ms |
+| Constant indexing/resolution | — | 42.8 ms |
+| Merged graph edges | 4,001 | 4,001 |
+
+All runs reused the identical cached graph on their warm lookup. The corpus references the same
+next file by import and constant, so expanded mode merges 5,001 raw edges into 4,001 edges while
+retaining both evidence forms. Every source is parsed once per cold graph. The roughly 3% median
+cold-time increase is a local observation, not a portable overhead guarantee.
+
+Heap-growth samples ranged from 4.18–5.55 MB for imports and 5.51–14.19 MB for expanded analysis;
+these pre-GC snapshots are sensitive to collection timing and do not establish retained or peak
+memory. Windows does not expose the Linux peak-RSS counter. ASTs and indexing structures are
+temporary; the cached graph retains immutable edges and evidence only.
 
 ## Reference baseline and target
 

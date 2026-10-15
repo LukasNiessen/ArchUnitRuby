@@ -9,8 +9,9 @@ module ArchUnit
         REQUIRE_RELATIVE = :require_relative
         AUTOLOAD = :autoload
         LOAD = :load
+        CONSTANT_REFERENCE = :constant_reference
 
-        ALL = [REQUIRE, REQUIRE_RELATIVE, AUTOLOAD, LOAD].freeze
+        ALL = [REQUIRE, REQUIRE_RELATIVE, AUTOLOAD, LOAD, CONSTANT_REFERENCE].freeze
 
         def self.valid?(value)
           ALL.include?(value)

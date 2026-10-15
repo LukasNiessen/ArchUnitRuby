@@ -41,6 +41,9 @@ jobs:
       - name: Test
         run: bundle exec rspec
 
+      - name: Exercise dependency-analysis reproducers
+        run: bundle exec ruby scripts/check_dependency_analysis.rb
+
   quality:
     name: Quality and package — Ruby 4.0 on Ubuntu
     runs-on: ubuntu-latest
@@ -70,6 +73,12 @@ jobs:
       - name: Extraction performance smoke benchmark
         run: >-
           bundle exec ruby benchmark/extraction.rb
+          --files 200 --gems 4 --imports-per-file 3
+          --max-cold-seconds 30 --max-warm-seconds 2
+
+      - name: Constant-index performance smoke benchmark
+        run: >-
+          bundle exec ruby benchmark/extraction.rb --constants
           --files 200 --gems 4 --imports-per-file 3
           --max-cold-seconds 30 --max-warm-seconds 2
 
@@ -123,6 +132,7 @@ jobs:
           GEM_PATH: ${{ runner.temp }}/archunit-gem-home
         run: |
           gem install pkg/archunit.gem --no-document
+          ruby scripts/check_dependency_analysis.rb
           ruby -e "
             require 'json'
             require 'stringio'

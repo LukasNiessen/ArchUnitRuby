@@ -2,11 +2,15 @@
 
 require 'prism'
 require_relative '../common/extraction/import_kind'
+require_relative 'conservative_local_flow'
+require_relative 'local_string_tracker'
 
 module ArchUnit
   module Extraction
-    # Collects supported literal dependency calls from a Prism syntax tree.
+    # Collects supported dependency calls from a Prism syntax tree.
     class ImportVisitor < Prism::Visitor
+      include ConservativeLocalFlow
+
       CALL_KINDS = {
         require: Common::Extraction::ImportKind::REQUIRE,
         require_relative: Common::Extraction::ImportKind::REQUIRE_RELATIVE,
@@ -14,38 +18,54 @@ module ArchUnit
         load: Common::Extraction::ImportKind::LOAD
       }.freeze
 
-      attr_reader :imports
+      attr_reader :imports, :unresolved_imports
 
       def initialize
         super
         @imports = []
+        @unresolved_imports = 0
+        @local_strings = LocalStringTracker.new
       end
 
       def visit_call_node(node)
-        record_import(node)
+        import_call = supported_import_call?(node)
+        record_import(node) if import_call
         super
+        invalidate_escaped_locals(node) unless import_call
+      end
+
+      def visit_local_variable_write_node(node)
+        super
+        @local_strings.assign(node.name, node.value)
       end
 
       private
 
       def record_import(node)
         import_kind = CALL_KINDS[node.name]
-        return unless import_kind && supported_receiver?(node, import_kind)
-
         arguments = node.arguments&.arguments || []
         argument = import_argument(arguments, import_kind)
-        return unless argument.is_a?(Prism::StringNode)
-        return unless valid_module_name?(argument.unescaped)
+        module_name = @local_strings.resolve(argument)
+        unless valid_module_name?(module_name)
+          @unresolved_imports += 1
+          return
+        end
 
-        @imports << located_import(argument, import_kind, node)
+        @imports << located_import(module_name, import_kind, node)
       end
 
-      def located_import(argument, import_kind, node)
-        [argument.unescaped, import_kind, node.location.start_line, node.location.end_line]
+      def located_import(module_name, import_kind, node)
+        [module_name, import_kind, node.location.start_line, node.location.end_line]
       end
 
       def valid_module_name?(module_name)
-        !module_name.empty? && !module_name.include?("\0")
+        module_name.is_a?(String) && !module_name.empty? && !module_name.include?("\0")
+      end
+
+      def supported_import_call?(node)
+        import_kind = CALL_KINDS[node.name]
+        import_kind && supported_receiver?(node, import_kind) &&
+          !import_argument(node.arguments&.arguments || [], import_kind).nil?
       end
 
       def supported_receiver?(node, import_kind)
@@ -72,6 +92,11 @@ module ArchUnit
 
           arguments[0]
         end
+      end
+
+      def invalidate_escaped_locals(node)
+        @local_strings.invalidate_escaped(node)
+        @local_strings.capture_scopes if %i[eval binding local_variable_set].include?(node.name)
       end
     end
     private_constant :ImportVisitor
