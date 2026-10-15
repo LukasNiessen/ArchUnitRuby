@@ -11,7 +11,9 @@ require_relative 'constant_index'
 module ArchUnit
   # Turns statically resolvable Ruby imports into dependency edges.
   module Extraction
-    DependencyContext = Data.define(:root, :targets, :load_paths, :profile, :cache)
+    DependencyContext = Data.define(
+      :root, :targets, :load_paths, :profile, :cache, :include_evidence
+    )
     private_constant :DependencyContext
 
     module_function
@@ -29,7 +31,7 @@ module ArchUnit
     def extract_dependencies_from(root, source_files, load_paths:, options:, profile: nil)
       context = DependencyContext.new(
         root:, targets: profiled_target_index(root, source_files, profile), load_paths:,
-        profile:, cache: {}
+        profile:, cache: {}, include_evidence: options.constant_references?
       )
 
       analyses = options.constant_references? ? parse_sources(root, source_files, profile) : {}
@@ -76,7 +78,11 @@ module ArchUnit
 
     def classify_imports(source, imports, context)
       ExtractionProfile.measure(context.profile, :edge_classification) do
-        imports.map { |import| dependency_edge(source, import, context.targets) }
+        imports.map do |import|
+          dependency_edge(
+            source, import, context.targets, include_evidence: context.include_evidence
+          )
+        end
       end
     end
     private_class_method :classify_imports
@@ -93,7 +99,7 @@ module ArchUnit
     end
     private_class_method :internal_target_index
 
-    def dependency_edge(source, import, internal_targets)
+    def dependency_edge(source, import, internal_targets, include_evidence:)
       target = import.resolved_path && internal_targets[canonical_path(import.resolved_path)]
 
       Common::Extraction::Edge.new(
@@ -101,7 +107,7 @@ module ArchUnit
         target: target || import.module_name,
         external: target.nil?,
         import_kinds: [import.import_kind],
-        evidence: [import_evidence(source, import)]
+        evidence: include_evidence ? [import_evidence(source, import)] : []
       )
     end
     private_class_method :dependency_edge

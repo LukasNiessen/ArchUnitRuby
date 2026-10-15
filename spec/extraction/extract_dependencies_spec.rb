@@ -32,18 +32,18 @@ RSpec.describe ArchUnit::Extraction, '.extract_dependencies' do
     edges = described_class.extract_dependencies(@project_root)
 
     expect(edges).to include(
-      have_attributes(
+      ArchUnit::Edge.new(
         source: 'lib/example.rb', target: 'lib/support.rb', external: false,
         import_kinds: [:require_relative]
       ),
-      have_attributes(
+      ArchUnit::Edge.new(
         source: 'lib/example.rb', target: 'lib/sample/widget.rb', external: false,
         import_kinds: [:require]
       ),
-      have_attributes(
+      ArchUnit::Edge.new(
         source: 'lib/example.rb', target: 'json', external: true, import_kinds: [:require]
       ),
-      have_attributes(
+      ArchUnit::Edge.new(
         source: 'lib/example.rb', target: 'missing_archunit_dependency', external: true,
         import_kinds: [:require]
       )
@@ -87,7 +87,7 @@ RSpec.describe ArchUnit::Extraction, '.extract_dependencies' do
     create_file('vendor/dependency.rb')
 
     expect(described_class.extract_dependencies(@project_root)).to contain_exactly(
-      have_attributes(
+      ArchUnit::Edge.new(
         source: 'lib/example.rb', target: 'vendor/dependency', external: true,
         import_kinds: [:require]
       )

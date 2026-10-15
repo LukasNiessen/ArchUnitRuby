@@ -46,17 +46,19 @@ On 2026-10-15, Ruby 4.0.6 on Windows x64, three fresh-process runs per mode on t
 
 | Measurement | Imports | Imports and constants |
 | --- | ---: | ---: |
-| Cold graph build | 1.959 s | 2.019 s |
-| Warm graph lookup | 3.23 ms | 2.62 ms |
-| Constant indexing/resolution | — | 42.8 ms |
+| Cold graph build | 1.706 s | 1.533 s |
+| Warm graph lookup | 1.93 ms | 1.95 ms |
+| Constant indexing/resolution | — | 32.0 ms |
 | Merged graph edges | 4,001 | 4,001 |
 
 All runs reused the identical cached graph on their warm lookup. The corpus references the same
 next file by import and constant, so expanded mode merges 5,001 raw edges into 4,001 edges while
-retaining both evidence forms. Every source is parsed once per cold graph. The roughly 3% median
-cold-time increase is a local observation, not a portable overhead guarantee.
+retaining both evidence forms. Every source is parsed once per cold graph. Cold samples ranged from
+1.45 to 1.86 seconds across modes. Filesystem and run-order noise prevent deriving a meaningful
+overhead percentage from this small sample; the separately measured indexing stage is more useful
+here than the difference between total medians.
 
-Heap-growth samples ranged from 4.18–5.55 MB for imports and 5.51–14.19 MB for expanded analysis;
+Heap-growth samples ranged from 3.07–5.49 MB for imports and 6.13–9.90 MB for expanded analysis;
 these pre-GC snapshots are sensitive to collection timing and do not establish retained or peak
 memory. Windows does not expose the Linux peak-RSS counter. ASTs and indexing structures are
 temporary; the cached graph retains immutable edges and evidence only.

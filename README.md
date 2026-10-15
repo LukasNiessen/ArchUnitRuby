@@ -413,11 +413,14 @@ or whether a conditional use executes. Qualified declaration owners are stabiliz
 if they do not stabilize within eight index passes, the project contributes imports only and its
 constant uses are counted as unresolved.
 
-An import and a constant use between the same files produce one logical edge. Its `import_kinds`
+In expanded mode, an import and a constant use between the same files produce one logical edge.
+Its `import_kinds`
 includes `:constant_reference`; `edge.evidence` and JSON graph exports retain the referenced name,
 source span, and definition line for constant uses. Import evidence retains its call span. CSV,
 HTML, and diagram reports use the same merged graph; CSV/HTML distinguish dependency kinds.
-`# archunit: ignore` continues to suppress imports only, not constant references.
+`# archunit: ignore` continues to suppress imports only, not constant references. Import-only mode
+leaves `edge.evidence` empty for compatibility with existing edge-value comparisons;
+`ArchUnit::Extraction.extract_imports` retains call locations in both modes.
 
 For diagnostics, pass an `ArchUnit::Extraction::ExtractionProfile` to
 `ArchUnit::Extraction.extract_graph(root, options: options, profile: profile)`. Its counters include

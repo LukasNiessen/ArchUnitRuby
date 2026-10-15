@@ -45,9 +45,15 @@ RSpec.describe 'expanded dependency analysis through the public API' do
 
     expect(file_rule.check.length).to eq(1)
     expect(file_rule(:should)).to pass
-    expect(file_rule.check.first.dependency.cumulated_edges.first).to have_attributes(
+    expect(file_rule.check(options).first.dependency.cumulated_edges.first).to have_attributes(
       import_kinds: [:require_relative],
       evidence: contain_exactly(have_attributes(line_number: 2, name: '../retrieval/store'))
+    )
+    expect(file_rule.check.first.dependency.cumulated_edges.first).to eq(
+      ArchUnit::Edge.new(
+        source: 'app/api/request.rb', target: 'app/retrieval/store.rb', external: false,
+        import_kinds: [:require_relative]
+      )
     )
   end
 

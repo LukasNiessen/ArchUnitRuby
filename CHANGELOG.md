@@ -4,7 +4,8 @@
 
 - Add opt-in project constant-reference dependencies with lexical lookup and conservative ambiguity handling.
 - Infer import paths from safely known local literal strings without evaluating application code.
-- Preserve dependency source evidence through graph merging and JSON reporting.
+- Preserve dependency source evidence in expanded mode through graph merging and JSON reporting,
+  while keeping import-only edge values compatible with existing consumers.
 - Support check options on metric measurements and add installed-gem extraction regression checks.
 - Discover adjacent `lib` directories in multi-gemspec repositories without evaluating gemspecs.
 - Support validated, project-local custom load paths through `CheckOptions`.

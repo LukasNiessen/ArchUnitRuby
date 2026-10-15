@@ -121,7 +121,7 @@ RSpec.describe ArchUnit::Extraction, 'constant dependencies' do
   it 'falls back to imports when dependent namespace owners exceed the bounded index passes' do
     source('lib/known.rb', 'class Known; end')
     declarations = ['module Root', 'module Branch; end']
-    10.times { declarations.concat(['module Branch::Nested', 'module Branch; end']) }
+    10.times { declarations.push('module Branch::Nested', 'module Branch; end') }
     declarations << '::Known.new'
     declarations.concat(Array.new(11, 'end'))
     source('app/api/request.rb', declarations.join("\n"))
