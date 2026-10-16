@@ -3,6 +3,7 @@
 require_relative '../assertion/violation'
 require_relative '../assertion/empty_test_violation'
 require_relative '../logging/check_logger'
+require_relative '../logging/inspection'
 require_relative 'check_options'
 
 module ArchUnit
@@ -28,7 +29,9 @@ module ArchUnit
 
         def execute_check(options, logger, check_name)
           logger.log_progress("executing #{check_name}")
-          violations = validate_violations(perform_check(options))
+          violations = Logging::Inspection.with(logger) do
+            validate_violations(perform_check(options))
+          end
           log_violations(logger, violations)
           logger.end_check(check_name, violation_count: violations.length)
           violations

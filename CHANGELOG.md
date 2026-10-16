@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.0.2 - 2026-09-30
+
+- Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
+- Log passing metric values without repeating custom calculations.
+- Document verbosity, CI log artifacts, and existing colored violation reports.
 
 - Add opt-in project constant-reference dependencies with lexical lookup and conservative ambiguity handling.
 - Infer import paths from safely known local literal strings without evaluating application code.

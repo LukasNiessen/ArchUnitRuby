@@ -41,6 +41,7 @@ module ArchUnit
           return empty_test if empty_test
 
           edges = Common::Projection.project_edges(graph, projection)
+          Common::Logging::Inspection.projection(edges)
           Assertion.gather_forbidden_slice_dependency_violations(
             edges, source_slice, target_slice
           )
