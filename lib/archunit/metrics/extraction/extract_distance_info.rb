@@ -30,7 +30,7 @@ module ArchUnit
       end
       private_class_method :build_distance_infos
 
-      # rubocop:disable Metrics/AbcSize -- Both directional indexes are built in one graph pass.
+      # rubocop:disable-next Metrics/AbcSize -- Both directional indexes are built in one graph pass.
       def coupling_indexes(graph, file_paths)
         outgoing = Hash.new { |hash, key| hash[key] = [] }
         incoming = Hash.new { |hash, key| hash[key] = [] }
@@ -43,7 +43,6 @@ module ArchUnit
         end
         [outgoing, incoming]
       end
-      # rubocop:enable Metrics/AbcSize
       private_class_method :coupling_indexes
     end
   end

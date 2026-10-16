@@ -13,11 +13,10 @@ module ArchUnit
       end
 
       # RSpec's matcher protocol fixes this method name.
-      # rubocop:disable Naming/PredicatePrefix
+      # rubocop:disable-next Naming/PredicatePrefix
       def does_not_match?(rule)
         matches_expectation?(rule, expected_to_pass: false)
       end
-      # rubocop:enable Naming/PredicatePrefix
 
       def failure_message
         result.message
