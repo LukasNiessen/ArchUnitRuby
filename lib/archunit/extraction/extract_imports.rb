@@ -30,8 +30,8 @@ module ArchUnit
       raise TechnicalError, "could not parse Ruby source file: #{e.message}"
     end
 
-    # rubocop:disable Metrics/ParameterLists -- Share the parsed AST with constant analysis.
-    def extract_imports_from(
+    # Share the parsed AST with constant analysis.
+    def extract_imports_from( # rubocop:disable Metrics/ParameterLists
       source_path, project_root:, load_paths: nil, profile: nil, resolution_cache: nil,
       parse_result: nil
     )
@@ -44,7 +44,6 @@ module ArchUnit
       raise TechnicalError, "could not parse Ruby source file: #{e.message}"
     end
     private_class_method :extract_imports_from
-    # rubocop:enable Metrics/ParameterLists
 
     def build_import_resolver(**)
       ImportResolver.new(**)

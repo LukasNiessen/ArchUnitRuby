@@ -9,8 +9,10 @@ module ArchUnit
       # Aggregated dependency evidence in a graph report snapshot.
       GraphReportEdge = Data.define(:source, :target, :count, :external, :import_kinds,
                                     :evidence) do
-        # rubocop:disable Metrics/ParameterLists -- Keywords mirror this immutable report value.
-        def initialize(source:, target:, count:, external:, import_kinds: [], evidence: [])
+        # Keywords mirror this immutable report value.
+        def initialize( # rubocop:disable Metrics/ParameterLists
+          source:, target:, count:, external:, import_kinds: [], evidence: []
+        )
           source = immutable_string(source, :source)
           target = immutable_string(target, :target)
           validate_count(count)
@@ -23,7 +25,6 @@ module ArchUnit
 
           super
         end
-        # rubocop:enable Metrics/ParameterLists
 
         private
 

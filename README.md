@@ -351,12 +351,12 @@ Check options and returned violations retain their existing behavior.
 
 Example debug lines (timestamp prefixes omitted):
 
-```text
+~~~ text
 [DEBUG] inspect: discovered file: "lib/service.rb"
 [DEBUG] inspect: dependency: "lib/service.rb" -> "json" (external=true, kinds=[:require])
 [DEBUG] inspect: selected file: "lib/service.rb"
 [DEBUG] log metric: method_count=3 [lib/service.rb:Service]
-```
+~~~
 
 For file-only CI artifacts, use `io: nil` with `output_directory:` and archive that directory.
 Logging sink errors still propagate. Debug details are produced lazily; checks with logging
@@ -366,11 +366,11 @@ disabled create no output or log files.
 
 The same formatted, numbered reports work with RSpec, Minitest, or standalone checks:
 
-```ruby
+~~~ ruby
 puts ArchUnit.format_violations(violations)               # Detect terminal support
 puts ArchUnit.format_violations(violations, color: true)  # Force ANSI colors
 puts ArchUnit.format_violations(violations, color: false) # Plain CI/file output
-```
+~~~
 
 Failure headings are bold red, violation headings yellow, and successful results green. Reports
 include dependency, file, or metric evidence. Automatic color detection respects `NO_COLOR`,
@@ -402,10 +402,10 @@ require 'experimental/plugin'
 
 Preceding local assignments to literal strings are also recognized for all four import forms:
 
-```ruby
+~~~ ruby
 path = '../retrieval/store'
 require_relative path
-```
+~~~
 
 Inference follows assignment order within straight-line lexical scopes. Reassignment replaces the
 value; aliases, mutation, unknown calls receiving the value, reflection, and unsupported control
@@ -419,7 +419,7 @@ Gemfile, gemspec, initializer, or `const_missing` hook is executed.
 
 For autoloaded applications, enable dependencies from known project constants alongside imports:
 
-```ruby
+~~~ ruby
 options = ArchUnit::CheckOptions.new(dependency_analysis: :imports_and_constants)
 
 # Detects Retrieval::Store.new even without require_relative.
@@ -432,7 +432,7 @@ report = ArchUnit.project_graph.with_check_options(options)
 puts report.to_json
 puts ArchUnit.project_slices.defined_by('app/(**)/').to_plantuml(options)
 values = ArchUnit.metrics.distance.instability.measure(options)
-```
+~~~
 
 The default remains `dependency_analysis: :imports`. Expanded mode indexes declarations from the
 same included source files, then resolves references to definition files. Files remain graph nodes.

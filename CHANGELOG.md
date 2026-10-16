@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.2 - 2026-09-30
+## 0.0.2 (unreleased)
 
 - Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
 - Log passing metric values without repeating custom calculations.
