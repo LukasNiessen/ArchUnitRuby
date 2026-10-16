@@ -9,12 +9,17 @@ module ArchUnit
     module FluentApi
       module_function
 
+      # Starts an immutable source-metrics scope.
+      # @return [MetricsBuilder]
       def metrics(project_locator = nil)
         MetricsBuilder.new(project_locator:)
       end
     end
   end
 
+  # Starts an immutable source-metrics scope.
+  # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+  # @return [Metrics::FluentApi::MetricsBuilder]
   def self.metrics(project_locator = nil)
     Metrics::FluentApi.metrics(project_locator)
   end

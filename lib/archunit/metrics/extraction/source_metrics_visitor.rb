@@ -7,7 +7,7 @@ module ArchUnit
   module Metrics
     module Extraction
       # Collects Ruby-specific count and class-cohesion facts from a Prism tree.
-      # rubocop:disable Metrics/ClassLength -- One visitor owns the state of a single AST walk.
+      # rubocop:disable-next Metrics/ClassLength -- One visitor owns the state of a single AST walk.
       class SourceMetricsVisitor < Prism::Visitor
         IMPORT_METHODS = %i[autoload load require require_relative].freeze
         ATTRIBUTE_METHODS = %i[attr_accessor attr_reader attr_writer].freeze
@@ -82,7 +82,7 @@ module ArchUnit
           @singleton_class_depth -= 1
         end
 
-        # rubocop:disable Metrics/MethodLength -- The ensure keeps nested visitor state balanced.
+        # rubocop:disable-next Metrics/MethodLength -- The ensure keeps nested visitor state balanced.
         def visit_def_node(node)
           active_class = active_class_accumulator
           unless active_class
@@ -97,7 +97,6 @@ module ArchUnit
         ensure
           @method_stack.pop if active_class
         end
-        # rubocop:enable Metrics/MethodLength
 
         INSTANCE_VARIABLE_NODES.each do |visitor_method|
           define_method(visitor_method) do |node|
@@ -271,7 +270,6 @@ module ArchUnit
           end
         end
       end
-      # rubocop:enable Metrics/ClassLength
       private_constant :SourceMetricsVisitor
     end
   end

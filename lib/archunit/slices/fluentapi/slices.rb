@@ -9,6 +9,8 @@ module ArchUnit
     module FluentApi
       module_function
 
+      # Starts an immutable slice-rule sentence.
+      # @return [SliceScopeBuilder]
       def project_slices(project_locator = nil)
         SliceScopeBuilder.new(project_locator:)
       end
@@ -19,6 +21,9 @@ module ArchUnit
     end
   end
 
+  # Starts an immutable slice-rule sentence.
+  # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+  # @return [Slices::FluentApi::SliceScopeBuilder]
   def self.project_slices(project_locator = nil)
     Slices::FluentApi.project_slices(project_locator)
   end

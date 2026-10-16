@@ -8,6 +8,10 @@ module ArchUnit
 
       # Immutable, per-check logging configuration. A nil CheckOptions#logging disables logging.
       LoggingOptions = Data.define(:level, :io, :output_directory, :append) do
+        # @param level [Symbol, String] one of debug, info, warn, or error
+        # @param io [#write, nil] stream sink, or nil to disable stream output
+        # @param output_directory [String, Pathname, nil] optional directory for timestamped logs
+        # @param append [Boolean] append to an existing selected log file when possible
         def initialize(level: :info, io: $stderr, output_directory: nil, append: false)
           level = normalize_level(level)
           validate_io(io)
@@ -16,6 +20,7 @@ module ArchUnit
           super
         end
 
+        # @return [Boolean] whether file logging is configured
         def file_output?
           !output_directory.nil?
         end

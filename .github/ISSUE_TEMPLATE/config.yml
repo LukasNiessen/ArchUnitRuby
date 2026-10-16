@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support guide
+    url: https://github.com/LukasNiessen/ArchUnitRuby/blob/main/SUPPORT.md
+    about: Read how to ask a useful usage question.
+  - name: Private security report
+    url: https://github.com/LukasNiessen/ArchUnitRuby/security/advisories/new
+    about: Report vulnerabilities privately instead of opening a public issue.
+
