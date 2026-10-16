@@ -9,6 +9,9 @@ module ArchUnit
       CheckOptions = Data.define(
         :allow_empty_tests, :logging, :clear_cache, :load_paths, :dependency_analysis
       ) do
+        # Normalizes nil or an existing options value for terminal execution.
+        # @param value [CheckOptions, nil]
+        # @return [CheckOptions]
         def self.resolve(value)
           return new if value.nil?
           return value if value.is_a?(self)
@@ -16,6 +19,11 @@ module ArchUnit
           raise ArgumentError, 'options must be a CheckOptions value or nil'
         end
 
+        # @param allow_empty_tests [Boolean] permit a selector that finds no subjects
+        # @param logging [LoggingOptions, nil] per-check logging configuration
+        # @param clear_cache [Boolean] rebuild the dependency graph for this check
+        # @param load_paths [Array<String, Pathname>] additional project-contained source roots
+        # @param dependency_analysis [Symbol] :imports or opt-in :imports_and_constants
         def initialize(
           allow_empty_tests: false, logging: nil, clear_cache: false, load_paths: [],
           dependency_analysis: :imports
@@ -31,10 +39,12 @@ module ArchUnit
           super
         end
 
+        # @return [Boolean] whether an empty subject selection is allowed
         def allow_empty_tests?
           allow_empty_tests
         end
 
+        # @return [Boolean] whether this check rebuilds the cached graph
         def clear_cache?
           clear_cache
         end

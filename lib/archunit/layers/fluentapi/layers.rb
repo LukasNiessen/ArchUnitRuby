@@ -9,6 +9,8 @@ module ArchUnit
     module FluentApi
       module_function
 
+      # Starts an immutable named-layer policy.
+      # @return [LayeredArchitecture]
       def project_layers(project_locator = nil)
         LayeredArchitecture.new(project_locator:)
       end
@@ -19,6 +21,9 @@ module ArchUnit
     end
   end
 
+  # Starts an immutable named-layer policy.
+  # @param project_locator [String, Pathname, nil] project directory, Gemfile, or gemspec
+  # @return [Layers::FluentApi::LayeredArchitecture]
   def self.project_layers(project_locator = nil)
     Layers::FluentApi.project_layers(project_locator)
   end

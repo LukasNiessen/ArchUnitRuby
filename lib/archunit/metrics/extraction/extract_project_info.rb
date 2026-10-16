@@ -54,7 +54,7 @@ module ArchUnit
       end
       private_class_method :visitor_counts
 
-      # rubocop:disable Metrics/MethodLength -- The state tracks Ruby's =begin/=end comments.
+      # rubocop:disable-next Metrics/MethodLength -- The state tracks Ruby's =begin/=end comments.
       def lines_of_code(source)
         in_block_comment = false
         source.each_line.count do |line|
@@ -70,7 +70,6 @@ module ArchUnit
           end
         end
       end
-      # rubocop:enable Metrics/MethodLength
       private_class_method :lines_of_code
 
       def source_path(value)

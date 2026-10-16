@@ -1,11 +1,16 @@
 # ArchUnitRuby - Architecture Testing
 
-<div align="center" name="top">
+<p align="center" name="top">
+  <img src="assets/logo-rounded.png" width="180" alt="ArchUnitRuby logo">
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Build & tests](https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&label=build%20%26%20tests)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml) [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)<br>
-[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit) [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
-
-</div>
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml"><img alt="Build & tests" src="https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&amp;label=build%20%26%20tests"></a>
+  <a href="https://github.com/LukasNiessen/ArchUnitRuby"><img alt="GitHub stars" src="https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg"></a><br>
+  <a href="https://clickgems.clickhouse.com/dashboard/archunit"><img alt="Gem downloads" src="https://img.shields.io/gem/dt/archunit.svg"></a>
+  <a href="https://www.ruby-lang.org/"><img alt="Ruby 3.3+" src="https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&amp;logoColor=white"></a>
+</p>
 
 Enforce architecture rules in Ruby projects. Check dependency directions, detect circular
 dependencies, enforce naming and location conventions, measure code quality, and generate
@@ -13,7 +18,7 @@ architecture reports as ordinary Ruby tests.
 
 _Inspired by the amazing ArchUnit library, but not affiliated with ArchUnit._
 
-[Setup](#-setup) · [Use Cases](#-use-cases) · [Features](#-features) · [Documentation](https://lukasniessen.github.io/ArchUnitRuby/) · [Sponsor](https://github.com/sponsors/LukasNiessen) · [Contributing](#-contributing)
+[Setup](#-setup) · [Use Cases](#-use-cases) · [Features](#-features) · [API Guide](https://lukasniessen.github.io/ArchUnitRuby/file.API.html) · [Documentation](https://lukasniessen.github.io/ArchUnitRuby/) · [Contributing](CONTRIBUTING.md)
 
 ArchUnitRuby turns a Ruby codebase into a dependency graph and lets you test that graph with rules
 that read like English:
@@ -29,12 +34,14 @@ It is a working executable prototype with file, layer, slice, graph-reporting, a
 is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Install the latest release as
 [`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
 
-Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
-[ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython).
+ArchUnitRuby follows the shared ArchUnitEverything architecture and fluent-API standard used by
+its siblings [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
+[ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython), adapted where Ruby idioms differ.
 
-The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide with a
-searchable, source-generated API reference for every public module, class, and method. The same
-site is rebuilt in CI and deployed from `main`, so the published reference follows the repository.
+The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide, a
+curated [API guide](https://lukasniessen.github.io/ArchUnitRuby/file.API.html), and a searchable,
+source-generated reference. The same site is rebuilt and link-validated in CI before deployment
+from `main`, so the published reference follows the repository.
 
 ## ⚡ 5 min Quickstart
 
@@ -507,6 +514,8 @@ the complete library graph must remain cycle-free.
 
 ## 🦊 Contributing
 
+Start with [CONTRIBUTING.md](CONTRIBUTING.md) for the complete development and pull-request guide.
+
 ~~~ bash
 git clone https://github.com/LukasNiessen/ArchUnitRuby.git
 cd ArchUnitRuby
@@ -554,6 +563,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 See everyone who has contributed on the [GitHub contributors page](https://github.com/LukasNiessen/ArchUnitRuby/graphs/contributors).
 
 Questions and feature ideas are welcome in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
+For usage help, responsible vulnerability reporting, and community expectations, see
+[SUPPORT.md](SUPPORT.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ### Star History
 

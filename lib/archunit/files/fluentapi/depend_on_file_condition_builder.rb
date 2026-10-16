@@ -26,14 +26,20 @@ module ArchUnit
           is_negated
         end
 
+        # Selects dependency targets by basename.
+        # @return [DependOnFileCondition]
         def with_name(pattern, except: nil)
           condition(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
+        # Selects dependency targets by containing folder.
+        # @return [DependOnFileCondition]
         def in_folder(pattern, except: nil)
           condition(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
+        # Selects dependency targets by complete path.
+        # @return [DependOnFileCondition]
         def in_path(pattern, except: nil)
           condition(Common::RegexFactory.path_matcher(pattern, except:))
         end

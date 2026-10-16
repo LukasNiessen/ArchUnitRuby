@@ -16,26 +16,38 @@ module ArchUnit
           freeze
         end
 
+        # Selects files by basename.
+        # @return [FileConditionBuilder]
         def with_name(pattern, except: nil)
           with_filter(Common::RegexFactory.filename_matcher(pattern, except:))
         end
 
+        # Selects files by project-relative containing folder.
+        # @return [FileConditionBuilder]
         def in_folder(pattern, except: nil)
           with_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end
 
+        # Selects files by complete project-relative path.
+        # @return [FileConditionBuilder]
         def in_path(pattern, except: nil)
           with_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
+        # Selects one exact project-relative file.
+        # @return [FileConditionBuilder]
         def in_file(file_path, except: nil)
           with_filter(Common::RegexFactory.exact_file_matcher(file_path, except:))
         end
 
+        # Enters the positive rule mood.
+        # @return [PositiveMatchPatternFileConditionBuilder]
         def should
           PositiveMatchPatternFileConditionBuilder.new(self)
         end
 
+        # Enters the negated rule mood.
+        # @return [NegatedMatchPatternFileConditionBuilder]
         def should_not
           NegatedMatchPatternFileConditionBuilder.new(self)
         end

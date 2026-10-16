@@ -1,0 +1,45 @@
+name: Bug report
+description: Report reproducible incorrect behavior in ArchUnitRuby
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Please remove credentials, private source code, and customer data. Security issues must use
+        private vulnerability reporting instead.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: ArchUnitRuby version, Ruby version, operating system, and test framework
+      placeholder: archunit 0.0.1, Ruby 3.4, Ubuntu, RSpec 3.13
+    validations:
+      required: true
+  - type: textarea
+    id: rule
+    attributes:
+      label: Minimal rule and project layout
+      description: Show the smallest synthetic rule, files, and dependencies that reproduce the problem.
+      render: ruby
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the violation output or stack trace after removing sensitive information.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+

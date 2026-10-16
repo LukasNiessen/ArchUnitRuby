@@ -14,10 +14,14 @@ module ArchUnit
   module Testing
     module_function
 
+    # Formats structured violations for a terminal or test failure.
+    # @return [String]
     def format_violations(violations, color: nil)
       ResultFactory.from_violations(violations, color:).message
     end
 
+    # Converts a rule check into a framework-neutral TestResult.
+    # @return [TestResult]
     def result_for(rule, options = nil, expected_to_pass: true)
       unless rule.is_a?(Common::FluentApi::Checkable)
         raise ArgumentError, 'rule must implement Checkable'
@@ -30,6 +34,8 @@ module ArchUnit
     end
   end
 
+  # Formats structured violations for a terminal or test failure.
+  # @return [String]
   def self.format_violations(violations, color: nil)
     Testing.format_violations(violations, color:)
   end

@@ -29,6 +29,12 @@ RSpec.describe ArchUnit::Common::Pattern do
     expect(matches?('lib/**/*.rb', 'app/service.rb')).to be(false)
   end
 
+  it 'lets a trailing double star include the named folder and its descendants' do
+    expect(matches?('app/api/**', 'app/api')).to be(true)
+    expect(matches?('app/api/**', 'app/api/internal')).to be(true)
+    expect(matches?('app/api/**', 'app/apis')).to be(false)
+  end
+
   it 'supports question marks and character classes within a segment' do
     expect(matches?('service?.[rR][bB]', 'service1.rb')).to be(true)
     expect(matches?('service?.[rR][bB]', 'service12.rb')).to be(false)
