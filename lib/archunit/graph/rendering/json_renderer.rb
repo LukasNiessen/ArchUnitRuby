@@ -26,10 +26,12 @@ module ArchUnit
         private_class_method :snapshot_hash
 
         def edge_hash(edge)
-          {
+          result = {
             source: edge.source, target: edge.target, count: edge.count,
             external: edge.external, import_kinds: edge.import_kinds
           }
+          result[:evidence] = edge.evidence.map(&:to_h) unless edge.evidence.empty?
+          result
         end
         private_class_method :edge_hash
       end

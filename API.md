@@ -189,6 +189,7 @@ options = ArchUnit::CheckOptions.new(
   allow_empty_tests: false,
   clear_cache: false,
   load_paths: ['components/billing/lib'],
+  dependency_analysis: :imports,
   logging: logging
 )
 
@@ -199,6 +200,31 @@ Zero selected subjects produce `EmptyTestViolation` by default. Set `allow_empty
 when an empty scope is intentionally valid. Set `clear_cache: true` after modifying the analyzed
 project during one process. `load_paths` adds project-contained source roots without evaluating
 gemspecs or running application code.
+
+`dependency_analysis` defaults to `:imports`. Imports accept literal arguments and preceding local
+literal-string assignments in supported straight-line scopes. Aliases, mutation/escape, closures,
+reflection, and unsupported control flow invalidate inferred values; runtime paths are not guessed.
+
+For autoloaded projects, opt into known project constant references alongside imports:
+
+~~~ruby
+options = ArchUnit::CheckOptions.new(dependency_analysis: :imports_and_constants)
+violations = rule.check(options)
+json = ArchUnit.project_graph.with_check_options(options).to_json
+values = ArchUnit.metrics.distance.instability.measure(options)
+~~~
+
+Expanded analysis resolves supported lexical, compact, and root-qualified references to their
+definition files. Explicit superclass and mixin references also contribute edges. Missing or
+ambiguous definitions, inherited-member lookup, and dynamic metaprogramming stay unresolved under
+the bounded contract in the main guide. Namespaces that fail to stabilize within eight index passes
+fall back to import-only results. Unknown third-party constants do not create architecture violations.
+
+Expanded edges include `:constant_reference` in `import_kinds` and retain `DependencyEvidence` with
+names and source lines in `edge.evidence` and JSON reports. An import and a constant use supporting
+the same file pair merge into one edge. Import-only edge evidence stays empty for compatibility;
+`ArchUnit::Extraction.extract_imports` retains import call locations in both modes. The analysis
+mode participates in graph-cache identity, and `clear_cache: true` rebuilds the symbol index.
 
 ## Errors and support
 

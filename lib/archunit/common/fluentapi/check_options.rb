@@ -6,7 +6,9 @@ module ArchUnit
   module Common
     module FluentApi
       # Immutable options shared by every terminal rule check.
-      CheckOptions = Data.define(:allow_empty_tests, :logging, :clear_cache, :load_paths) do
+      CheckOptions = Data.define(
+        :allow_empty_tests, :logging, :clear_cache, :load_paths, :dependency_analysis
+      ) do
         # Normalizes nil or an existing options value for terminal execution.
         # @param value [CheckOptions, nil]
         # @return [CheckOptions]
@@ -21,11 +23,19 @@ module ArchUnit
         # @param logging [LoggingOptions, nil] per-check logging configuration
         # @param clear_cache [Boolean] rebuild the dependency graph for this check
         # @param load_paths [Array<String, Pathname>] additional project-contained source roots
-        def initialize(allow_empty_tests: false, logging: nil, clear_cache: false, load_paths: [])
+        # @param dependency_analysis [Symbol] :imports or opt-in :imports_and_constants
+        def initialize(
+          allow_empty_tests: false, logging: nil, clear_cache: false, load_paths: [],
+          dependency_analysis: :imports
+        )
           validate_boolean(allow_empty_tests, :allow_empty_tests)
           validate_logging(logging)
           validate_boolean(clear_cache, :clear_cache)
           load_paths = immutable_load_paths(load_paths)
+          unless %i[imports imports_and_constants].include?(dependency_analysis)
+            raise ArgumentError, 'dependency_analysis must be :imports or :imports_and_constants'
+          end
+
           super
         end
 
@@ -37,6 +47,10 @@ module ArchUnit
         # @return [Boolean] whether this check rebuilds the cached graph
         def clear_cache?
           clear_cache
+        end
+
+        def constant_references?
+          dependency_analysis == :imports_and_constants
         end
 
         private

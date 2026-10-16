@@ -4,11 +4,14 @@ require_relative '../common/extraction/import_kind'
 
 module ArchUnit
   module Extraction
-    ResolvedImport = Data.define(:module_name, :import_kind, :line_number, :resolved_path) do
-      def initialize(module_name:, import_kind:, line_number:, resolved_path: nil)
+    ResolvedImport = Data.define(:module_name, :import_kind, :line_number, :resolved_path,
+                                 :end_line) do
+      def initialize(module_name:, import_kind:, line_number:, resolved_path: nil,
+                     end_line: line_number)
         validate_module_name(module_name)
         validate_import_kind(import_kind)
         validate_line_number(line_number)
+        validate_line_number(end_line)
         validate_resolved_path(resolved_path)
 
         module_name = module_name.dup.freeze
