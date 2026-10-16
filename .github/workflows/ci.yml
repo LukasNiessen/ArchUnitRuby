@@ -244,6 +244,19 @@ jobs:
           ruby-version: "4.0"
           bundler-cache: true
           working-directory: ArchUnitRuby-TestRepo-RAG
+        env:
+          # The fixture locks an older version of the adjacent, checked-out path gem.
+          # Refresh that entry for this revision while retaining its locked dependencies.
+          BUNDLE_FROZEN: "false"
+
+      - name: Verify the fixture loads this checkout
+        working-directory: ArchUnitRuby-TestRepo-RAG
+        run: >-
+          bundle exec ruby -e
+          "require 'archunit'; expected = File.realpath('../ArchUnitRuby');
+          actual = File.realpath(Gem.loaded_specs.fetch('archunit').full_gem_path);
+          abort 'Fixture loaded a different ArchUnit checkout' unless actual == expected;
+          puts \"Testing ArchUnit #{ArchUnit::VERSION} from #{actual}\""
 
       - name: Test the RAG fixture against this revision
         run: bundle exec rake

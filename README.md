@@ -23,7 +23,7 @@ _Inspired by the amazing ArchUnit library, but not affiliated with ArchUnit._
 ArchUnitRuby turns a Ruby codebase into a dependency graph and lets you test that graph with rules
 that read like English:
 
-~~~ruby
+~~~ ruby
 ArchUnit.project_files
         .in_folder('app/api/**')
         .should_not.depend_on_files
@@ -31,7 +31,7 @@ ArchUnit.project_files
 ~~~
 
 It is a working executable prototype with file, layer, slice, graph-reporting, and metric APIs. It
-is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Version 0.0.1 is available as
+is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Install the latest release as
 [`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
 
 ArchUnitRuby follows the shared ArchUnitEverything architecture and fluent-API standard used by
@@ -49,7 +49,7 @@ from `main`, so the published reference follows the repository.
 
 ArchUnitRuby requires Ruby 3.3 or newer. Add it to your test dependencies:
 
-~~~ruby
+~~~ ruby
 # Gemfile
 group :test do
   gem 'archunit', '~> 0.0.1'
@@ -58,7 +58,7 @@ end
 
 Then install it:
 
-~~~bash
+~~~ bash
 bundle install
 ~~~
 
@@ -77,7 +77,7 @@ for you.
 
 Create `spec/architecture_spec.rb`:
 
-~~~ruby
+~~~ ruby
 require 'archunit'
 
 RSpec.describe 'architecture' do
@@ -92,7 +92,7 @@ end
 
 Run it like any other specification:
 
-~~~bash
+~~~ bash
 bundle exec rspec spec/architecture_spec.rb
 ~~~
 
@@ -101,7 +101,7 @@ bundle exec rspec spec/architecture_spec.rb
 Architecture specifications run with the rest of the test suite, so no dedicated CI integration
 is required:
 
-~~~yaml
+~~~ yaml
 # GitHub Actions
 - name: Run architecture tests
   run: bundle exec rspec spec/architecture_spec.rb
@@ -114,7 +114,7 @@ is required:
 The project locator is optional. With no argument, ArchUnitRuby searches from the current directory
 for a `Gemfile` or gemspec. Pass a directory or either marker file when analyzing another project:
 
-~~~ruby
+~~~ ruby
 ArchUnit.project_files('/workspace/my_app')
 ArchUnit.project_files('/workspace/my_app/Gemfile')
 ~~~
@@ -135,7 +135,7 @@ Every rule is built left to right from the same small grammar:
 Building a rule is lazy and does not scan the filesystem. `check`, `measure`, snapshot/report
 terminals, and export terminals perform the work. Builders are immutable, so a scope can be reused:
 
-~~~ruby
+~~~ ruby
 services = ArchUnit.project_files.in_folder('app/services/**')
 
 cycle_rule = services.should.have_no_cycles
@@ -150,7 +150,7 @@ Paths are project-relative and normalized to `/` separators.
 A scope matching zero files returns `EmptyTestViolation`; it does not silently pass. Opt out only
 when an empty result is genuinely valid:
 
-~~~ruby
+~~~ ruby
 rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))
 ~~~
 
@@ -161,7 +161,7 @@ rule.check(ArchUnit::CheckOptions.new(allow_empty_tests: true))
 File rules cover cycles, naming, location, internal dependencies, external modules, and custom
 source predicates:
 
-~~~ruby
+~~~ ruby
 rules = [
   ArchUnit.project_files.in_path('lib/**/*.rb').should.have_no_cycles,
   ArchUnit.project_files.in_folder('app/services/**')
@@ -176,7 +176,7 @@ rules.each { |rule| ArchUnit.assert_passes(rule) }
 A custom predicate receives an immutable `FileInfo` with `path`, `name`, `extension`, `directory`,
 complete `content`, and non-blank `lines_of_code`:
 
-~~~ruby
+~~~ ruby
 rule = ArchUnit.project_files.in_folder('app/services/**')
                .should.adhere_to(
                  ->(file) { file.lines_of_code < 300 },
@@ -188,7 +188,7 @@ rule = ArchUnit.project_files.in_folder('app/services/**')
 
 Named layers express an allowlist or blocklist over groups of files:
 
-~~~ruby
+~~~ ruby
 rule = ArchUnit.project_layers
                .layer('api').defined_by('app/api/**/*.rb')
                .layer('services').defined_by('app/services/**/*.rb')
@@ -208,7 +208,7 @@ requires at least one forbidden target.
 
 Slices group files by one captured path segment and preserve every concrete dependency as evidence:
 
-~~~ruby
+~~~ ruby
 slices = ArchUnit.project_slices.defined_by('lib/my_app/(**)/')
 rule = slices.should_not.contain_dependency('api', 'database')
 
@@ -219,7 +219,7 @@ expect(rule).to pass
 
 A checked-in PlantUML component diagram can also be the architecture contract:
 
-~~~ruby
+~~~ ruby
 rule = slices.should
              .ignoring_external_slices
              .adhere_to_diagram_in_file('docs/architecture.puml')
@@ -235,7 +235,7 @@ The supported subset recognizes components, directed dependencies, comments, and
 Graph reporting builds one immutable snapshot and renders it consistently as DOT, Mermaid, D2, CSV,
 JSON, or self-contained HTML:
 
-~~~ruby
+~~~ ruby
 report = ArchUnit.project_graph
                  .include_external_dependencies
                  .focus_on('app/services/**', 2)
@@ -254,7 +254,7 @@ regular-expression replacement. Every format has an in-memory `to_<format>` and 
 
 Metric scopes select files and Ruby classes before measurement or assertion:
 
-~~~ruby
+~~~ ruby
 services = ArchUnit.metrics
                    .in_path('app/services/**/*.rb')
                    .for_classes_matching('*Service')
@@ -274,7 +274,7 @@ distance. Zone guards detect the conventional zones of pain and uselessness.
 Use `measure` for immutable numeric results, `custom_metric` for a calculation over `ClassInfo`, and
 `export_as_html` for an offline metrics report:
 
-~~~ruby
+~~~ ruby
 services.count.export_as_html('reports/service-counts')
 ~~~
 
@@ -286,7 +286,7 @@ The threshold vocabulary is intentionally limited to `should_be_below`, `should_
 Every selector accepts `except:` in the same call. A plain pattern or array uses the parent
 selector's context, including filenames for path and folder selectors:
 
-~~~ruby
+~~~ ruby
 scope = ArchUnit.project_files.in_path(
   'app/**/*.rb',
   except: ['app/generated/**', 'schema.rb']
@@ -296,7 +296,7 @@ scope = ArchUnit.project_files.in_path(
 Use explicit targets when needed. Supported keys are `in_path`, `in_folder`, `with_name`, and
 `for_classes_matching`:
 
-~~~ruby
+~~~ ruby
 scope = ArchUnit.metrics.in_path(
   'app/**/*.rb',
   except: { in_folder: 'app/generated', with_name: '*_spec.rb' }
@@ -310,14 +310,14 @@ scope = ArchUnit.metrics.in_path(
 `check` returns an array of structured violations. Architecture disagreement is data, not an
 exception:
 
-~~~ruby
+~~~ ruby
 violations = rule.check
 violations.each { |violation| puts violation.class }
 ~~~
 
 Translate that result into a test failure at the boundary that suits your suite:
 
-~~~ruby
+~~~ ruby
 expect(rule).to pass              # RSpec
 assert_passes(rule)               # Minitest test case
 ArchUnit.assert_passes(rule)      # Framework-neutral
@@ -330,7 +330,7 @@ violations retain the concrete dependency, file, layer, slice, or metric evidenc
 
 Logging is off by default and belongs to one check; there is no process-global configuration:
 
-~~~ruby
+~~~ ruby
 logging = ArchUnit::LoggingOptions.new(
   level: :debug,
   output_directory: 'tmp/archunit-logs',
@@ -343,6 +343,45 @@ violations = rule.check(ArchUnit::CheckOptions.new(logging: logging))
 Levels are `debug`, `info`, `warn`, and `error`. The fixed events cover check start/end, progress,
 violations, and metric evidence. `io:` defaults to `$stderr`, accepts any writable stream, and may be
 `nil`. File output creates missing directories and writes timestamped `archunit-*.log` files.
+
+At `:debug`, inspection includes the project root, each discovered file, every dependency with
+its import kind and external flag, selected files, and all metric calculations (including passing
+values). It observes the same graph on both cold and cached checks. Custom metrics run once.
+Check options and returned violations retain their existing behavior.
+
+| Level | Included output |
+| --- | --- |
+| `:debug` | Graph inspection, selections, metric values, and everything below |
+| `:info` | Check lifecycle and progress, violations, technical errors |
+| `:warn` | Violations and technical errors |
+| `:error` | Technical errors |
+
+Example debug lines (timestamp prefixes omitted):
+
+~~~ text
+[DEBUG] inspect: discovered file: "lib/service.rb"
+[DEBUG] inspect: dependency: "lib/service.rb" -> "json" (external=true, kinds=[:require])
+[DEBUG] inspect: selected file: "lib/service.rb"
+[DEBUG] log metric: method_count=3 [lib/service.rb:Service]
+~~~
+
+For file-only CI artifacts, use `io: nil` with `output_directory:` and archive that directory.
+Logging sink errors still propagate. Debug details are produced lazily; checks with logging
+disabled create no output or log files.
+
+### Readable, colored failure reports
+
+The same formatted, numbered reports work with RSpec, Minitest, or standalone checks:
+
+~~~ ruby
+puts ArchUnit.format_violations(violations)               # Detect terminal support
+puts ArchUnit.format_violations(violations, color: true)  # Force ANSI colors
+puts ArchUnit.format_violations(violations, color: false) # Plain CI/file output
+~~~
+
+Failure headings are bold red, violation headings yellow, and successful results green. Reports
+include dependency, file, or metric evidence. Automatic color detection respects `NO_COLOR`,
+`TERM=dumb`, and non-terminal output. Log files remain plain text for searching and CI artifacts.
 
 ## 🕵️ Technical Deep Dive
 
@@ -361,7 +400,7 @@ Project dependencies use normalized, project-relative paths. Standard-library an
 retain the module name written in source. Inline or immediately preceding ignore directives can
 suppress known compatibility imports:
 
-~~~ruby
+~~~ ruby
 require 'legacy/client' # archunit: ignore legacy/client
 
 # archunit: ignore experimental/plugin
@@ -377,7 +416,7 @@ never evaluated. Add non-standard source roots explicitly through the per-check 
 are relative to the project root, must remain inside it, and use the order given after the normal
 top-level `lib` and project-root search locations:
 
-~~~ruby
+~~~ ruby
 options = ArchUnit::CheckOptions.new(
   load_paths: ['components/billing/source', 'plugins/search/lib']
 )
@@ -405,7 +444,7 @@ the complete library graph must remain cycle-free.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) for the complete development and pull-request guide.
 
-~~~bash
+~~~ bash
 git clone https://github.com/LukasNiessen/ArchUnitRuby.git
 cd ArchUnitRuby
 bundle install
@@ -424,7 +463,7 @@ Cold and warm extraction can be profiled independently with a generated multi-ge
 benchmark reports stage timings, resolution-cache effectiveness, Ruby heap growth, and peak RSS on
 platforms that expose it:
 
-~~~bash
+~~~ bash
 bundle exec ruby benchmark/extraction.rb
 ~~~
 
