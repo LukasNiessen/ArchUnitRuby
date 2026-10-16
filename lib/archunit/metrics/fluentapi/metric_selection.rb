@@ -40,7 +40,7 @@ module ArchUnit
         end
 
         # Evaluates this metric for every selected subject.
-        # @param options [CheckOptions, nil] includes the dependency-analysis mode for coupling metrics
+        # @param options [CheckOptions, nil] dependency-analysis options for coupling metrics
         # @return [Array<MetricMeasurement>]
         def measure(options = nil)
           options = Common::FluentApi::CheckOptions.resolve(options)
