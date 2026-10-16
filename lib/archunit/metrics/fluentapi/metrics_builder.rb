@@ -58,6 +58,7 @@ module ArchUnit
         def analyze
           project = Extraction.extract_project_info(project_locator)
           selected_files = project.files.filter_map { |file| selected_file_info(file) }
+          Common::Logging::Inspection.selection('metric file', selected_files, &:path)
           Extraction::ProjectInfo.new(project_root: project.project_root, files: selected_files)
         end
 

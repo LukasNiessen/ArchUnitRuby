@@ -53,6 +53,14 @@ module ArchUnit
           write(:debug, "log metric: #{metric}=#{value}#{context}")
         end
 
+        def debug?
+          !@options.nil? && enabled?(:debug)
+        end
+
+        def debug
+          write(:debug, "inspect: #{yield}") if debug?
+        end
+
         def close
           @mutex.synchronize do
             @file&.close
