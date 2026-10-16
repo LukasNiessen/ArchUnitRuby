@@ -9,7 +9,7 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
     File.write(path, source)
   end
 
-  # rubocop:disable Metrics/MethodLength -- Both small files form one reusable fixture project.
+  # rubocop:disable-next Metrics/MethodLength -- Both small files form one reusable fixture project.
   def build_project(root)
     write_source(root, 'lib/models/order.rb', <<~RUBY)
       class Sales::Order
@@ -26,9 +26,8 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
       end
     RUBY
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength -- Four files create both distance zones.
+  # rubocop:disable-next Metrics/MethodLength -- Four files create both distance zones.
   def build_distance_project(root)
     write_source(root, 'lib/stable.rb', <<~RUBY)
       class Stable
@@ -50,7 +49,6 @@ RSpec.describe ArchUnit::Metrics::FluentApi do
       end
     RUBY
   end
-  # rubocop:enable Metrics/MethodLength
 
   it 'builds immutable selectors without touching the filesystem' do
     allow(ArchUnit::MetricExtraction).to receive(:extract_project_info).and_call_original

@@ -70,7 +70,7 @@ module ArchUnit
       end
 
       # Static information about one Ruby class declaration.
-      # rubocop:disable Lint/DataDefineOverride -- `methods` is the established metric vocabulary.
+      # rubocop:disable-next Lint/DataDefineOverride -- `methods` is the established metric vocabulary.
       ClassInfo = Data.define(:name, :file_path, :methods, :fields) do
         include ValueValidation
 
@@ -86,7 +86,6 @@ module ArchUnit
           "#{file_path}:#{name}"
         end
       end
-      # rubocop:enable Lint/DataDefineOverride
 
       # Static counts and class declarations extracted from one Ruby source file.
       FileInfo = Data.define(
@@ -102,7 +101,7 @@ module ArchUnit
       ) do
         include ValueValidation
 
-        # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists -- Independent count facts.
+        # rubocop:disable-next Metrics/MethodLength, Metrics/ParameterLists -- Independent count facts.
         def initialize(
           path:,
           lines_of_code:,
@@ -131,7 +130,6 @@ module ArchUnit
 
           super
         end
-        # rubocop:enable Metrics/MethodLength, Metrics/ParameterLists
 
         def identifier
           path

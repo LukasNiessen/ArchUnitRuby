@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe ArchUnit::DistanceMetrics do
-  # rubocop:disable Metrics/ParameterLists -- Named fixture dimensions keep formulas readable.
+  # rubocop:disable-next Metrics/ParameterLists -- Named fixture dimensions keep formulas readable.
   def distance_info(
     types: 1, abstract_types: 0, incoming: 0, outgoing: 0, files: 1, lines: 0
   )
@@ -15,7 +15,6 @@ RSpec.describe ArchUnit::DistanceMetrics do
       efferent_coupling: outgoing, project_file_count: files
     )
   end
-  # rubocop:enable Metrics/ParameterLists
 
   def values_for(info)
     described_class::CALCULATIONS.to_h do |name, _calculation|
