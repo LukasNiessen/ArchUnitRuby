@@ -63,14 +63,14 @@ module ArchUnit
       load_paths = ExtractionProfile.measure(profile, :load_path_discovery) do
         LoadPaths.resolve(root, explicit_paths: options.load_paths, source_files:)
       end
-      edges = extraction_edges(root, source_files, load_paths, profile)
+      edges = extraction_edges(root, source_files, load_paths, options, profile)
       graph_from_edges(edges, profile)
     end
     private_class_method :extract_graph_uncached
 
-    def extraction_edges(root, source_files, load_paths, profile)
+    def extraction_edges(root, source_files, load_paths, options, profile)
       edges = self_edges(source_files) + extract_dependencies_from(
-        root, source_files, load_paths:, profile:
+        root, source_files, load_paths:, profile:, options:
       )
       profile&.increment(:raw_edges, edges.length)
       edges
@@ -123,7 +123,8 @@ module ArchUnit
           source: first.source,
           target: first.target,
           external: first.external,
-          import_kinds: parallel_edges.flat_map(&:import_kinds)
+          import_kinds: parallel_edges.flat_map(&:import_kinds),
+          evidence: parallel_edges.flat_map(&:evidence)
         )
       end
     end

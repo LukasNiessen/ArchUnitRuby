@@ -40,9 +40,11 @@ module ArchUnit
         end
 
         # Evaluates this metric for every selected subject.
+        # @param options [CheckOptions, nil] dependency-analysis options for coupling metrics
         # @return [Array<MetricMeasurement>]
-        def measure
-          scope.__send__(:subjects_for, metric.subject_type).map do |subject|
+        def measure(options = nil)
+          options = Common::FluentApi::CheckOptions.resolve(options)
+          scope.__send__(:subjects_for, metric.subject_type, options:).map do |subject|
             MetricMeasurement.new(
               subject:,
               metric_name: metric.name,

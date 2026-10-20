@@ -407,8 +407,79 @@ require 'legacy/client' # archunit: ignore legacy/client
 require 'experimental/plugin'
 ~~~
 
-Dynamic imports such as `require dependency_name` or `require "plugins/#{name}"` are omitted rather
-than guessed because resolving them would require executing application code.
+Preceding local assignments to literal strings are also recognized for all four import forms:
+
+~~~ ruby
+path = '../retrieval/store'
+require_relative path
+~~~
+
+Inference follows assignment order within straight-line lexical scopes. Reassignment replaces the
+value; aliases, mutation, unknown calls receiving the value, reflection, and unsupported control
+flow invalidate it. Values are not carried across branches, loops, exception handlers, or captured
+blocks. Once a closure or reflective binding can access an enclosing scope, local inference remains
+disabled for that scope. Independent literal assignments inside a method or block can still resolve. Runtime values
+such as `ENV.fetch('PLUGIN_PATH')`, interpolation, and method results remain unresolved. No source,
+Gemfile, gemspec, initializer, or `const_missing` hook is executed.
+
+### Constant References (Opt-in)
+
+For autoloaded applications, enable dependencies from known project constants alongside imports:
+
+~~~ ruby
+options = ArchUnit::CheckOptions.new(dependency_analysis: :imports_and_constants)
+
+# Detects Retrieval::Store.new even without require_relative.
+rule = ArchUnit.project_files
+               .in_path('app/api/**')
+               .should_not.depend_on_files.in_path('app/retrieval/**')
+violations = rule.check(options)
+
+report = ArchUnit.project_graph.with_check_options(options)
+puts report.to_json
+puts ArchUnit.project_slices.defined_by('app/(**)/').to_plantuml(options)
+values = ArchUnit.metrics.distance.instability.measure(options)
+~~~
+
+The default remains `dependency_analysis: :imports`. Expanded mode indexes declarations from the
+same included source files, then resolves references to definition files. Files remain graph nodes.
+It supports lexical nesting, compact namespaces, root-qualified names, and explicit superclass,
+`include`, `prepend`, and `extend` references. Nested `module A; module B` includes `A` in lexical
+lookup; top-level `module A::B` does not. A nearer namespace shadows a root namespace even when its
+requested child is missing.
+
+References with multiple definition files (reopened classes/modules), missing definitions, and
+dynamic definitions are omitted, never assigned to an arbitrary file. `Alias = Original` defines
+`Alias` in its own file and records the reference to `Original`; lookup through aliases such as
+`Alias::Child` is not followed. Inherited constant members and singleton-class lexical lookup are
+not modeled. Unqualified root fallback is conservatively suppressed in scopes with an explicit
+superclass, mixins, or dynamic constant operations. Use explicit `::Namespace::Constant` references
+or import rules where those limits matter. Static analysis does not establish runtime load order
+or whether a conditional use executes. Qualified declaration owners are stabilized before lookup;
+if they do not stabilize within eight index passes, the project contributes imports only and its
+constant uses are counted as unresolved.
+
+In expanded mode, an import and a constant use between the same files produce one logical edge.
+Its `import_kinds`
+includes `:constant_reference`; `edge.evidence` and JSON graph exports retain the referenced name,
+source span, and definition line for constant uses. Import evidence retains its call span. CSV,
+HTML, and diagram reports use the same merged graph; CSV/HTML distinguish dependency kinds.
+`# archunit: ignore` continues to suppress imports only, not constant references. Import-only mode
+leaves `edge.evidence` empty for compatibility with existing edge-value comparisons;
+`ArchUnit::Extraction.extract_imports` retains call locations in both modes.
+
+For diagnostics, pass an `ArchUnit::Extraction::ExtractionProfile` to
+`ArchUnit::Extraction.extract_graph(root, options: options, profile: profile)`. Its counters include
+`unresolved_imports`, `unresolved_constant_references`, and `ambiguous_constant_references`; unknown
+third-party constants do not become architecture violations. These counts describe a cold analysis;
+a cache hit does not rerun diagnostics. Malformed source is skipped, as in import-only mode.
+
+Expanded analysis uses a bounded Prism index and adds no runtime dependency. The design spike
+considered [RubyDEX](https://github.com/Shopify/rubydex), whose semantic index is broader but adds a
+Rust/native extension and platform packaging requirements. Reusing our existing Prism parser keeps
+the Ruby 3.3/3.4/4.0 Windows/Linux support contract; each included source is parsed once per graph
+build. A later semantic backend can broaden the documented lookup subset. Lookup fixtures follow
+the [Ruby constant-scope documentation](https://docs.ruby-lang.org/en/master/syntax/modules_and_classes_rdoc.html#label-Constants).
 
 Repositories containing multiple gems are discovered statically: every `*.gemspec` beneath the
 project root contributes its adjacent existing `lib` directory to feature resolution. Gemspecs are
@@ -425,8 +496,9 @@ violations = rule.check(options)
 report = ArchUnit.project_graph.with_check_options(options)
 ~~~
 
-Load-path choices affect graph caching. Equivalent normalized choices reuse a cached graph, while a
-different set builds a separate graph. Use `clear_cache: true` after changing files or gemspec
+Load-path choices and dependency-analysis mode affect graph caching. Equivalent normalized choices
+reuse a cached graph, while a different mode or load-path set builds a separate graph. Use
+`clear_cache: true` after changing files, constant definitions, or gemspec
 layout within one process.
 
 ## 🐲 Example Repository
@@ -474,8 +546,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 
 ## 📅 Plans and Current Limitations
 
-- Ruby constants are not modeled as a separate graph. Files are the primary dependency vocabulary.
-- Dynamic `require`, `autoload`, and `load` arguments cannot be resolved statically.
+- Files are the primary vocabulary; opt-in constant analysis has the lookup limits described above.
+- Runtime-derived import paths cannot be resolved; safely known local literal strings are supported.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
 - The API is still pre-release and may change before the first stable gem version.
 

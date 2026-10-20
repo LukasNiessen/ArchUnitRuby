@@ -12,6 +12,7 @@ module ArchUnit
         file_read
         prism_parse
         import_extraction
+        constant_indexing
         target_resolution
         target_index
         edge_classification
@@ -20,6 +21,9 @@ module ArchUnit
       COUNTERS = %i[
         source_files
         imports
+        unresolved_imports
+        unresolved_constant_references
+        ambiguous_constant_references
         resolution_cache_hits
         resolution_cache_misses
         raw_edges
