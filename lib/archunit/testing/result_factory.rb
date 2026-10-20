@@ -11,16 +11,28 @@ module ArchUnit
     # Shapes a violation collection into one framework-neutral test result.
     class ResultFactory
       class << self
-        def from_violations(violations, color: nil, expected_to_pass: true)
+        def from_violations(violations, color: nil, expected_to_pass: true, rationale: nil)
           validate_violations(violations)
           validate_expected_to_pass(expected_to_pass)
           color = resolve_color(color)
-          return empty_result(color, expected_to_pass) if violations.empty?
-
-          failing_result(violations, color, expected_to_pass)
+          result = if violations.empty?
+                     empty_result(color, expected_to_pass)
+                   else
+                     failing_result(violations, color, expected_to_pass)
+                   end
+          explain_result(result, rationale)
         end
 
         private
+
+        def explain_result(result, rationale)
+          unless rationale.nil? || (rationale.is_a?(String) && !rationale.strip.empty?)
+            raise ArgumentError, 'rationale must be a non-empty String or nil'
+          end
+          return result unless rationale && result.failed?
+
+          TestResult.new(passed: false, message: "#{result.message}\n\nBecause: #{rationale.strip}")
+        end
 
         def passing_result(color)
           message = ColorUtils.green('No architecture violations found.', enabled: color)

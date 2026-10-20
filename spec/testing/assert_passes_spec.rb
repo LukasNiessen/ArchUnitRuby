@@ -73,7 +73,7 @@ RSpec.describe ArchUnit::Testing, '.assert_passes' do
     rule = rule_class.new
 
     expect(ArchUnit::ResultFactory).to receive(:from_violations)
-      .with([violation]).and_call_original
+      .with([violation], expected_to_pass: true, rationale: nil).and_call_original
     expect { ArchUnit.assert_passes(rule) }.to raise_error(ArchUnit::AssertionFailure)
   end
 

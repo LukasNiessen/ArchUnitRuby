@@ -28,9 +28,7 @@ module ArchUnit
       end
 
       violations = rule.check(options)
-      return ResultFactory.from_violations(violations) if expected_to_pass
-
-      ResultFactory.from_violations(violations, expected_to_pass: false)
+      ResultFactory.from_violations(violations, expected_to_pass:, rationale: rule.rationale)
     end
   end
 

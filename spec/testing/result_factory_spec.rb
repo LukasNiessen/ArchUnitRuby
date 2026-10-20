@@ -74,4 +74,11 @@ RSpec.describe ArchUnit::Testing::ResultFactory do
       described_class.from_violations([violation], color: false).message
     )
   end
+
+  it 'validates optional rationale independently of the result' do
+    ['', '   ', false, 42].each do |invalid|
+      expect { described_class.from_violations([], rationale: invalid) }
+        .to raise_error(ArgumentError, /rationale/)
+    end
+  end
 end
