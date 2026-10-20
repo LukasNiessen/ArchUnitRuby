@@ -29,7 +29,7 @@ module ArchUnit
         root = ExtractionProfile.measure(profile, :project_discovery) do
           Pathname.new(locate_project(locator, working_directory:))
         end
-        patterns = resolve_exclude_patterns(exclude_patterns)
+        patterns = resolve_project_exclude_patterns(root, exclude_patterns)
         key = graph_cache_key(root, exclude_patterns: patterns, options:)
 
         Common::Logging::Inspection.graph(fetch_graph(root, patterns, options, key, profile), root:)
@@ -57,7 +57,7 @@ module ArchUnit
 
     def extract_graph_uncached(root, exclude_patterns, options, profile)
       source_files = ExtractionProfile.measure(profile, :source_enumeration) do
-        enumerate_source_files(root, exclude_patterns:)
+        enumerate_source_files_with_patterns(root, exclude_patterns)
       end
       profile&.increment(:source_files, source_files.length)
       load_paths = ExtractionProfile.measure(profile, :load_path_discovery) do

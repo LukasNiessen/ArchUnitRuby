@@ -46,6 +46,19 @@ failed negated RSpec expectations. Successful assertions and raw violation forma
 Start with `ArchUnit.project_files(project_locator = nil)`; `ArchUnit.files` is its short alias.
 Without a locator, ArchUnitRuby searches upward for a `Gemfile` or gemspec.
 
+The detected root's `.archignore` is applied centrally to graphs and file-based metrics. It accepts
+blank lines, full-line `#` comments, basename globs, root-relative path globs, leading `/` anchors,
+and trailing `/` directory patterns. Backslashes normalize to `/`. Bare names match at any depth;
+patterns containing a separator match from the project root. A directory pattern excludes its
+descendants but not a similarly named regular file. Nested ignore files are not read.
+
+Repository patterns combine with defaults or explicit `exclude_patterns:`. An explicit `[]` only
+disables defaults, never repository patterns. The normalized effective pattern set participates in
+graph cache identity; changing the file is noticed on the next check without `clear_cache`.
+Changing source contents still requires explicit cache clearing. Reads are bounded to 1 MiB; UTF-8
+BOMs are accepted and invalid bytes replaced. Symlinks (including project-local ones), non-regular
+files, negation, NUL characters, and a bare `/` are rejected. No Ruby or gemspec code is evaluated.
+
 | Scope or predicate | Purpose |
 | --- | --- |
 | `with_name(pattern)` | Select or require a filename pattern |

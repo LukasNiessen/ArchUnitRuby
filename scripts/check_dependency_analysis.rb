@@ -5,6 +5,22 @@ require 'json'
 require 'tmpdir'
 require 'archunit'
 
+def verify_rationale(rule)
+  explanation = 'Keep retrieval behind the API boundary'
+  ArchUnit.assert_passes(rule.because(explanation))
+  abort 'explained rule unexpectedly passed'
+rescue ArchUnit::AssertionFailure => e
+  abort 'rationale missing or repeated' unless e.message.scan(explanation).length == 1
+end
+
+def verify_project_exclusions(root, rule)
+  File.write(File.join(root, '.archignore'), "app/retrieval/\n")
+  abort 'ignore configuration did not refresh graph' unless rule.check.empty?
+
+  remaining = ArchUnit.metrics(root).count.classes.measure.map { |item| item.subject.path }
+  abort 'ignored file remained in metrics' unless remaining == ['app/api/request.rb']
+end
+
 # Also run after installing the built gem, outside Bundler's source checkout.
 Dir.mktmpdir('archunit-installed-analysis') do |root|
   File.write(File.join(root, 'Gemfile'), "raise 'must never execute project source'\n")
@@ -28,7 +44,10 @@ Dir.mktmpdir('archunit-installed-analysis') do |root|
   refreshed = ArchUnit::CheckOptions.new(clear_cache: true)
   abort 'local-string dependency missing' unless rule.check(refreshed).length == 1
   ArchUnit.assert_passes(allowed)
-  puts 'Installed dependency analysis: constant and local-string reproducers passed.'
+
+  verify_rationale(rule)
+  verify_project_exclusions(root, rule)
+  puts 'Installed dependency analysis, rule rationale, and project exclusions passed.'
 ensure
   ArchUnit.clear_graph_cache
 end

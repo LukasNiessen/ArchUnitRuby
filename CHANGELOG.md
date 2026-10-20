@@ -2,6 +2,9 @@
 
 ## 0.0.2 (unreleased)
 
+- Apply bounded project-root `.archignore` exclusions consistently to dependency graphs and metrics,
+  with cache invalidation, cross-platform glob handling, and configuration safety checks.
+
 - Add immutable `.because(...)` explanations to every executable rule and shared assertion output.
 
 - Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
