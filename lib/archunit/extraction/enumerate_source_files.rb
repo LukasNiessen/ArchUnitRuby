@@ -4,9 +4,11 @@ require 'find'
 require 'pathname'
 require_relative '../error/technical_error'
 require_relative '../error/user_error'
+require_relative 'arch_ignore'
 
 module ArchUnit
   # Ruby-specific project discovery and source extraction.
+  # rubocop:disable-next Metrics/ModuleLength -- One source policy keeps graphs and metrics aligned.
   module Extraction
     DEFAULT_EXCLUDED_DIRECTORIES = %w[
       .bundle
@@ -30,13 +32,24 @@ module ArchUnit
 
     def enumerate_source_files(project_root, exclude_patterns: nil)
       root = source_root(project_root)
-      patterns = resolve_exclude_patterns(exclude_patterns)
+      patterns = resolve_project_exclude_patterns(root, exclude_patterns)
+      enumerate_source_files_with_patterns(root, patterns)
+    end
+
+    def enumerate_source_files_with_patterns(root, patterns)
       source_files_under(root, patterns).sort.freeze
     rescue UserError, TechnicalError
       raise
     rescue SystemCallError => e
       raise TechnicalError, "could not enumerate Ruby source files: #{e.message}"
     end
+    private_class_method :enumerate_source_files_with_patterns
+
+    def resolve_project_exclude_patterns(root, value)
+      configured = resolve_exclude_patterns(value)
+      resolve_exclude_patterns([*configured, *ArchIgnore.patterns(root)])
+    end
+    private_class_method :resolve_project_exclude_patterns
 
     def source_files_under(root, exclude_patterns)
       Find.find(root.to_s).filter_map do |entry|
@@ -100,6 +113,8 @@ module ArchUnit
       raise UserError, 'project_root must be an existing directory' unless root.directory?
 
       root.realpath
+    rescue SystemCallError => e
+      raise TechnicalError, "could not enumerate Ruby source files: #{e.message}"
     end
     private_class_method :source_root
 

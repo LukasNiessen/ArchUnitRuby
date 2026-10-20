@@ -136,6 +136,30 @@ ArchUnit.project_files('/workspace/my_app')
 ArchUnit.project_files('/workspace/my_app/Gemfile')
 ~~~
 
+### Project-wide exclusions
+
+Add a `.archignore` at the detected project root to keep generated or intentionally out-of-scope
+Ruby files out of dependency graphs and file-based metrics:
+
+~~~ text
+# Architecture exclusions (not a full gitignore parser)
+/db/migrate/
+generated/
+**/*_generated.rb
+~~~
+
+Blank lines and full-line `#` comments are ignored. Bare names match at any directory depth;
+patterns containing `/` are project-relative, and a leading `/` anchors a pattern to the root.
+A trailing `/` matches directories and their descendants, not similarly named files. Windows
+separators are normalized. Only the root file is read; nested `.archignore` files are not inherited.
+
+These patterns combine with the built-in exclusions or explicit `exclude_patterns:`; `[]` disables
+the defaults, not `.archignore`. Effective pattern changes automatically select a fresh cached graph.
+Source-code edits still require `clear_cache: true` in a long-lived process. The file is limited to
+1 MiB, must be a regular non-symlink file, and is decoded as UTF-8 with invalid bytes replaced.
+Negation (`!pattern`), NUL characters, and a bare `/` are rejected with `ArchUnit::UserError`.
+No configuration or application code is executed.
+
 ### Fluent Grammar
 
 Every rule is built left to right from the same small grammar:
@@ -566,6 +590,7 @@ The implementation conventions and intended dependency directions live in [`AGEN
 - Files are the primary vocabulary; opt-in constant analysis has the lookup limits described above.
 - Runtime-derived import paths cannot be resolved; safely known local literal strings are supported.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
+- `.archignore` supports exclusion globs, not negated gitignore patterns or nested ignore files.
 - The API is still pre-release and may change before the first stable gem version.
 
 ## 💟 Community
