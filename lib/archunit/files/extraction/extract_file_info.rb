@@ -63,15 +63,24 @@ module ArchUnit
 
       def source_path_within(root, identifier)
         path = root.join(identifier).cleanpath
-        relative = path.relative_path_from(root).to_s.tr('\\', '/')
-        if relative == '..' || relative.start_with?('../')
-          raise TechnicalError, 'source file must be inside the project root'
-        end
+        ensure_inside_root(root, path)
         raise TechnicalError, "source file does not exist: #{identifier}" unless path.file?
 
-        path
+        resolved = path.realpath
+        ensure_inside_root(root, resolved)
+        resolved
       end
       private_class_method :source_path_within
+
+      def ensure_inside_root(root, path)
+        relative = path.relative_path_from(root).to_s.tr('\\', '/')
+        return unless relative == '..' || relative.start_with?('../')
+
+        raise TechnicalError, 'source file must be inside the project root'
+      rescue ArgumentError
+        raise TechnicalError, 'source file must be inside the project root'
+      end
+      private_class_method :ensure_inside_root
 
       def directory_of(identifier)
         return '' unless identifier.include?('/')

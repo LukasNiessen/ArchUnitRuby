@@ -6,6 +6,9 @@ module ArchUnit
       module Cycles
         # Finds strongly connected components in a directed adjacency map.
         class TarjanScc
+          Frame = Struct.new(:vertex, :neighbours, :index)
+          private_constant :Frame
+
           def self.call(adjacency, vertices: adjacency.keys)
             new(adjacency, vertices).call
           end
@@ -30,13 +33,20 @@ module ArchUnit
           private
 
           def visit(vertex)
-            index_vertex(vertex)
-
-            neighbours(vertex).each do |neighbour|
-              inspect_neighbour(vertex, neighbour)
+            frames = [enter_vertex(vertex)]
+            until frames.empty?
+              frame = frames.last
+              if frame.index < frame.neighbours.length
+                inspect_neighbour(frame, frames)
+              else
+                finish_vertex(frames)
+              end
             end
+          end
 
-            extract_component(vertex) if @lowlinks.fetch(vertex) == @indices.fetch(vertex)
+          def enter_vertex(vertex)
+            index_vertex(vertex)
+            Frame.new(vertex, neighbours(vertex), 0)
           end
 
           def index_vertex(vertex)
@@ -47,16 +57,26 @@ module ArchUnit
             @on_stack.add(vertex)
           end
 
-          def inspect_neighbour(vertex, neighbour)
+          def inspect_neighbour(frame, frames)
+            neighbour = frame.neighbours.fetch(frame.index)
+            frame.index += 1
             unless @indices.key?(neighbour)
-              visit(neighbour)
-              @lowlinks[vertex] = [@lowlinks.fetch(vertex), @lowlinks.fetch(neighbour)].min
+              frames << enter_vertex(neighbour)
               return
             end
-
             return unless @on_stack.include?(neighbour)
 
-            @lowlinks[vertex] = [@lowlinks.fetch(vertex), @indices.fetch(neighbour)].min
+            update_lowlink(frame.vertex, @indices.fetch(neighbour))
+          end
+
+          def finish_vertex(frames)
+            vertex = frames.pop.vertex
+            extract_component(vertex) if @lowlinks.fetch(vertex) == @indices.fetch(vertex)
+            update_lowlink(frames.last.vertex, @lowlinks.fetch(vertex)) unless frames.empty?
+          end
+
+          def update_lowlink(vertex, index)
+            @lowlinks[vertex] = [@lowlinks.fetch(vertex), index].min
           end
 
           def extract_component(root)

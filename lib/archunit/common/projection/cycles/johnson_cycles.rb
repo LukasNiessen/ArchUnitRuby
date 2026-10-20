@@ -8,6 +8,9 @@ module ArchUnit
       module Cycles
         # Enumerates every elementary directed cycle once using Johnson's algorithm.
         class JohnsonCycles
+          Frame = Struct.new(:vertex, :neighbours, :index, :found_cycle)
+          private_constant :Frame
+
           def self.call(adjacency)
             new(adjacency).call
           end
@@ -55,36 +58,49 @@ module ArchUnit
           end
 
           def circuit(vertex)
+            frames = [enter_vertex(vertex)]
+            until frames.empty?
+              frame = frames.last
+              if frame.index < frame.neighbours.length
+                explore_neighbour(frame, frames)
+              else
+                finish_vertex(frames)
+              end
+            end
+          end
+
+          def enter_vertex(vertex)
             @stack << vertex
             @blocked.add(vertex)
-            found_cycle = explore_neighbours(vertex)
-            found_cycle ? unblock(vertex) : record_blockers(vertex)
-            @stack.pop
-            found_cycle
+            Frame.new(vertex, component_neighbours(vertex), 0, false)
           end
 
-          def explore_neighbours(vertex)
-            found_cycle = false
-            component_neighbours(vertex).each do |neighbour|
-              closes_cycle = record_cycle?(neighbour)
-              finds_cycle = !@blocked.include?(neighbour) && circuit(neighbour)
-              found_cycle = true if closes_cycle || finds_cycle
+          def explore_neighbour(frame, frames)
+            neighbour = frame.neighbours.fetch(frame.index)
+            frame.index += 1
+            if neighbour == @start
+              @cycles << @stack.dup
+              frame.found_cycle = true
+            elsif !@blocked.include?(neighbour)
+              frames << enter_vertex(neighbour)
             end
-            found_cycle
           end
 
-          def record_cycle?(neighbour)
-            return false unless neighbour == @start
-
-            @cycles << @stack.dup
-            true
+          def finish_vertex(frames)
+            frame = frames.pop
+            frame.found_cycle ? unblock(frame.vertex) : record_blockers(frame.vertex)
+            @stack.pop
+            frames.last.found_cycle ||= frame.found_cycle unless frames.empty?
           end
 
           def unblock(vertex)
-            return unless @blocked.delete?(vertex)
+            pending = [vertex]
+            until pending.empty?
+              candidate = pending.pop
+              next unless @blocked.delete?(candidate)
 
-            dependants = @blocked_by.delete(vertex) || []
-            dependants.each { |dependant| unblock(dependant) }
+              pending.concat((@blocked_by.delete(candidate) || []).to_a)
+            end
           end
 
           def record_blockers(vertex)
