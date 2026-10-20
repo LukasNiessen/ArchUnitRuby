@@ -2,6 +2,13 @@
 
 ## 0.0.2 (unreleased)
 
+- Avoid stack overflows in strongly-connected-component detection, elementary-cycle traversal,
+  and blocked-vertex propagation on deep dependency graphs.
+- Skip symlinked source entries and enforce canonical project boundaries for direct file metadata.
+- Reuse source-entry file status instead of repeating separate directory and file probes.
+- Validate version/changelog/lock consistency in CI and require prepared release metadata before
+  RubyGems publication.
+
 - Apply bounded project-root `.archignore` exclusions consistently to dependency graphs and metrics,
   with cache invalidation, cross-platform glob handling, and configuration safety checks.
 

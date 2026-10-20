@@ -282,9 +282,10 @@ assert helper's job, at the very edge.
 
 ## Working here
 
-- **Commit straight to `main`.** No branching ceremony, no required review, no pull requests. There
-  are no users yet and one maintainer. Speed is the point. (This does *not* apply to ArchUnitTS and
-  ArchUnitPython, which have real users and full process.)
+- **Respect the current repository protections.** The gem is public and has multiple maintainers.
+  Keep changes focused and tested, use the agreed PR workflow, and never bypass a required review
+  or failing CI check. Review policy is a maintainer decision; do not assume the original prototype's
+  direct-to-main policy still applies. Publishing a release is a separate, explicitly authorized step.
 - **Test the pure parts against fixture graphs**, and add one integration test per rule through the
   fluent API against a sample project. The first is where the coverage comes from; the second proves
   the wiring.

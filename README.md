@@ -136,6 +136,10 @@ ArchUnit.project_files('/workspace/my_app')
 ArchUnit.project_files('/workspace/my_app/Gemfile')
 ~~~
 
+Source discovery skips symlinked files and directories, including project-local aliases. This
+avoids duplicate file identities and unintentionally parsing linked source outside the project.
+Direct file-information extraction also checks the canonical source path against the project root.
+
 ### Project-wide exclusions
 
 Add a `.archignore` at the detected project root to keep generated or intentionally out-of-scope
@@ -566,7 +570,8 @@ bundle exec rake docs
 gem build archunit.gemspec --strict
 ~~~
 
-`bundle exec rake` runs the randomized RSpec suite and RuboCop. CI additionally enforces 98% line
+`bundle exec rake` validates release metadata, then runs the randomized RSpec suite and RuboCop.
+CI additionally enforces 98% line
 and 90% branch coverage, runs the dogfooding rules explicitly, builds the documentation, loads the
 public API with Ruby warnings, tests optional RSpec/Minitest integrations, builds and installs the
 gem artifact, runs the external RAG fixture, and checks Ruby 3.3, 3.4, and 4.0 across Ubuntu and
@@ -591,6 +596,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 - Runtime-derived import paths cannot be resolved; safely known local literal strings are supported.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
 - `.archignore` supports exclusion globs, not negated gitignore patterns or nested ignore files.
+- Cycle traversal is iterative and tested on 10,000-node chains and rings. Enumerating every cycle
+  can still be expensive in densely connected graphs; narrow the selected scope when necessary.
 - The API is still pre-release and may change before the first stable gem version.
 
 ## 💟 Community
