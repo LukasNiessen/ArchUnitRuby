@@ -2,6 +2,8 @@
 
 ## 0.0.2 (unreleased)
 
+- Add immutable `.because(...)` explanations to every executable rule and shared assertion output.
+
 - Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
 - Log passing metric values without repeating custom calculations.
 - Document verbosity, CI log artifacts, and existing colored violation reports.
