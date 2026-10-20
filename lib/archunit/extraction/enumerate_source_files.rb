@@ -53,12 +53,12 @@ module ArchUnit
 
     def source_files_under(root, exclude_patterns)
       Find.find(root.to_s).filter_map do |entry|
-        if File.directory?(entry)
-          Find.prune if excluded_path?(entry, root, exclude_patterns)
-          next
-        end
+        stat = File.lstat(entry)
+        next if stat.symlink?
 
-        if ruby_source_file?(entry) && !excluded_path?(entry, root, exclude_patterns)
+        if stat.directory?
+          Find.prune if excluded_path?(entry, root, exclude_patterns)
+        elsif ruby_source_file?(entry, stat) && !excluded_path?(entry, root, exclude_patterns)
           relative_identifier(entry, root).freeze
         end
       end
@@ -98,8 +98,8 @@ module ArchUnit
     end
     private_class_method :normalize_exclude_pattern
 
-    def ruby_source_file?(entry)
-      File.file?(entry) && File.extname(entry) == '.rb'
+    def ruby_source_file?(entry, stat)
+      stat.file? && File.extname(entry) == '.rb'
     end
     private_class_method :ruby_source_file?
 
