@@ -22,28 +22,40 @@ module ArchUnit
           freeze
         end
 
+        # Captures slice names with the `(**)` segment in a glob pattern.
+        # @return [SliceScopeBuilder]
         def defined_by(pattern, except: nil)
           copy(projection: Projection.slice_by_pattern(pattern, except:))
         end
 
+        # Captures slice names with the first group in a regular expression.
+        # @return [SliceScopeBuilder]
         def defined_by_regex(regexp, except: nil)
           copy(projection: Projection.slice_by_regex(regexp, except:))
         end
 
+        # Enters the negated slice-rule mood.
+        # @return [NegativeSliceConditionBuilder]
         def should_not
           NegativeSliceConditionBuilder.new(self)
         end
 
+        # Enters the positive slice-rule mood.
+        # @return [PositiveSliceConditionBuilder]
         def should
           PositiveSliceConditionBuilder.new(self)
         end
 
+        # Renders the real slice graph as PlantUML.
+        # @return [String]
         def to_plantuml(options = nil)
           graph = extract_graph(options)
           edges = Common::Projection.project_edges(graph, projection)
           Uml::PlantUmlRenderer.render(edges, components: projection.slice_labels(graph))
         end
 
+        # Writes the real slice graph as PlantUML.
+        # @return [nil]
         def export_as_plantuml(output_path, options = nil)
           graph = extract_graph(options)
           edges = Common::Projection.project_edges(graph, projection)

@@ -18,6 +18,8 @@ module ArchUnit
           freeze
         end
 
+        # Forbids a directed dependency between two named slices.
+        # @return [ForbiddenSliceDependencyCondition]
         def contain_dependency(source_slice, target_slice)
           ForbiddenSliceDependencyCondition.new(scope, source_slice:, target_slice:)
         end

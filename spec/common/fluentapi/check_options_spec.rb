@@ -8,7 +8,8 @@ RSpec.describe ArchUnit::Common::FluentApi::CheckOptions do
       allow_empty_tests: false,
       logging: nil,
       clear_cache: false,
-      load_paths: []
+      load_paths: [],
+      dependency_analysis: :imports
     )
     expect(options.allow_empty_tests?).to be(false)
     expect(options.clear_cache?).to be(false)
@@ -56,5 +57,13 @@ RSpec.describe ArchUnit::Common::FluentApi::CheckOptions do
   it 'is exposed from the gem public surface' do
     expect(ArchUnit::CheckOptions).to equal(described_class)
     expect(ArchUnit::LoggingOptions).to equal(ArchUnit::Common::Logging::LoggingOptions)
+  end
+
+  it 'supports explicit constant analysis and rejects unknown analysis modes' do
+    expect(described_class.new).not_to be_constant_references
+    expanded = described_class.new(dependency_analysis: :imports_and_constants)
+    expect(expanded).to be_constant_references
+    expect { described_class.new(dependency_analysis: :dynamic) }
+      .to raise_error(ArgumentError, /dependency_analysis/)
   end
 end

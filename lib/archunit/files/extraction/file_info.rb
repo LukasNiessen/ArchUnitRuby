@@ -8,7 +8,7 @@ module ArchUnit
       FileInfo = Data.define(
         :path, :name, :extension, :directory, :content, :lines_of_code
       ) do
-        # rubocop:disable Metrics/ParameterLists -- FileInfo has six required public fields.
+        # rubocop:disable-next Metrics/ParameterLists -- FileInfo has six required public fields.
         def initialize(path:, name:, extension:, directory:, content:, lines_of_code:)
           path = immutable_string(path, :path, allow_empty: false, normalize_path: true)
           name = immutable_string(name, :name, allow_empty: false)
@@ -20,7 +20,6 @@ module ArchUnit
           lines_of_code = non_negative_integer(lines_of_code)
           super
         end
-        # rubocop:enable Metrics/ParameterLists
 
         private
 

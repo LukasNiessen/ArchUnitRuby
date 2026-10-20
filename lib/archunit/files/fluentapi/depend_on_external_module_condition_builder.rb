@@ -26,6 +26,8 @@ module ArchUnit
           is_negated
         end
 
+        # Selects an allowed or forbidden external module name.
+        # @return [DependOnExternalModuleCondition]
         def matching(module_name, except: nil)
           filter = Common::RegexFactory.path_matcher(module_name, except:)
           DependOnExternalModuleCondition.new(self, module_filters: [filter])

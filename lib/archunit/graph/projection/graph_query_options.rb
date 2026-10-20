@@ -21,7 +21,7 @@ module ArchUnit
         end
 
         # The options bag deliberately mirrors the eight independent fluent modifiers.
-        # rubocop:disable Metrics/ParameterLists
+        # rubocop:disable-next Metrics/ParameterLists
         def initialize(
           include_external_dependencies: false, include_self_dependencies: false,
           focus: nil, focus_depth: 1, reachable_from: nil, dependents_of: nil,
@@ -37,7 +37,6 @@ module ArchUnit
           title = immutable_title(title)
           super
         end
-        # rubocop:enable Metrics/ParameterLists
 
         def with(**overrides)
           self.class.new(**to_h, **overrides)

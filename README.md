@@ -1,11 +1,16 @@
 # ArchUnitRuby - Architecture Testing
 
-<div align="center" name="top">
+<p align="center" name="top">
+  <img src="assets/logo-rounded.png" width="180" alt="ArchUnitRuby logo">
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Build & tests](https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&label=build%20%26%20tests)](https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml) [![GitHub stars](https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg)](https://github.com/LukasNiessen/ArchUnitRuby)<br>
-[![Gem downloads](https://img.shields.io/gem/dt/archunit.svg)](https://clickgems.clickhouse.com/dashboard/archunit) [![Ruby 3.3+](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
-
-</div>
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/LukasNiessen/ArchUnitRuby/actions/workflows/ci.yml"><img alt="Build & tests" src="https://img.shields.io/github/actions/workflow/status/LukasNiessen/ArchUnitRuby/ci.yml?branch=main&amp;label=build%20%26%20tests"></a>
+  <a href="https://github.com/LukasNiessen/ArchUnitRuby"><img alt="GitHub stars" src="https://img.shields.io/github/stars/LukasNiessen/ArchUnitRuby.svg"></a><br>
+  <a href="https://clickgems.clickhouse.com/dashboard/archunit"><img alt="Gem downloads" src="https://img.shields.io/gem/dt/archunit.svg"></a>
+  <a href="https://www.ruby-lang.org/"><img alt="Ruby 3.3+" src="https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby&amp;logoColor=white"></a>
+</p>
 
 Enforce architecture rules in Ruby projects. Check dependency directions, detect circular
 dependencies, enforce naming and location conventions, measure code quality, and generate
@@ -13,7 +18,7 @@ architecture reports as ordinary Ruby tests.
 
 _Inspired by the amazing ArchUnit library, but not affiliated with ArchUnit._
 
-[Setup](#-setup) · [Use Cases](#-use-cases) · [Features](#-features) · [Documentation](https://lukasniessen.github.io/ArchUnitRuby/) · [Sponsor](https://github.com/sponsors/LukasNiessen) · [Contributing](#-contributing)
+[Setup](#-setup) · [Use Cases](#-use-cases) · [Features](#-features) · [API Guide](https://lukasniessen.github.io/ArchUnitRuby/file.API.html) · [Documentation](https://lukasniessen.github.io/ArchUnitRuby/) · [Contributing](CONTRIBUTING.md)
 
 ArchUnitRuby turns a Ruby codebase into a dependency graph and lets you test that graph with rules
 that read like English:
@@ -29,12 +34,14 @@ It is a working executable prototype with file, layer, slice, graph-reporting, a
 is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Install the latest release as
 [`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
 
-Siblings: [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
-[ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython).
+ArchUnitRuby follows the shared ArchUnitEverything architecture and fluent-API standard used by
+its siblings [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
+[ArchUnitPython](https://github.com/LukasNiessen/ArchUnitPython), adapted where Ruby idioms differ.
 
-The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide with a
-searchable, source-generated API reference for every public module, class, and method. The same
-site is rebuilt in CI and deployed from `main`, so the published reference follows the repository.
+The [documentation site](https://lukasniessen.github.io/ArchUnitRuby/) combines this guide, a
+curated [API guide](https://lukasniessen.github.io/ArchUnitRuby/file.API.html), and a searchable,
+source-generated reference. The same site is rebuilt and link-validated in CI before deployment
+from `main`, so the published reference follows the repository.
 
 ## ⚡ 5 min Quickstart
 
@@ -351,12 +358,12 @@ Check options and returned violations retain their existing behavior.
 
 Example debug lines (timestamp prefixes omitted):
 
-```text
+~~~ text
 [DEBUG] inspect: discovered file: "lib/service.rb"
 [DEBUG] inspect: dependency: "lib/service.rb" -> "json" (external=true, kinds=[:require])
 [DEBUG] inspect: selected file: "lib/service.rb"
 [DEBUG] log metric: method_count=3 [lib/service.rb:Service]
-```
+~~~
 
 For file-only CI artifacts, use `io: nil` with `output_directory:` and archive that directory.
 Logging sink errors still propagate. Debug details are produced lazily; checks with logging
@@ -366,11 +373,11 @@ disabled create no output or log files.
 
 The same formatted, numbered reports work with RSpec, Minitest, or standalone checks:
 
-```ruby
+~~~ ruby
 puts ArchUnit.format_violations(violations)               # Detect terminal support
 puts ArchUnit.format_violations(violations, color: true)  # Force ANSI colors
 puts ArchUnit.format_violations(violations, color: false) # Plain CI/file output
-```
+~~~
 
 Failure headings are bold red, violation headings yellow, and successful results green. Reports
 include dependency, file, or metric evidence. Automatic color detection respects `NO_COLOR`,
@@ -400,8 +407,79 @@ require 'legacy/client' # archunit: ignore legacy/client
 require 'experimental/plugin'
 ~~~
 
-Dynamic imports such as `require dependency_name` or `require "plugins/#{name}"` are omitted rather
-than guessed because resolving them would require executing application code.
+Preceding local assignments to literal strings are also recognized for all four import forms:
+
+~~~ ruby
+path = '../retrieval/store'
+require_relative path
+~~~
+
+Inference follows assignment order within straight-line lexical scopes. Reassignment replaces the
+value; aliases, mutation, unknown calls receiving the value, reflection, and unsupported control
+flow invalidate it. Values are not carried across branches, loops, exception handlers, or captured
+blocks. Once a closure or reflective binding can access an enclosing scope, local inference remains
+disabled for that scope. Independent literal assignments inside a method or block can still resolve. Runtime values
+such as `ENV.fetch('PLUGIN_PATH')`, interpolation, and method results remain unresolved. No source,
+Gemfile, gemspec, initializer, or `const_missing` hook is executed.
+
+### Constant References (Opt-in)
+
+For autoloaded applications, enable dependencies from known project constants alongside imports:
+
+~~~ ruby
+options = ArchUnit::CheckOptions.new(dependency_analysis: :imports_and_constants)
+
+# Detects Retrieval::Store.new even without require_relative.
+rule = ArchUnit.project_files
+               .in_path('app/api/**')
+               .should_not.depend_on_files.in_path('app/retrieval/**')
+violations = rule.check(options)
+
+report = ArchUnit.project_graph.with_check_options(options)
+puts report.to_json
+puts ArchUnit.project_slices.defined_by('app/(**)/').to_plantuml(options)
+values = ArchUnit.metrics.distance.instability.measure(options)
+~~~
+
+The default remains `dependency_analysis: :imports`. Expanded mode indexes declarations from the
+same included source files, then resolves references to definition files. Files remain graph nodes.
+It supports lexical nesting, compact namespaces, root-qualified names, and explicit superclass,
+`include`, `prepend`, and `extend` references. Nested `module A; module B` includes `A` in lexical
+lookup; top-level `module A::B` does not. A nearer namespace shadows a root namespace even when its
+requested child is missing.
+
+References with multiple definition files (reopened classes/modules), missing definitions, and
+dynamic definitions are omitted, never assigned to an arbitrary file. `Alias = Original` defines
+`Alias` in its own file and records the reference to `Original`; lookup through aliases such as
+`Alias::Child` is not followed. Inherited constant members and singleton-class lexical lookup are
+not modeled. Unqualified root fallback is conservatively suppressed in scopes with an explicit
+superclass, mixins, or dynamic constant operations. Use explicit `::Namespace::Constant` references
+or import rules where those limits matter. Static analysis does not establish runtime load order
+or whether a conditional use executes. Qualified declaration owners are stabilized before lookup;
+if they do not stabilize within eight index passes, the project contributes imports only and its
+constant uses are counted as unresolved.
+
+In expanded mode, an import and a constant use between the same files produce one logical edge.
+Its `import_kinds`
+includes `:constant_reference`; `edge.evidence` and JSON graph exports retain the referenced name,
+source span, and definition line for constant uses. Import evidence retains its call span. CSV,
+HTML, and diagram reports use the same merged graph; CSV/HTML distinguish dependency kinds.
+`# archunit: ignore` continues to suppress imports only, not constant references. Import-only mode
+leaves `edge.evidence` empty for compatibility with existing edge-value comparisons;
+`ArchUnit::Extraction.extract_imports` retains call locations in both modes.
+
+For diagnostics, pass an `ArchUnit::Extraction::ExtractionProfile` to
+`ArchUnit::Extraction.extract_graph(root, options: options, profile: profile)`. Its counters include
+`unresolved_imports`, `unresolved_constant_references`, and `ambiguous_constant_references`; unknown
+third-party constants do not become architecture violations. These counts describe a cold analysis;
+a cache hit does not rerun diagnostics. Malformed source is skipped, as in import-only mode.
+
+Expanded analysis uses a bounded Prism index and adds no runtime dependency. The design spike
+considered [RubyDEX](https://github.com/Shopify/rubydex), whose semantic index is broader but adds a
+Rust/native extension and platform packaging requirements. Reusing our existing Prism parser keeps
+the Ruby 3.3/3.4/4.0 Windows/Linux support contract; each included source is parsed once per graph
+build. A later semantic backend can broaden the documented lookup subset. Lookup fixtures follow
+the [Ruby constant-scope documentation](https://docs.ruby-lang.org/en/master/syntax/modules_and_classes_rdoc.html#label-Constants).
 
 Repositories containing multiple gems are discovered statically: every `*.gemspec` beneath the
 project root contributes its adjacent existing `lib` directory to feature resolution. Gemspecs are
@@ -418,8 +496,9 @@ violations = rule.check(options)
 report = ArchUnit.project_graph.with_check_options(options)
 ~~~
 
-Load-path choices affect graph caching. Equivalent normalized choices reuse a cached graph, while a
-different set builds a separate graph. Use `clear_cache: true` after changing files or gemspec
+Load-path choices and dependency-analysis mode affect graph caching. Equivalent normalized choices
+reuse a cached graph, while a different mode or load-path set builds a separate graph. Use
+`clear_cache: true` after changing files, constant definitions, or gemspec
 layout within one process.
 
 ## 🐲 Example Repository
@@ -434,6 +513,8 @@ modules cannot depend on one another, implementation files cannot depend on the 
 the complete library graph must remain cycle-free.
 
 ## 🦊 Contributing
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md) for the complete development and pull-request guide.
 
 ~~~ bash
 git clone https://github.com/LukasNiessen/ArchUnitRuby.git
@@ -465,8 +546,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 
 ## 📅 Plans and Current Limitations
 
-- Ruby constants are not modeled as a separate graph. Files are the primary dependency vocabulary.
-- Dynamic `require`, `autoload`, and `load` arguments cannot be resolved statically.
+- Files are the primary vocabulary; opt-in constant analysis has the lookup limits described above.
+- Runtime-derived import paths cannot be resolved; safely known local literal strings are supported.
 - PlantUML support is a deliberately small component-diagram subset, not a complete UML parser.
 - The API is still pre-release and may change before the first stable gem version.
 
@@ -482,6 +563,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 See everyone who has contributed on the [GitHub contributors page](https://github.com/LukasNiessen/ArchUnitRuby/graphs/contributors).
 
 Questions and feature ideas are welcome in [GitHub Issues](https://github.com/LukasNiessen/ArchUnitRuby/issues).
+For usage help, responsible vulnerability reporting, and community expectations, see
+[SUPPORT.md](SUPPORT.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ### Star History
 

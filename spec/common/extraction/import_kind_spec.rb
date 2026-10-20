@@ -6,7 +6,8 @@ RSpec.describe ArchUnit::Common::Extraction::ImportKind do
       :require,
       :require_relative,
       :autoload,
-      :load
+      :load,
+      :constant_reference
     )
   end
 

@@ -30,13 +30,16 @@ module ArchUnit
       raise TechnicalError, "could not parse Ruby source file: #{e.message}"
     end
 
-    def extract_imports_from(
-      source_path, project_root:, load_paths: nil, profile: nil, resolution_cache: nil
+    # Share the parsed AST with constant analysis.
+    def extract_imports_from( # rubocop:disable Metrics/ParameterLists
+      source_path, project_root:, load_paths: nil, profile: nil, resolution_cache: nil,
+      parse_result: nil
     )
       resolver = build_import_resolver(
         source_path:, project_root:, load_paths:, profile:, cache: resolution_cache
       )
-      resolve_imports(parsed_imports(source_path, profile), resolver)
+      parse_result ||= parse_source(source_path, profile)
+      resolve_imports(parsed_imports(parse_result, profile), resolver)
     rescue SystemCallError => e
       raise TechnicalError, "could not parse Ruby source file: #{e.message}"
     end
@@ -52,16 +55,23 @@ module ArchUnit
     end
     private_class_method :resolve_imports
 
-    def parsed_imports(source_path, profile)
+    def parse_source(source_path, profile)
       source = ExtractionProfile.measure(profile, :file_read) { File.binread(source_path) }
-      parse_result = ExtractionProfile.measure(profile, :prism_parse) do
+      ExtractionProfile.measure(profile, :prism_parse) do
         Prism.parse(source, filepath: source_path.to_s)
       end
+    rescue SystemCallError => e
+      raise TechnicalError, "could not parse Ruby source file: #{e.message}"
+    end
+    private_class_method :parse_source
+
+    def parsed_imports(parse_result, profile)
       return [] unless parse_result.success?
 
       ExtractionProfile.measure(profile, :import_extraction) do
         visitor = ImportVisitor.new
         visitor.visit(parse_result.value)
+        profile&.increment(:unresolved_imports, visitor.unresolved_imports)
         reject_ignored_imports(visitor.imports, parse_result.comments)
       end
     end
@@ -108,11 +118,12 @@ module ArchUnit
     private_class_method :ignored_module?
 
     def resolved_import(located_import, resolver)
-      module_name, import_kind, line_number, = located_import
+      module_name, import_kind, line_number, end_line = located_import
       ResolvedImport.new(
         module_name: module_name,
         import_kind: import_kind,
         line_number: line_number,
+        end_line: end_line,
         resolved_path: resolver.resolve(module_name, import_kind)
       )
     end

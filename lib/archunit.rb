@@ -53,6 +53,7 @@ module ArchUnit
   Checkable = Common::FluentApi::Checkable
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
+  DependencyEvidence = Common::Extraction::DependencyEvidence
   Graph = Common::Extraction::Graph
   MappedEdge = Common::Projection::MappedEdge
   ProjectedEdge = Common::Projection::ProjectedEdge
@@ -107,6 +108,9 @@ module ArchUnit
   ResultFactory = Testing::ResultFactory
   AssertionFailure = Testing::AssertionFailure
 
+  # Clears every cached dependency graph in the current process.
+  # Use this after changing analyzed source files between checks.
+  # @return [nil]
   def self.clear_graph_cache
     Extraction.clear_graph_cache
   end

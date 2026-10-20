@@ -13,6 +13,7 @@ module ExtractionBenchmark
     files: 1_000,
     gems: 10,
     imports_per_file: 3,
+    dependency_analysis: :imports,
     max_cold_seconds: nil,
     max_warm_seconds: nil,
     output: nil
@@ -59,6 +60,7 @@ module ExtractionBenchmark
       dependencies = dependency_features(index)
       contents = dependencies.map { |feature| "require '#{feature}'" }.join("\n")
       contents = '# isolated benchmark file' if contents.empty?
+      contents += "\nclass BenchFile#{index}; BenchFile#{(index + 1) % file_count}.new; end"
       write(source_path(index), "#{contents}\n")
     end
 
@@ -127,13 +129,16 @@ module ExtractionBenchmark
 
     def extract_profiled
       profile = ArchUnit::Extraction::ExtractionProfile.new
-      graph = ArchUnit::Extraction.extract_graph(@root, profile:)
+      options = ArchUnit::CheckOptions.new(
+        dependency_analysis: @configuration.fetch(:dependency_analysis)
+      )
+      graph = ArchUnit::Extraction.extract_graph(@root, profile:, options:)
       [graph, profile]
     end
 
     def benchmark_result(values)
       {
-        corpus: @configuration.slice(:files, :gems, :imports_per_file),
+        corpus: @configuration.slice(:files, :gems, :imports_per_file, :dependency_analysis),
         graph_edges: values.cold_graph.length,
         graph_cache_reused: values.cold_graph.equal?(values.warm_graph),
         cold: values.cold_profile.to_h.merge(memory_delta(values.before, values.after_cold)),
@@ -195,6 +200,9 @@ module ExtractionBenchmark
       configure_corpus_options(parser, options)
       configure_threshold_options(parser, options)
       parser.on('--output PATH', String) { |value| options[:output] = value }
+      parser.on('--constants', 'Include project constant references') do
+        options[:dependency_analysis] = :imports_and_constants
+      end
     end
   end
 
