@@ -1,0 +1,61 @@
+{
+  "projects": {
+    "rack": {
+      "repository": "rack/rack",
+      "revision": "e1f22fdbe99afd2126b6fbf05bb12399359574b7",
+      "witness": { "source": "rack.rb", "target": "rack/builder.rb" },
+      "modes": {
+        "imports": {
+          "file_count": 49,
+          "internal_dependencies": 133,
+          "external_dependencies": 28,
+          "internal_graph_sha256": "8749f31622cfb15062f77de0f32eb870b5eb6f782bdc3365604b62236712510c"
+        },
+        "imports_and_constants": {
+          "file_count": 49,
+          "internal_dependencies": 140,
+          "external_dependencies": 28,
+          "internal_graph_sha256": "a3897a8c67acee0a1d372c5bb97dcfd7a862048e5759d8f3fb1507f3121498d6"
+        }
+      }
+    },
+    "rake": {
+      "repository": "ruby/rake",
+      "revision": "15df62f11e7f3980bb404bf1471e326cb7ad40ec",
+      "witness": { "source": "rake.rb", "target": "rake/application.rb" },
+      "modes": {
+        "imports": {
+          "file_count": 44,
+          "internal_dependencies": 57,
+          "external_dependencies": 12,
+          "internal_graph_sha256": "1b188eb049249b6f12cbb8d3307c6c3d4ad786e29a19d4a4f1b31f31fe3dae04"
+        },
+        "imports_and_constants": {
+          "file_count": 44,
+          "internal_dependencies": 78,
+          "external_dependencies": 12,
+          "internal_graph_sha256": "a2bcb171c24678a6a1277fe4b3b4b32afef5c23ba3f8b6ca263db7b7ee41e466"
+        }
+      }
+    },
+    "rspec-core": {
+      "repository": "rspec/rspec-core",
+      "revision": "aec5f49485d97908183dbe790a7fefb8baaa8091",
+      "witness": { "source": "rspec/autorun.rb", "target": "rspec/core.rb" },
+      "modes": {
+        "imports": {
+          "file_count": 74,
+          "internal_dependencies": 18,
+          "external_dependencies": 34,
+          "internal_graph_sha256": "81e0621a26487d438391595a7407d651b15025247caa37c20f1bb7fab77f8415"
+        },
+        "imports_and_constants": {
+          "file_count": 74,
+          "internal_dependencies": 157,
+          "external_dependencies": 34,
+          "internal_graph_sha256": "34f388962ada484dc84d055dd261cfadc16f17d5538dec2ea45de821f1ee0a4c"
+        }
+      }
+    }
+  }
+}
