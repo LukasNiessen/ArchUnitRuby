@@ -28,3 +28,30 @@ Run architecture analysis with the same filesystem permissions you would grant a
 review exported reports before sharing them because paths and dependency names may reveal project
 structure.
 
+## Locked dependency scanning
+
+`bundle exec rake security` refreshes the public [Ruby advisory database](https://github.com/rubysec/ruby-advisory-db)
+and scans this checkout's `Gemfile.lock` with [bundler-audit](https://github.com/rubysec/bundler-audit).
+The scanner is a development dependency, not a runtime dependency of the published gem.
+
+The separate dependency-security workflow runs on pull requests, pushes to `main`, manual dispatch,
+and Mondays at 07:17 UTC after this workflow reaches the default branch. It has read-only repository
+permissions, a ten-minute limit, and retains JSON evidence for 14 days even on failure. No automatic
+advisory exceptions or dependency upgrades are applied.
+
+The wrapper normalizes Windows database paths, rejects empty databases, and verifies detection of
+a known-vulnerable synthetic lockfile before accepting a clean result. No vulnerable gem is installed
+or executed for that health check. Failed database updates fail the scan rather than silently using
+stale data. Reports include the advisory count and database commit.
+
+For an explicitly offline repeat using an already downloaded database:
+
+~~~bash
+bundle exec ruby scripts/check_dependency_security.rb --no-update
+~~~
+
+The report is saved to `pkg/dependency-audit.json`; `--database PATH` and `--output PATH` override
+locations. A clean scan means no matches in that database snapshot, not a security certification.
+It does not audit Ruby itself, all versions allowed by the gemspec, or an application's unrelated
+dependency lockfile. Default tests remain offline; only the separate security task refreshes data.
+
