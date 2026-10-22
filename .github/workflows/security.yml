@@ -20,8 +20,6 @@ jobs:
     name: Locked dependency vulnerability scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      BUNDLER_AUDIT_DB: ${{ runner.temp }}/ruby-advisory-db
     steps:
       - uses: actions/checkout@v7
         with:
@@ -31,6 +29,8 @@ jobs:
           ruby-version: '4.0'
           bundler-cache: true
       - name: Update advisories, verify detection, and scan locked dependencies
+        env:
+          BUNDLER_AUDIT_DB: ${{ runner.temp }}/ruby-advisory-db
         run: bundle exec ruby scripts/check_dependency_security.rb
       - name: Preserve dated scan evidence, including failures
         if: always()

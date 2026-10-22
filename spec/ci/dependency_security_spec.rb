@@ -91,6 +91,11 @@ RSpec.describe DependencySecurity::Checker do
     expect(workflow.fetch('permissions')).to eq('contents' => 'read')
     job = workflow.fetch('jobs').fetch('audit')
     expect(job.fetch('timeout-minutes')).to eq(10)
+    expect(job).not_to have_key('env')
+    scan = job.fetch('steps').find do |step|
+      step['run'] == 'bundle exec ruby scripts/check_dependency_security.rb'
+    end
+    expect(scan.fetch('env')).to have_key('BUNDLER_AUDIT_DB')
     expect(job.fetch('steps')).to include(include('if' => 'always()'))
     triggers = workflow['on'] || workflow[true]
     expect(triggers).to include('pull_request', 'workflow_dispatch', 'schedule')
