@@ -1,0 +1,76 @@
+name: Real-world static canary
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'Gemfile'
+      - 'Gemfile.lock'
+      - 'benchmark/extraction.rb'
+      - 'benchmark/real_world_canary.rb'
+      - 'benchmark/canary/**'
+      - 'spec/benchmark/**'
+      - '.github/workflows/canary.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canary:
+    name: Static lib analysis — ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: rack
+            repository: rack/rack
+            revision: e1f22fdbe99afd2126b6fbf05bb12399359574b7
+          - name: rake
+            repository: ruby/rake
+            revision: 15df62f11e7f3980bb404bf1471e326cb7ad40ec
+          - name: rspec-core
+            repository: rspec/rspec-core
+            revision: aec5f49485d97908183dbe790a7fefb8baaa8091
+    defaults:
+      run:
+        working-directory: archunit
+    steps:
+      - name: Check out ArchUnitRuby
+        uses: actions/checkout@v7
+        with:
+          path: archunit
+          persist-credentials: false
+      - name: Check out pinned corpus as data only
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ matrix.repository }}
+          ref: ${{ matrix.revision }}
+          path: corpus
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up this project's Ruby and dependencies only
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+          working-directory: archunit
+      - name: Validate baseline, cache reuse, and passing/failing rules
+        run: >-
+          bundle exec ruby benchmark/real_world_canary.rb
+          --project ${{ matrix.name }} --root ../corpus
+          --output pkg/canary-${{ matrix.name }}.json
+      - name: Retain performance and correctness evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: canary-${{ matrix.name }}-${{ github.run_id }}
+          path: archunit/pkg/canary-${{ matrix.name }}.json
+          if-no-files-found: warn
+          retention-days: 14
