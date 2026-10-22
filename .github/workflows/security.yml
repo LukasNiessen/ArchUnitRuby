@@ -1,0 +1,42 @@
+name: Dependency security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 7 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Locked dependency vulnerability scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BUNDLER_AUDIT_DB: ${{ runner.temp }}/ruby-advisory-db
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - name: Update advisories, verify detection, and scan locked dependencies
+        run: bundle exec ruby scripts/check_dependency_security.rb
+      - name: Preserve dated scan evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-audit-${{ github.run_id }}
+          path: pkg/dependency-audit.json
+          if-no-files-found: warn
+          retention-days: 14

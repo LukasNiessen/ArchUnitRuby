@@ -2,6 +2,9 @@
 
 ## 0.0.2 (unreleased)
 
+- Add development-only locked dependency scanning with advisory refresh, fail-closed health checks,
+  Windows path normalization, and retained CI reports.
+
 - Avoid stack overflows in strongly-connected-component detection, elementary-cycle traversal,
   and blocked-vertex propagation on deep dependency graphs.
 - Skip symlinked source entries and enforce canonical project boundaries for direct file metadata.

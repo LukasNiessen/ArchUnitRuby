@@ -36,6 +36,10 @@ The coverage suite enforces at least 98% line and 90% branch coverage. The docum
 the complete site, checks the public API guide, rejects unrendered Markdown, and validates internal
 links.
 
+Run `bundle exec rake security` separately to refresh advisories and scan the locked development
+and runtime dependencies. See [SECURITY.md](SECURITY.md) for report locations and offline usage.
+The normal test suite uses a synthetic local advisory and never fetches vulnerability data.
+
 For a stable release, follow the [pre-release checklist](.github/PRE_RELEASE_CHECKLIST.md) and
 [publishing guide](.github/RELEASING.md). Development allows an unreleased changelog heading and
 installation instructions for the published gem. The separate `--release` metadata check requires

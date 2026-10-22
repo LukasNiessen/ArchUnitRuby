@@ -13,6 +13,11 @@ task :release_metadata do
   ruby 'scripts/check_release_metadata.rb'
 end
 
+desc 'Refresh advisories and scan locked development/runtime dependencies'
+task :security do
+  ruby 'scripts/check_dependency_security.rb'
+end
+
 desc 'Build the GitHub Pages documentation site'
 task :docs do
   sh 'yard doc'
