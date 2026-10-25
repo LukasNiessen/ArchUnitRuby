@@ -65,6 +65,25 @@ temporary; the cached graph retains immutable edges and evidence only.
 
 ## Reference baseline and target
 
+### Pre-v1 source-walk audit (2026-10-20)
+
+Three alternating fresh-process pairs compared commit `d5f3e36` with the audit's status-reusing,
+symlink-skipping walker on the same 1,000-file / 10-gem / 3-import corpus. Ruby 4.0.6, Windows x64:
+
+| Pair | Before cold | After cold | Before enumeration | After enumeration |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 3.772 s | 3.472 s | 0.938 s | 0.673 s |
+| 2 | 7.445 s | 6.373 s | 2.126 s | 1.002 s |
+| 3 | 7.810 s | 7.754 s | 2.155 s | 1.975 s |
+
+Every pair retained 4,001 graph edges and reused its cached graph. Warm lookups ranged from
+3.6–11.0 ms. Enumeration improved in each pair, but the large run-to-run variation makes an exact
+speedup claim inappropriate. This is evidence against an obvious regression, not a portable speed
+guarantee. The walker now uses one explicit `lstat` result for its own type/symlink decisions;
+Ruby's `Find` traversal still performs its own metadata checks.
+
+### Original extraction baseline
+
 On 2026-08-14, Ruby 4.0.6 on the Windows development machine produced the following default-corpus
 results. The optimized values are the median of three fresh processes:
 

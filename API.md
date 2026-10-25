@@ -46,6 +46,10 @@ failed negated RSpec expectations. Successful assertions and raw violation forma
 Start with `ArchUnit.project_files(project_locator = nil)`; `ArchUnit.files` is its short alias.
 Without a locator, ArchUnitRuby searches upward for a `Gemfile` or gemspec.
 
+Discovery skips symlinked source files and directories, including aliases inside the project root.
+Direct `FileInfo` extraction validates canonical as well as lexical containment before reading.
+The source walker reuses a single file-status result per entry for type and symlink decisions.
+
 The detected root's `.archignore` is applied centrally to graphs and file-based metrics. It accepts
 blank lines, full-line `#` comments, basename globs, root-relative path globs, leading `/` anchors,
 and trailing `/` directory patterns. Backslashes normalize to `/`. Bare names match at any depth;
@@ -86,6 +90,10 @@ rules = [
 
 Positive dependency rules are allowlists: every selected dependency must match at least one target.
 Negated dependency rules are blocklists: matching dependencies become violations.
+
+Cycle projection uses iterative strongly-connected-component and elementary-cycle traversals, so
+long dependency chains do not consume Ruby's call stack. It still enumerates all elementary cycles;
+dense graphs can have exponentially many results. Scope cycle rules to meaningful components.
 
 ## Layer rules
 

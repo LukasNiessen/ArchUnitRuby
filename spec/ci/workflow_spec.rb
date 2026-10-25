@@ -96,6 +96,21 @@ RSpec.describe 'the CI workflow' do
     expect(workflow.fetch('jobs').values).to all(include('timeout-minutes' => 10))
   end
 
+  it 'checks development metadata and guards release readiness before publication' do
+    expect(quality_job.fetch('steps')).to include(
+      include('run' => 'bundle exec ruby scripts/check_release_metadata.rb')
+    )
+    release = YAML.safe_load_file(
+      File.expand_path('../../.github/workflows/release.yml', __dir__), aliases: true
+    )
+    release_steps = release.fetch('jobs').fetch('release').fetch('steps')
+    validation = release_steps.index do |step|
+      step['run'] == 'bundle exec ruby scripts/check_release_metadata.rb --release'
+    end
+    publication = release_steps.index { |step| step['uses'] == 'rubygems/release-gem@v1' }
+    expect(validation).to be < publication
+  end
+
   it 'locks dependencies for both CI operating-system families' do
     lockfile = File.read(File.expand_path('../../Gemfile.lock', __dir__))
 

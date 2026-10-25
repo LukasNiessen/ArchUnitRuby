@@ -8,6 +8,11 @@ require 'yard'
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new(:rubocop)
 
+desc 'Validate version, changelog, and local-gem lock consistency'
+task :release_metadata do
+  ruby 'scripts/check_release_metadata.rb'
+end
+
 desc 'Build the GitHub Pages documentation site'
 task :docs do
   sh 'yard doc'
@@ -22,4 +27,4 @@ namespace :benchmark do
   end
 end
 
-task default: %i[spec rubocop]
+task default: %i[release_metadata spec rubocop]

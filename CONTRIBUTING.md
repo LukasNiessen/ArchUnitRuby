@@ -22,7 +22,8 @@ bundle install
 bundle exec rake
 ~~~
 
-`bundle exec rake` runs the randomized RSpec suite and RuboCop. Before submitting documentation or
+`bundle exec rake` validates development release metadata, then runs the randomized RSpec suite and
+RuboCop. Before submitting documentation or
 public API changes, also run:
 
 ~~~bash
@@ -34,6 +35,11 @@ gem build archunit.gemspec --strict
 The coverage suite enforces at least 98% line and 90% branch coverage. The documentation task builds
 the complete site, checks the public API guide, rejects unrendered Markdown, and validates internal
 links.
+
+For a stable release, follow the [pre-release checklist](.github/PRE_RELEASE_CHECKLIST.md) and
+[publishing guide](.github/RELEASING.md). Development allows an unreleased changelog heading and
+installation instructions for the published gem. The separate `--release` metadata check requires
+a valid dated heading and an installation example targeting the version being published.
 
 ## Design expectations
 

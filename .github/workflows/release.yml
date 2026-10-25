@@ -47,6 +47,9 @@ jobs:
             puts "Releasing archunit #{expected}"
           '
 
+      - name: Verify release metadata
+        run: bundle exec ruby scripts/check_release_metadata.rb --release
+
       - name: Test and lint
         run: bundle exec rake
 
