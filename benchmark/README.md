@@ -1,5 +1,8 @@
 # Extraction performance benchmark
 
+For pinned production-library compatibility checks, public passing/failing rule witnesses, and
+real-world timing artifacts, see the [static canary guide](canary/README.md).
+
 The benchmark generates a deterministic multi-gem Ruby repository, then measures one cold graph
 build and one same-process cached lookup. Target application code and generated gemspecs are never
 executed.

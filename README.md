@@ -588,6 +588,11 @@ bundle exec ruby benchmark/extraction.rb
 See the [benchmark guide](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/benchmark/README.md)
 for corpus controls, JSON output, and CI limits.
 
+The separate [real-world canary](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/benchmark/canary/README.md)
+checks pinned Rack, Rake, and RSpec production-library sources in both dependency modes, including
+passing and deliberately failing rules, graph baselines, and cold/warm performance. It never runs
+those projects or installs their dependencies, and is not scheduled automatically yet.
+
 The implementation conventions and intended dependency directions live in [`AGENTS.md`](AGENTS.md).
 
 ## 📅 Plans and Current Limitations
