@@ -17,6 +17,8 @@ PR stack. They are not considered shipped until those changes reach `main` and a
   instructions, and replace prototype/pre-release wording with an accurate stable API contract.
 - Run `bundle exec ruby scripts/check_release_metadata.rb --release`; development checks alone
   intentionally do not prove publication readiness.
+- Run `bundle exec rake security` with a freshly updated advisory database and review the JSON
+  evidence. Resolve actionable findings; do not add unexplained advisory ignores to pass CI.
 - Publish only after maintainer approval via the trusted-publisher workflow. Install the published
   version in a clean project and rerun a passing/failing architecture example before announcing it.
 
@@ -39,5 +41,5 @@ an actively changing or hostile filesystem. Dense graphs can have exponentially 
 - Establish repeated real-world performance baselines on pinned Ruby repositories before setting
   tighter thresholds. Report cold analysis, warm cache reuse, graph contents, and memory separately.
 - Add an opt-in, non-blocking real-world canary once the repository set and update policy are agreed.
-- Consider dependency vulnerability scanning and mutation testing as separate, measured additions;
-  do not confuse high line coverage with proof of semantic correctness.
+- Dependency vulnerability scanning is available as a separate task/workflow. Consider mutation
+  testing as another measured addition; high line coverage is not proof of semantic correctness.
