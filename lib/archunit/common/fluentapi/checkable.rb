@@ -11,6 +11,24 @@ module ArchUnit
     module FluentApi
       # The shared execution contract implemented by every terminal rule.
       module Checkable
+        # Optional normalized explanation, kept separate from violation values.
+        # @return [String, nil]
+        attr_reader :rationale
+
+        # Explains why this completed rule exists, without changing the original.
+        # Append this after all selectors and modifiers.
+        # @param reason [String] a non-blank human-readable explanation
+        # @return [Checkable] a distinct frozen rule of the same type
+        def because(reason)
+          unless reason.is_a?(String) && !reason.strip.empty?
+            raise ArgumentError, 'reason must be a non-empty String'
+          end
+
+          copy = dup
+          copy.instance_variable_set(:@rationale, reason.strip.freeze)
+          copy.freeze
+        end
+
         # Executes the rule and returns every architecture disagreement as structured data.
         # @param options [CheckOptions, nil]
         # @return [Array<ArchUnit::Violation>]

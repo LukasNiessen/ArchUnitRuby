@@ -109,6 +109,23 @@ is required:
 
 ## 🚐 Setup
 
+### Explain why a rule exists
+
+Append `.because(...)` to a completed file, layer, slice, or metric rule:
+
+~~~ ruby
+rule = ArchUnit.project_files.in_folder('app/api/**')
+               .should_not.depend_on_files.in_folder('app/database/**')
+               .because('Keep persistence out of the API')
+
+expect(rule).to pass
+~~~
+
+The explanation appears once in a failed RSpec, Minitest, or `ArchUnit.assert_passes` assertion.
+It is available as `rule.rationale`. Calling `.because(...)` returns a distinct frozen rule;
+the original rule and direct `check` results are unchanged. Reasons must be non-blank strings.
+Add the explanation after all selectors and modifiers.
+
 ### Project Location
 
 The project locator is optional. With no argument, ArchUnitRuby searches from the current directory

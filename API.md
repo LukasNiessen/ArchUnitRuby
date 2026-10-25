@@ -36,6 +36,13 @@ keys such as `{ in_folder: 'generated', with_name: '*_spec.rb' }`.
 
 ## File rules
 
+Every completed rule implementing `ArchUnit::Checkable` supports `.because(reason)`. Append it
+after all selectors and modifiers to get a distinct frozen rule of the same type, with a trimmed,
+immutable `rationale` string. Non-string or blank reasons raise `ArgumentError`. The original rule,
+violations, graph cache, and `check` options are unchanged. The shared result formatter adds
+`Because: ...` exactly once to failed framework-neutral, RSpec, and Minitest assertions, including
+failed negated RSpec expectations. Successful assertions and raw violation formatting omit it.
+
 Start with `ArchUnit.project_files(project_locator = nil)`; `ArchUnit.files` is its short alias.
 Without a locator, ArchUnitRuby searches upward for a `Gemfile` or gemspec.
 
