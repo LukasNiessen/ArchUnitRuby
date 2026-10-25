@@ -9,6 +9,16 @@ module ArchUnit
   module Metrics
     module FluentApi
       # Lazy selection of one metric over a metrics scope.
+      # @!method should_be_below(threshold)
+      #   @return [MetricThresholdCondition]
+      # @!method should_be_above(threshold)
+      #   @return [MetricThresholdCondition]
+      # @!method should_be(threshold)
+      #   @return [MetricThresholdCondition]
+      # @!method should_be_below_or_equal(threshold)
+      #   @return [MetricThresholdCondition]
+      # @!method should_be_above_or_equal(threshold)
+      #   @return [MetricThresholdCondition]
       class MetricSelection
         THRESHOLD_METHODS = {
           should_be_below: :below,
@@ -29,8 +39,12 @@ module ArchUnit
           freeze
         end
 
-        def measure
-          scope.__send__(:subjects_for, metric.subject_type).map do |subject|
+        # Evaluates this metric for every selected subject.
+        # @param options [CheckOptions, nil] dependency-analysis options for coupling metrics
+        # @return [Array<MetricMeasurement>]
+        def measure(options = nil)
+          options = Common::FluentApi::CheckOptions.resolve(options)
+          scope.__send__(:subjects_for, metric.subject_type, options:).map do |subject|
             MetricMeasurement.new(
               subject:,
               metric_name: metric.name,
@@ -45,6 +59,8 @@ module ArchUnit
           end
         end
 
+        # Creates a rule from a custom predicate over value and subject.
+        # @return [MetricPredicateCondition]
         def should_satisfy(predicate)
           MetricPredicateCondition.new(selection: self, predicate:)
         end

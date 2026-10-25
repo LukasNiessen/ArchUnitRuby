@@ -1,16 +1,21 @@
 # frozen_string_literal: true
 
 require_relative 'import_kind'
+require_relative 'dependency_evidence'
 
 module ArchUnit
   module Common
     module Extraction
-      Edge = Data.define(:source, :target, :external, :import_kinds) do
-        def initialize(source:, target:, external:, import_kinds: [])
+      Edge = Data.define(:source, :target, :external, :import_kinds, :evidence) do
+        def initialize(source:, target:, external:, import_kinds: [], evidence: [])
           source = immutable_identifier(source, :source)
           target = immutable_identifier(target, :target)
           validate_external(external)
           import_kinds = immutable_import_kinds(import_kinds)
+          evidence = Array(evidence).uniq.freeze
+          unless evidence.all?(DependencyEvidence)
+            raise ArgumentError, 'evidence must contain DependencyEvidence values'
+          end
 
           super
         end

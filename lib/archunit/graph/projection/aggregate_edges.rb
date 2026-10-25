@@ -12,7 +12,7 @@ module ArchUnit
 
         def aggregate(edges, collapse:, include_self_dependencies:)
           groups = Hash.new do |hash, key|
-            hash[key] = { count: 0, external: false, import_kinds: [] }
+            hash[key] = { count: 0, external: false, import_kinds: [], evidence: [] }
           end
 
           edges.each do |edge|
@@ -30,6 +30,7 @@ module ArchUnit
           group[:count] += 1
           group[:external] ||= edge.external
           group[:import_kinds] |= edge.import_kinds
+          group[:evidence] |= edge.evidence
         end
         private_class_method :accumulate
 
@@ -37,7 +38,8 @@ module ArchUnit
           groups.sort_by { |(source, target), _group| [source, target] }.map do |key, group|
             GraphReportEdge.new(
               source: key.first, target: key.last, count: group[:count],
-              external: group[:external], import_kinds: group[:import_kinds]
+              external: group[:external], import_kinds: group[:import_kinds],
+              evidence: group[:evidence]
             )
           end.freeze
         end

@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'irb', '~> 1.15'
 gem 'kramdown', '~> 2.5.2'
 gem 'minitest', '~> 5.25'
 gem 'rake', '~> 13.2'

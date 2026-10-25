@@ -1,11 +1,21 @@
 # Changelog
 
-## 0.0.2 - 2026-09-30
+## 0.0.2 (unreleased)
 
 - Add opt-in debug inspection of project roots, graphs, and selected files on cold and cached checks.
 - Log passing metric values without repeating custom calculations.
 - Document verbosity, CI log artifacts, and existing colored violation reports.
 
+- Add opt-in project constant-reference dependencies with lexical lookup and conservative ambiguity handling.
+- Infer import paths from safely known local literal strings without evaluating application code.
+- Preserve dependency source evidence in expanded mode through graph merging and JSON reporting,
+  while keeping import-only edge values compatible with existing consumers.
+- Support check options on metric measurements and add installed-gem extraction regression checks.
+- Make trailing folder globs such as `app/api/**` include the named folder itself.
+- Validate the README quickstart as a passing and failing end-to-end architecture test.
+- Add a curated API guide, reliable Markdown rendering, responsive documentation navigation, and
+  documentation quality checks.
+- Add the ArchUnitRuby family logo, social preview, and repository community health files.
 - Discover adjacent `lib` directories in multi-gemspec repositories without evaluating gemspecs.
 - Support validated, project-local custom load paths through `CheckOptions`.
 - Add cold/warm extraction profiling, a reproducible benchmark, and resolution caching.

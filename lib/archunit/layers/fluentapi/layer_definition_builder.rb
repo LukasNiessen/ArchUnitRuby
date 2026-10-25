@@ -15,10 +15,14 @@ module ArchUnit
           freeze
         end
 
+        # Adds a full-path selector to this layer definition.
+        # @return [LayeredArchitecture]
         def defined_by(pattern, except: nil)
           add_filter(Common::RegexFactory.path_matcher(pattern, except:))
         end
 
+        # Adds a containing-folder selector to this layer definition.
+        # @return [LayeredArchitecture]
         def defined_by_folder(pattern, except: nil)
           add_filter(Common::RegexFactory.folder_matcher(pattern, except:))
         end

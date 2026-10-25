@@ -1,18 +1,28 @@
 # frozen_string_literal: true
 
 require_relative '../../common/extraction/import_kind'
+require_relative '../../common/extraction/dependency_evidence'
 
 module ArchUnit
   module GraphReporting
     module Projection
       # Aggregated dependency evidence in a graph report snapshot.
-      GraphReportEdge = Data.define(:source, :target, :count, :external, :import_kinds) do
-        def initialize(source:, target:, count:, external:, import_kinds: [])
+      GraphReportEdge = Data.define(:source, :target, :count, :external, :import_kinds,
+                                    :evidence) do
+        # Keywords mirror this immutable report value.
+        def initialize( # rubocop:disable Metrics/ParameterLists
+          source:, target:, count:, external:, import_kinds: [], evidence: []
+        )
           source = immutable_string(source, :source)
           target = immutable_string(target, :target)
           validate_count(count)
           validate_external(external)
           import_kinds = immutable_import_kinds(import_kinds)
+          evidence = Array(evidence).uniq.freeze
+          unless evidence.all?(Common::Extraction::DependencyEvidence)
+            raise ArgumentError, 'evidence must contain DependencyEvidence values'
+          end
+
           super
         end
 
