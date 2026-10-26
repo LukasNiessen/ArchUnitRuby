@@ -136,6 +136,7 @@ jobs:
         run: |
           gem install pkg/archunit.gem --no-document
           ruby scripts/check_dependency_analysis.rb
+          ruby scripts/check_constant_writes.rb
           ruby -e "
             require 'json'
             require 'stringio'

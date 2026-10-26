@@ -25,6 +25,8 @@
 - Document verbosity, CI log artifacts, and existing colored violation reports.
 
 - Add opt-in project constant-reference dependencies with lexical lookup and conservative ambiguity handling.
+- Index lexical, qualified, and root-qualified `||=` declarations in expanded analysis without
+  executing source or changing import-only mode.
 - Infer import paths from safely known local literal strings without evaluating application code.
 - Preserve dependency source evidence in expanded mode through graph merging and JSON reporting,
   while keeping import-only edge values compatible with existing consumers.

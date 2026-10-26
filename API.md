@@ -248,6 +248,11 @@ ambiguous definitions, inherited-member lookup, and dynamic metaprogramming stay
 the bounded contract in the main guide. Namespaces that fail to stabilize within eight index passes
 fall back to import-only results. Unknown third-party constants do not create architecture violations.
 
+Declarations include ordinary `=` and conditional `||=`, with lexical/qualified/root-qualified
+ownership and definition evidence. This does not predict runtime execution or load order. Multiple
+definition files remain ambiguous; update-only compound and multiple-assignment forms are not
+inferred as new declaration owners.
+
 Expanded edges include `:constant_reference` in `import_kinds` and retain `DependencyEvidence` with
 names and source lines in `edge.evidence` and JSON reports. An import and a constant use supporting
 the same file pair merge into one edge. Import-only edge evidence stays empty for compatibility;
