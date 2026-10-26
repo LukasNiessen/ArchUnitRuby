@@ -2,6 +2,7 @@
 
 require_relative 'archunit/version'
 require_relative 'archunit/error/technical_error'
+require_relative 'archunit/error/source_parse_error'
 require_relative 'archunit/error/user_error'
 require_relative 'archunit/common/pattern'
 require_relative 'archunit/common/filter'
@@ -54,6 +55,7 @@ module ArchUnit
   ImportKind = Common::Extraction::ImportKind
   Edge = Common::Extraction::Edge
   DependencyEvidence = Common::Extraction::DependencyEvidence
+  ParseDiagnostic = Common::Extraction::ParseDiagnostic
   Graph = Common::Extraction::Graph
   MappedEdge = Common::Projection::MappedEdge
   ProjectedEdge = Common::Projection::ProjectedEdge

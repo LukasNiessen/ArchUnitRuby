@@ -146,15 +146,13 @@ RSpec.describe ArchUnit::MetricExtraction do
     end
   end
 
-  it 'returns physical code lines but no AST counts for malformed Ruby' do
+  it 'rejects malformed Ruby instead of reporting misleading zero AST counts' do
     Dir.mktmpdir do |root|
       path = write_source(root, 'broken.rb', "class Broken\n  def nope(\nend\n")
 
-      info = described_class.extract_file_info(path)
-
-      expect(info.lines_of_code).to eq(3)
-      expect([info.statement_count, info.class_count, info.function_count]).to eq([0, 0, 0])
-      expect(info.class_infos).to be_empty
+      expect do
+        described_class.extract_file_info(path)
+      end.to raise_error(ArchUnit::SourceParseError, /broken.rb/)
     end
   end
 

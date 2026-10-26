@@ -259,6 +259,13 @@ mode participates in graph-cache identity, and `clear_cache: true` rebuilds the 
 Invalid API input raises `ArchUnit::UserError` or `ArgumentError`; library or environment failures
 raise `ArchUnit::TechnicalError`. Rule failures remain violation data.
 
+Malformed included Ruby raises `ArchUnit::SourceParseError`, a `TechnicalError`, during graph or
+AST-metric extraction. No partial graph is returned or cached. `error.diagnostics` is an immutable
+array of `ArchUnit::ParseDiagnostic` values with `path`, one-based `line`/`column`, and `message`;
+each value supports `to_h`. RSpec/Minitest assertions propagate this technical failure instead of
+reporting a pass or an ordinary architecture violation. Excluded files are not parsed. The profile's
+`malformed_files` counter records a rejected file; existing cache-clearing rules still apply.
+
 See the [main guide](index.html) for installation and complete examples, [SUPPORT.md](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/SUPPORT.md)
 for help, and [SECURITY.md](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/SECURITY.md) for
 responsible vulnerability reporting.

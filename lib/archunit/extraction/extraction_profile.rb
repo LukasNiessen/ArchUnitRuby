@@ -20,6 +20,7 @@ module ArchUnit
       ].freeze
       COUNTERS = %i[
         source_files
+        malformed_files
         imports
         unresolved_imports
         unresolved_constant_references

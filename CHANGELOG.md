@@ -2,6 +2,9 @@
 
 ## 0.0.2 (unreleased)
 
+- Fail closed on malformed included Ruby in dependency graphs and AST metrics, with structured
+  source diagnostics and profile counters instead of silently treating incomplete analysis as clean.
+
 - Add development-only locked dependency scanning with advisory refresh, fail-closed health checks,
   Windows path normalization, and retained CI reports.
 
