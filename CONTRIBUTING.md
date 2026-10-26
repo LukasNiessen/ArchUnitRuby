@@ -32,7 +32,12 @@ bundle exec rake docs
 gem build archunit.gemspec --strict
 ~~~
 
-The coverage suite enforces at least 98% line and 90% branch coverage. The documentation task builds
+The coverage suite enforces at least 98% line and 90% branch coverage on every `lib/**/*.rb` runtime
+file, including unloaded files. Specs, benchmarks, and development scripts do not contribute to
+the enforced denominator. A subprocess regression test verifies the actual filtered report and
+thresholds without merging its partial probe execution into the full suite. Native symlink tests
+may be skipped on Windows accounts without link privileges; Linux CI exercises those scenarios.
+The documentation task builds
 the complete site, checks the public API guide, rejects unrendered Markdown, and validates internal
 links.
 
