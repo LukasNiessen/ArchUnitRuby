@@ -517,7 +517,14 @@ For diagnostics, pass an `ArchUnit::Extraction::ExtractionProfile` to
 `ArchUnit::Extraction.extract_graph(root, options: options, profile: profile)`. Its counters include
 `unresolved_imports`, `unresolved_constant_references`, and `ambiguous_constant_references`; unknown
 third-party constants do not become architecture violations. These counts describe a cold analysis;
-a cache hit does not rerun diagnostics. Malformed source is skipped, as in import-only mode.
+a cache hit does not rerun diagnostics. Included malformed Ruby now raises
+`ArchUnit::SourceParseError < ArchUnit::TechnicalError` in both modes and in AST metrics, rather
+than silently returning a partial graph or zero counts. Its immutable `diagnostics` contain
+`path`, one-based `line` and `column`, and the parser `message`; the extraction profile increments
+`malformed_files`. Fix or explicitly exclude invalid files using the project source policy.
+Fluent rule selectors do not limit graph discovery. Failed graph builds are not cached; after
+editing previously cached valid source, the normal explicit `clear_cache: true` policy still applies.
+This intentionally changes the prototype's permissive behavior before the stable release.
 
 Expanded analysis uses a bounded Prism index and adds no runtime dependency. The design spike
 considered [RubyDEX](https://github.com/Shopify/rubydex), whose semantic index is broader but adds a

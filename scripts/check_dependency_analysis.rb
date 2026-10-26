@@ -21,6 +21,29 @@ def verify_project_exclusions(root, rule)
   abort 'ignored file remained in metrics' unless remaining == ['app/api/request.rb']
 end
 
+def reject_malformed_source(rule)
+  rule.check
+  abort 'malformed source unexpectedly passed'
+rescue ArchUnit::SourceParseError => e
+  diagnostic = e.diagnostics.first
+  abort 'parser location missing' unless diagnostic.path.end_with?('request.rb') &&
+                                         diagnostic.line.positive? && diagnostic.column.positive?
+end
+
+def verify_parse_diagnostics(request, rule)
+  File.write(request, "class Broken <\n")
+  ArchUnit.clear_graph_cache
+  reject_malformed_source(rule)
+  File.write(request, "path = '../retrieval/store'\nrequire_relative path\n")
+  ArchUnit.clear_graph_cache
+end
+
+def verify_rule_extensions(root, request, rule)
+  verify_rationale(rule)
+  verify_parse_diagnostics(request, rule)
+  verify_project_exclusions(root, rule)
+end
+
 # Also run after installing the built gem, outside Bundler's source checkout.
 Dir.mktmpdir('archunit-installed-analysis') do |root|
   File.write(File.join(root, 'Gemfile'), "raise 'must never execute project source'\n")
@@ -45,8 +68,7 @@ Dir.mktmpdir('archunit-installed-analysis') do |root|
   abort 'local-string dependency missing' unless rule.check(refreshed).length == 1
   ArchUnit.assert_passes(allowed)
 
-  verify_rationale(rule)
-  verify_project_exclusions(root, rule)
+  verify_rule_extensions(root, request, rule)
   puts 'Installed dependency analysis, rule rationale, and project exclusions passed.'
 ensure
   ArchUnit.clear_graph_cache

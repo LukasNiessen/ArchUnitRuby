@@ -364,11 +364,10 @@ RSpec.describe ArchUnit::Extraction, '.extract_imports' do
     expect(extract.map(&:module_name)).to eq(%w[json set])
   end
 
-  it 'skips a file that Prism cannot parse' do
+  it 'rejects a file that Prism cannot parse' do
     create_file('lib/example.rb', "require 'json'\ndef broken(\n")
 
-    expect(extract).to eq([])
-    expect(extract).to be_frozen
+    expect { extract }.to raise_error(ArchUnit::SourceParseError, /example.rb/)
   end
 
   it 'returns immutable import collections and values' do

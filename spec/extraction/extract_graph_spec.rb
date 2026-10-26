@@ -23,14 +23,10 @@ RSpec.describe ArchUnit::Extraction, '.extract_graph' do
     described_class.extract_graph(@project_root)
   end
 
-  it 'emits a self-edge for every Ruby source, including isolated and malformed files' do
+  it 'emits a self-edge for every valid Ruby source, including isolated files' do
     create_file('lib/isolated.rb')
-    create_file('lib/broken.rb', "def broken(\n")
 
     expect(extract).to contain_exactly(
-      ArchUnit::Edge.new(
-        source: 'lib/broken.rb', target: 'lib/broken.rb', external: false
-      ),
       ArchUnit::Edge.new(
         source: 'lib/isolated.rb', target: 'lib/isolated.rb', external: false
       )
