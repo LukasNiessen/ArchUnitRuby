@@ -30,9 +30,10 @@ ArchUnit.project_files
         .in_folder('app/database/**')
 ~~~
 
-It is a working executable prototype with file, layer, slice, graph-reporting, and metric APIs. It
-is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows. Install the latest release as
-[`archunit`](https://rubygems.org/gems/archunit) on RubyGems.
+ArchUnitRuby provides file, layer, slice, graph-reporting, and metric APIs with a documented 1.0
+compatibility baseline. It is tested on Ruby 3.3, 3.4, and 4.0 on Linux and Ruby 4.0 on Windows.
+The gem is named [`archunit`](https://rubygems.org/gems/archunit); check RubyGems for published-version
+availability, since a development checkout can be ahead of the published gem.
 
 ArchUnitRuby follows the shared ArchUnitEverything architecture and fluent-API standard used by
 its siblings [ArchUnitTS](https://github.com/LukasNiessen/ArchUnitTS) and
@@ -47,12 +48,13 @@ from `main`, so the published reference follows the repository.
 
 ### Installation
 
-ArchUnitRuby requires Ruby 3.3 or newer. Add it to your test dependencies:
+ArchUnitRuby requires Ruby 3.3 or newer. These instructions target the 1.0 series. Add it to your
+test dependencies once the target version is published:
 
 ~~~ ruby
 # Gemfile
 group :test do
-  gem 'archunit', '~> 0.0.1'
+  gem 'archunit', '~> 1.0.0'
 end
 ~~~
 
@@ -62,7 +64,7 @@ Then install it:
 bundle install
 ~~~
 
-Or install it directly with `gem install archunit`.
+Or install it directly with `gem install archunit --version '~> 1.0.0'`.
 
 [ClickGems download analytics](https://clickgems.clickhouse.com/dashboard/archunit) show trends by
 date, gem version, Ruby version, system, and country. Download totals count package fetches rather
@@ -530,7 +532,7 @@ than silently returning a partial graph or zero counts. Its immutable `diagnosti
 `malformed_files`. Fix or explicitly exclude invalid files using the project source policy.
 Fluent rule selectors do not limit graph discovery. Failed graph builds are not cached; after
 editing previously cached valid source, the normal explicit `clear_cache: true` policy still applies.
-This intentionally changes the prototype's permissive behavior before the stable release.
+This intentionally changes the 0.0.1 prototype's permissive behavior in the 1.0 API.
 
 Expanded analysis uses a bounded Prism index and adds no runtime dependency. The design spike
 considered [RubyDEX](https://github.com/Shopify/rubydex), whose semantic index is broader but adds a
@@ -608,6 +610,29 @@ those projects or installs their dependencies, and is not scheduled automaticall
 
 The implementation conventions and intended dependency directions live in [`AGENTS.md`](AGENTS.md).
 
+## 1.0 compatibility and migration
+
+The documented entry points, fluent rule methods, options, public data/error types, and report
+formats in the [API guide](https://lukasniessen.github.io/ArchUnitRuby/file.API.html) form the 1.x
+compatibility baseline. Additive capabilities may be introduced in minor versions; incompatible
+public API changes require a new major version and migration notes. Private implementation helpers
+are not part of that contract. Correctness fixes can reveal violations that earlier versions missed;
+review the changelog when updating.
+
+When upgrading from 0.0.1:
+
+- The default remains import-only. Explicitly opt into `dependency_analysis: :imports_and_constants`
+  when you want the documented static constant-reference model; it may reveal additional violations.
+- Included malformed Ruby now raises `SourceParseError < TechnicalError`, rather than silently
+  passing or returning zero AST counts. Fix or explicitly exclude invalid source files.
+- Project `.archignore` exclusions and skipped symlinked source entries can change the discovered
+  file set. Empty selections are still violations by default; check selectors rather than blindly
+  allowing empty tests.
+- Cached graph results still require explicit clearing after source edits in a long-lived process.
+
+Stable API compatibility does not mean complete Ruby interpretation or exhaustive runtime detection.
+The supported static-analysis boundaries below remain part of the contract.
+
 ## 📅 Plans and Current Limitations
 
 - Files are the primary vocabulary; opt-in constant analysis has the lookup limits described above.
@@ -616,7 +641,8 @@ The implementation conventions and intended dependency directions live in [`AGEN
 - `.archignore` supports exclusion globs, not negated gitignore patterns or nested ignore files.
 - Cycle traversal is iterative and tested on 10,000-node chains and rings. Enumerating every cycle
   can still be expensive in densely connected graphs; narrow the selected scope when necessary.
-- The API is still pre-release and may change before the first stable gem version.
+- Method-call/protocol rules, a standalone CLI, presets, and adoption baselines are roadmap work,
+  not claims made by the current 1.0 API.
 
 ## 💟 Community
 
