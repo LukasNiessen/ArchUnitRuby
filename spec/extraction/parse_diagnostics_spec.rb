@@ -56,6 +56,7 @@ RSpec.describe 'strict source parsing' do
   end
 
   it 'propagates technical failure through assertions and both framework adapters' do
+    ArchUnit::Testing::MinitestAdapter.install!
     expect { ArchUnit.assert_passes(rule) }.to raise_error(ArchUnit::TechnicalError)
     expect { expect(rule).to pass }.to raise_error(ArchUnit::TechnicalError)
     context = Class.new do
