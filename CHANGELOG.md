@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.0.2 (unreleased)
+## 1.0.0 - 2026-10-26
+
+First stable API baseline. The previously unreleased 0.0.2 development work is included here;
+0.0.1 remains the preceding published version. See the README's migration notes before upgrading.
+
+- Fail closed on malformed included Ruby in dependency graphs and AST metrics, with structured
+  source diagnostics and profile counters instead of silently treating incomplete analysis as clean.
 
 - Add development-only locked dependency scanning with advisory refresh, fail-closed health checks,
   Windows path normalization, and retained CI reports.
@@ -11,6 +17,8 @@
 - Reuse source-entry file status instead of repeating separate directory and file probes.
 - Validate version/changelog/lock consistency in CI and require prepared release metadata before
   RubyGems publication.
+- Enforce the unchanged coverage thresholds on runtime library source only, with a real-report
+  regression check that excludes loaded specs, benchmarks, and scripts from the denominator.
 
 - Apply bounded project-root `.archignore` exclusions consistently to dependency graphs and metrics,
   with cache invalidation, cross-platform glob handling, and configuration safety checks.
@@ -22,6 +30,8 @@
 - Document verbosity, CI log artifacts, and existing colored violation reports.
 
 - Add opt-in project constant-reference dependencies with lexical lookup and conservative ambiguity handling.
+- Index lexical, qualified, and root-qualified `||=` declarations in expanded analysis without
+  executing source or changing import-only mode.
 - Infer import paths from safely known local literal strings without evaluating application code.
 - Preserve dependency source evidence in expanded mode through graph merging and JSON reporting,
   while keeping import-only edge values compatible with existing consumers.

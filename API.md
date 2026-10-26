@@ -7,6 +7,20 @@ which entry point to choose and how the stages fit together.
 All rule builders are immutable and lazy. Constructing a rule does not read the project; `check`,
 `measure`, `snapshot`, and export methods are the terminals that perform work.
 
+## 1.x compatibility contract
+
+This guide defines the supported 1.0 public surface: documented entry points, fluent methods,
+options, public data/error types, and report formats. Additive capabilities can arrive in minor
+versions; incompatible public API changes require a major version and migration notes. Private
+helpers and classes marked as implementation details are not part of that compatibility promise.
+Correctness fixes can change detected violations; compatibility is not a promise to preserve missed
+dependencies or misleading clean results.
+
+Static extraction remains bounded and does not execute the target application's source or gemspecs.
+Import-only is the default; expanded constant analysis is explicit opt-in. The documented unresolved
+lookup cases, project source/exclusion policy, strict parser failures, and explicit cache-clearing
+behavior remain important when upgrading. See the README's migration notes for changes from 0.0.1.
+
 ## Common rule shape
 
 ~~~ruby
@@ -248,6 +262,11 @@ ambiguous definitions, inherited-member lookup, and dynamic metaprogramming stay
 the bounded contract in the main guide. Namespaces that fail to stabilize within eight index passes
 fall back to import-only results. Unknown third-party constants do not create architecture violations.
 
+Declarations include ordinary `=` and conditional `||=`, with lexical/qualified/root-qualified
+ownership and definition evidence. This does not predict runtime execution or load order. Multiple
+definition files remain ambiguous; update-only compound and multiple-assignment forms are not
+inferred as new declaration owners.
+
 Expanded edges include `:constant_reference` in `import_kinds` and retain `DependencyEvidence` with
 names and source lines in `edge.evidence` and JSON reports. An import and a constant use supporting
 the same file pair merge into one edge. Import-only edge evidence stays empty for compatibility;
@@ -258,6 +277,13 @@ mode participates in graph-cache identity, and `clear_cache: true` rebuilds the 
 
 Invalid API input raises `ArchUnit::UserError` or `ArgumentError`; library or environment failures
 raise `ArchUnit::TechnicalError`. Rule failures remain violation data.
+
+Malformed included Ruby raises `ArchUnit::SourceParseError`, a `TechnicalError`, during graph or
+AST-metric extraction. No partial graph is returned or cached. `error.diagnostics` is an immutable
+array of `ArchUnit::ParseDiagnostic` values with `path`, one-based `line`/`column`, and `message`;
+each value supports `to_h`. RSpec/Minitest assertions propagate this technical failure instead of
+reporting a pass or an ordinary architecture violation. Excluded files are not parsed. The profile's
+`malformed_files` counter records a rejected file; existing cache-clearing rules still apply.
 
 See the [main guide](index.html) for installation and complete examples, [SUPPORT.md](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/SUPPORT.md)
 for help, and [SECURITY.md](https://github.com/LukasNiessen/ArchUnitRuby/blob/main/SECURITY.md) for

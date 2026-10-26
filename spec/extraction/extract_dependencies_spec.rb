@@ -94,14 +94,14 @@ RSpec.describe ArchUnit::Extraction, '.extract_dependencies' do
     )
   end
 
-  it 'skips malformed source files without losing dependencies from valid files' do
+  it 'rejects malformed source instead of returning only dependencies from valid files' do
     create_file('lib/broken.rb', "require 'hidden'\ndef broken(\n")
     create_file('lib/valid.rb', "require_relative 'support'\n")
     create_file('lib/support.rb')
 
-    sources = described_class.extract_dependencies(@project_root).map(&:source)
-
-    expect(sources).to eq(['lib/valid.rb'])
+    expect do
+      described_class.extract_dependencies(@project_root)
+    end.to raise_error(ArchUnit::SourceParseError, /broken.rb/)
   end
 
   it 'returns an immutable edge collection' do

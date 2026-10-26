@@ -42,7 +42,7 @@ module ArchUnit
       def collect(namespace_names: nil)
         @analyses.to_h do |source, result|
           visitor = ConstantVisitor.new(namespace_names:)
-          visitor.visit(result.value) if result.success?
+          visitor.visit(result.value)
           [source, visitor]
         end
       end

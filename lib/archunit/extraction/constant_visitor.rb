@@ -40,6 +40,11 @@ module ArchUnit
         visit(node.value)
       end
 
+      # ||= introduces a possible declaration, like a conditional ordinary assignment.
+      # This records ownership, not whether the branch executes or what value it stores.
+      alias visit_constant_or_write_node visit_constant_write_node
+      alias visit_constant_path_or_write_node visit_constant_path_write_node
+
       def visit_constant_read_node(node)
         record_reference(node.name.to_s, node)
       end

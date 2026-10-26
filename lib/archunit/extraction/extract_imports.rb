@@ -2,6 +2,7 @@
 
 require 'prism'
 require_relative '../error/technical_error'
+require_relative '../error/source_parse_error'
 require_relative '../error/user_error'
 require_relative 'extraction_profile'
 require_relative 'import_resolver'
@@ -57,17 +58,17 @@ module ArchUnit
 
     def parse_source(source_path, profile)
       source = ExtractionProfile.measure(profile, :file_read) { File.binread(source_path) }
-      ExtractionProfile.measure(profile, :prism_parse) do
+      result = ExtractionProfile.measure(profile, :prism_parse) do
         Prism.parse(source, filepath: source_path.to_s)
       end
+      profile&.increment(:malformed_files) unless result.success?
+      SourceParseError.validate!(result, path: source_path)
     rescue SystemCallError => e
       raise TechnicalError, "could not parse Ruby source file: #{e.message}"
     end
     private_class_method :parse_source
 
     def parsed_imports(parse_result, profile)
-      return [] unless parse_result.success?
-
       ExtractionProfile.measure(profile, :import_extraction) do
         visitor = ImportVisitor.new
         visitor.visit(parse_result.value)

@@ -3,6 +3,7 @@
 require 'pathname'
 require 'prism'
 require_relative '../../error/technical_error'
+require_relative '../../error/source_parse_error'
 require_relative '../../extraction/enumerate_source_files'
 require_relative '../../extraction/locate_project'
 require_relative 'metric_info'
@@ -26,15 +27,15 @@ module ArchUnit
         path = source_path(source_file)
         identifier = (relative_path || path.basename.to_s).to_s.tr('\\', '/')
         source = path.read
-        build_file_info(identifier, source)
+        result = SourceParseError.validate!(Prism.parse(source, filepath: path.to_s), path:)
+        build_file_info(identifier, source, result)
       rescue SystemCallError => e
         raise TechnicalError, "could not extract Ruby source metrics: #{e.message}"
       end
 
-      def build_file_info(identifier, source)
-        parse_result = Prism.parse(source)
+      def build_file_info(identifier, source, parse_result)
         visitor = SourceMetricsVisitor.new(identifier)
-        visitor.visit(parse_result.value) if parse_result.success?
+        visitor.visit(parse_result.value)
         FileInfo.new(
           path: identifier, lines_of_code: lines_of_code(source), **visitor_counts(visitor)
         )
