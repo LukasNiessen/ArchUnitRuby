@@ -11,6 +11,8 @@
 - Reuse source-entry file status instead of repeating separate directory and file probes.
 - Validate version/changelog/lock consistency in CI and require prepared release metadata before
   RubyGems publication.
+- Enforce the unchanged coverage thresholds on runtime library source only, with a real-report
+  regression check that excludes loaded specs, benchmarks, and scripts from the denominator.
 
 - Apply bounded project-root `.archignore` exclusions consistently to dependency graphs and metrics,
   with cache invalidation, cross-platform glob handling, and configuration safety checks.
