@@ -493,6 +493,12 @@ It supports lexical nesting, compact namespaces, root-qualified names, and expli
 lookup; top-level `module A::B` does not. A nearer namespace shadows a root namespace even when its
 requested child is missing.
 
+Ordinary `=` and conditional `||=` constant declarations are indexed, including qualified and
+root-qualified forms. A conditional declaration records a possible definition file, not proof that
+the assignment executes or its resulting value. Multiple candidate files stay ambiguous. Other
+compound writes (`&&=`, operators) and multiple-assignment declarations are not inferred as new
+definition owners; unsupported targets remain unresolved rather than inventing ownership.
+
 References with multiple definition files (reopened classes/modules), missing definitions, and
 dynamic definitions are omitted, never assigned to an arbitrary file. `Alias = Original` defines
 `Alias` in its own file and records the reference to `Original`; lookup through aliases such as

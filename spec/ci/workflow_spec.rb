@@ -43,6 +43,7 @@ RSpec.describe 'the CI workflow' do
       "bundle exec ruby -w -Ilib -e \"require 'archunit'\"",
       'gem build archunit.gemspec --strict --output pkg/archunit.gem',
       'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files',
+      'ruby scripts/check_constant_writes.rb',
       'depend_on_files', 'depend_on_external_modules', "matching('json')",
       'adhere_to', 'file.extension', 'ArchUnit::Checkable',
       'ArchUnit.assert_passes', 'ArchUnit.format_violations',
