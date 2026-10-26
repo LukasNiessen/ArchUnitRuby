@@ -1,26 +1,45 @@
 # Stable-release readiness
 
-All four currently open feature issues (#47, #48, #54, #55) have implementations in the pending
-PR stack. They are not considered shipped until those changes reach `main` and a gem is published.
+The original feature backlog (#47, #48, #54, #55) and the correctness/QA audit fixes (#63-65) are
+merged. PRs #68-70 were reviewed and merged on 2026-10-26; the resulting `main` passed CI, security
+scanning, and documentation deployment. This checklist tracks the 1.0.0 preparation, not proof that
+RubyGems publication has happened. The preceding published gem is 0.0.1.
 
-## Before 1.0.0
+## 1.0.0 preparation
 
-- Merge the reviewed integration work and the rationale/exclusion PRs in dependency order. Retarget
-  stacked PRs to `main` after their base merges. Do not bypass the existing branch protections.
-- Merge the pre-v1 audit fixes and rerun the entire matrix on `main`: supported Ruby versions,
-  Windows/Linux, coverage, lint, dogfooding, documentation links, installed-gem checks, and the RAG fixture.
-- Keep the import-only default and the explicit `imports_and_constants` opt-in documented. Unknown
-  runtime behavior, ambiguous constants, and dynamic import paths are not a complete Ruby interpreter.
-- Review representative passing and failing rules manually. Include a constant-only forbidden edge,
-  a safely inferred import, a `.because(...)` failure, and `.archignore` exclusions.
-- Set the version to `1.0.0`, refresh the local gem lock entry, date the changelog, update installation
-  instructions, and replace prototype/pre-release wording with an accurate stable API contract.
-- Run `bundle exec ruby scripts/check_release_metadata.rb --release`; development checks alone
-  intentionally do not prove publication readiness.
-- Run `bundle exec rake security` with a freshly updated advisory database and review the JSON
-  evidence. Resolve actionable findings; do not add unexplained advisory ignores to pass CI.
-- Publish only after maintainer approval via the trusted-publisher workflow. Install the published
-  version in a clean project and rerun a passing/failing architecture example before announcing it.
+- [x] Merge the reviewed extraction, source-boundary, cycle, parser-diagnostic, conditional-constant,
+  and coverage fixes without bypassing protections.
+- [x] Document the import-only default, explicit expanded mode, stable public surface, and migration
+  from 0.0.1. Unknown runtime behavior and ambiguous or unsupported names remain analysis limits.
+- [x] Synchronize version 1.0.0, local lock entry, dated changelog, and installation instructions.
+- [x] Run `bundle exec ruby scripts/check_release_metadata.rb --release` on the candidate.
+- [x] Run the full coverage/lint/dogfood suite, build/link-check docs, and check both public-API
+  smoke scripts. Native symlink skips on Windows must also be exercised in Linux CI.
+- [x] Refresh advisory data and pass `bundle exec rake security`, including scanner-health checks.
+- [x] Check passing/failing rules and both dependency modes on the pinned Rack/Rake/RSpec corpus.
+- [x] Build with `gem build --strict`, install that exact artifact in an isolated gem home, confirm
+  its version/path, and exercise the installed API from a clean project without the source checkout.
+
+Preparation evidence (2026-10-26): 614 examples, zero failures, eight native-symlink skips on Windows;
+98.48% library line and 91.51% branch coverage; 267 Ruby files lint-clean; 179 validated documentation
+pages; 1,269 fresh advisories with no findings and the vulnerable-fixture health check passing.
+All six pinned corpus/mode baselines matched. The isolated installed 1.0.0 artifact passed a clean
+rule, an intentionally failing one-line import change, conditional-constant policies, exclusion
+refresh, and strict malformed-source diagnostics, plus both dependency-analysis smoke scripts.
+
+## Publication remains a separate approval
+
+- [ ] Review and merge the preparation PR, then verify the full matrix on that exact `main` revision:
+  supported Ruby versions, Windows/Linux, library-only coverage, lint, dogfooding, docs, packaging,
+  installed-gem checks, security, and the downstream RAG fixture.
+- [ ] Confirm the changelog date at publication and explicitly authorize the trusted-publisher
+  `Release` workflow for version `1.0.0` on `main`. Verify the RubyGems account and configured release
+  environment still belong to the intended maintainers. Never publish merely to run checks.
+- [ ] Verify the published 1.0.0 gem and generated tag, install from RubyGems in a clean project,
+  and rerun passing/failing architecture examples before announcing availability.
+
+CLI, richer semantic method/protocol rules, presets, and gradual-adoption baselines remain in #66.
+They are not prerequisites for the initial stable API baseline.
 
 ## Audit coverage added
 
@@ -38,8 +57,8 @@ an actively changing or hostile filesystem. Dense graphs can have exponentially 
 
 ## Next useful improvements
 
-- Establish repeated real-world performance baselines on pinned Ruby repositories before setting
-  tighter thresholds. Report cold analysis, warm cache reuse, graph contents, and memory separately.
-- Add an opt-in, non-blocking real-world canary once the repository set and update policy are agreed.
+- The pinned real-world canary is implemented with manually triggered/relevant-PR checks, reviewed
+  graph fingerprints, and cold/warm/memory evidence. Review its stability and cost before scheduling
+  it or tightening thresholds; the small lib-only corpus is not a full Rails benchmark.
 - Dependency vulnerability scanning is available as a separate task/workflow. Consider mutation
   testing as another measured addition; high line coverage is not proof of semantic correctness.

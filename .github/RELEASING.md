@@ -21,6 +21,10 @@ and makes that RubyGems account an owner.
 
 ## Publishing a version
 
+Preparation and publication are separate actions. A version commit, successful CI run, or strict
+metadata check does not publish a gem. Do not dispatch `Release` for a dry run: its last step uploads
+to RubyGems and creates the version tag. Keep publication behind explicit maintainer authorization.
+
 1. Update `ArchUnit::VERSION` in `lib/archunit/version.rb` and add the release to `CHANGELOG.md`.
 2. Refresh the local gem's `Gemfile.lock` entry, date the changelog heading as
    `## <version> - YYYY-MM-DD`, and update the README installation example to `~> <version>`.

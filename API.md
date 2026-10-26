@@ -7,6 +7,20 @@ which entry point to choose and how the stages fit together.
 All rule builders are immutable and lazy. Constructing a rule does not read the project; `check`,
 `measure`, `snapshot`, and export methods are the terminals that perform work.
 
+## 1.x compatibility contract
+
+This guide defines the supported 1.0 public surface: documented entry points, fluent methods,
+options, public data/error types, and report formats. Additive capabilities can arrive in minor
+versions; incompatible public API changes require a major version and migration notes. Private
+helpers and classes marked as implementation details are not part of that compatibility promise.
+Correctness fixes can change detected violations; compatibility is not a promise to preserve missed
+dependencies or misleading clean results.
+
+Static extraction remains bounded and does not execute the target application's source or gemspecs.
+Import-only is the default; expanded constant analysis is explicit opt-in. The documented unresolved
+lookup cases, project source/exclusion policy, strict parser failures, and explicit cache-clearing
+behavior remain important when upgrading. See the README's migration notes for changes from 0.0.1.
+
 ## Common rule shape
 
 ~~~ruby

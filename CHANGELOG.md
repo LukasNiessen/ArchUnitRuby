@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.0.2 (unreleased)
+## 1.0.0 - 2026-10-26
+
+First stable API baseline. The previously unreleased 0.0.2 development work is included here;
+0.0.1 remains the preceding published version. See the README's migration notes before upgrading.
 
 - Fail closed on malformed included Ruby in dependency graphs and AST metrics, with structured
   source diagnostics and profile counters instead of silently treating incomplete analysis as clean.
