@@ -66,6 +66,48 @@ bundle install
 
 Or install it directly with `gem install archunit --version '~> 1.0.0'`.
 
+### Command line (unreleased 1.1 development feature)
+
+The development checkout adds an `archunit` executable; the published 1.0.0 gem does **not** include
+it. Use these commands from this checkout with its development bundle, or after a future 1.1 release:
+
+~~~sh
+bundle exec archunit init
+# Review and customize .archunit.rb before running checks.
+bundle exec archunit check
+bundle exec archunit check --format json --dependency-analysis imports_and_constants
+bundle exec archunit explain
+~~~
+
+The starter checks cycles in `lib/**/*.rb`. Replace or extend it with named rules, for example:
+
+~~~ruby
+# .archunit.rb -- trusted executable Ruby
+rule 'API stays out of storage' do
+  project_files.in_path('app/api/**').should_not.depend_on_files.in_path('app/db/**')
+    .because('Keep storage private')
+end
+~~~
+
+Configuration helpers `project_files` / `files`, `project_layers` / `layers`, `project_slices`, and
+`metrics` default to `--project DIRECTORY` (the working directory otherwise). `--config FILE` selects
+a configuration relative to the invocation directory; the default is `PROJECT/.archunit.rb`.
+`init` refuses to overwrite an existing destination, including directories and dangling symlinks.
+
+`check` returns exit **0** when every rule passes, **1** for architecture violations (including empty
+selections), and **2** for argument, configuration, or analysis errors. Text uses the existing
+violation wording. `--format json` returns a schema-versioned document with per-rule names, rationales,
+violations, summary counts, and structured parse diagnostics for malformed source. `explain` lists
+configured rules and settings without checking them: `configured` / `not_checked` is not a passing
+architecture result. It is not yet a semantic dependency trace or focused-path report.
+
+Only run configurations you trust: `.archunit.rb` is arbitrary executable Ruby, **not a sandbox**,
+and `explain` also loads it. For an untrusted target repository, provide your own trusted
+configuration via `--config`. The CLI does not automatically load target application source,
+evaluate a target Gemfile/gemspec, install its dependencies, or boot Rails. Invoking Bundler yourself
+still has Bundler's normal Gemfile behavior. RSpec/Minitest remain fully supported; the CLI composes
+the same Checkable rules and is not a replacement for their integrations.
+
 [ClickGems download analytics](https://clickgems.clickhouse.com/dashboard/archunit) show trends by
 date, gem version, Ruby version, system, and country. Download totals count package fetches rather
 than unique users, so repeated installs and automated clients may contribute to the total. The
@@ -641,8 +683,8 @@ The supported static-analysis boundaries below remain part of the contract.
 - `.archignore` supports exclusion globs, not negated gitignore patterns or nested ignore files.
 - Cycle traversal is iterative and tested on 10,000-node chains and rings. Enumerating every cycle
   can still be expensive in densely connected graphs; narrow the selected scope when necessary.
-- Method-call/protocol rules, a standalone CLI, presets, and adoption baselines are roadmap work,
-  not claims made by the current 1.0 API.
+- Method-call/protocol rules, presets, and adoption baselines remain roadmap work. The initial CLI
+  is unreleased 1.1 development work, not a claim about the published 1.0 API.
 
 ## 💟 Community
 

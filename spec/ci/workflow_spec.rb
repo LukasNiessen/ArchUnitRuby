@@ -44,6 +44,7 @@ RSpec.describe 'the CI workflow' do
       'gem build archunit.gemspec --strict --output pkg/archunit.gem',
       'gem install pkg/archunit.gem', "require 'archunit'", 'ArchUnit.project_files',
       'ruby scripts/check_constant_writes.rb',
+      'ruby scripts/check_cli.rb',
       'depend_on_files', 'depend_on_external_modules', "matching('json')",
       'adhere_to', 'file.extension', 'ArchUnit::Checkable',
       'ArchUnit.assert_passes', 'ArchUnit.format_violations',
@@ -76,6 +77,10 @@ RSpec.describe 'the CI workflow' do
       "require 'minitest'", 'include Minitest::Assertions',
       'context.assert_passes(rule)', 'context.assertions == 1'
     )
+  end
+
+  it 'exercises CLI acceptance on every supported compatibility platform' do
+    expect(steps).to include(include('run' => 'bundle exec ruby scripts/check_cli.rb'))
   end
 
   it 'keeps the installed-gem smoke program syntactically valid Ruby' do

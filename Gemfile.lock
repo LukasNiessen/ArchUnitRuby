@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    archunit (1.0.0)
+    archunit (1.1.0)
       csv (>= 3.3, < 4.0)
       json (>= 2.7, < 3.0)
       prism (>= 1.0, < 2.0)
@@ -112,7 +112,7 @@ DEPENDENCIES
   yard (~> 0.9.45)
 
 CHECKSUMS
-  archunit (1.0.0)
+  archunit (1.1.0)
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   bundler-audit (0.9.3) sha256=81c8766c71e47d0d28a0f98c7eed028539f21a6ea3cd8f685eb6f42333c9b4e9
   csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
