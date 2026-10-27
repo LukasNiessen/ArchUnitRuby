@@ -226,6 +226,17 @@ RSpec.describe ArchUnit::CLI do
     expect(File.directory?(File.join(@root, 'app'))).to be(true)
   end
 
+  it 'refuses an existing filesystem entry before attempting to open a configuration' do
+    link = File.join(@root, 'simulated-linked-config.rb')
+    allow(File).to receive(:lstat).with(link).and_return(double('existing filesystem entry'))
+    expect(File).not_to receive(:open)
+
+    code, output, errors = invoke('init', '--config', link, '--format=json')
+    expect(code).to eq(2)
+    expect(JSON.parse(output).dig('error', 'type')).to eq('Errno::EEXIST')
+    expect(errors).to eq('')
+  end
+
   it 'never follows or replaces a dangling configuration symlink during init' do
     link = File.join(@root, 'linked-config.rb')
     target = File.join(@root, 'missing-config.rb')

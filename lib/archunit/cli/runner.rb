@@ -52,11 +52,20 @@ module ArchUnit
       end
 
       def initialize_configuration
+        ensure_missing_configuration
         File.open(@options.config_path, File::WRONLY | File::CREAT | File::EXCL) do |file|
           file.write(Configuration::STARTER)
         end
         @report.finish('initialized')
         0
+      end
+
+      def ensure_missing_configuration
+        # Windows exclusive creation may follow a dangling symlink; inspect the entry itself.
+        File.lstat(@options.config_path)
+        raise Errno::EEXIST, @options.config_path
+      rescue Errno::ENOENT
+        nil
       end
 
       def explain(rules)

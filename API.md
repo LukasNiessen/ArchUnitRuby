@@ -285,7 +285,9 @@ archunit check --dependency-analysis imports_and_constants
 archunit explain --config ./trusted-architecture.rb
 ~~~
 
-`init` uses exclusive creation and never replaces an existing path. The default configuration is
+`init` checks the filesystem entry itself and uses exclusive creation to reject existing paths,
+including dangling symlinks on Windows. This is not a sandbox against a hostile process concurrently
+replacing filesystem entries. The default configuration is
 `PROJECT/.archunit.rb`; an explicit `--config` path is relative to the invocation directory. The
 project defaults to that working directory. Named declarations are
 `rule('unique name') { completed_checkable }`; the configuration helpers `project_files` / `files`,
