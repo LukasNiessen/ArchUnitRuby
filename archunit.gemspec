@@ -21,10 +21,12 @@ Gem::Specification.new do |spec|
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   packaged_files = [
-    'lib/**/*', 'assets/logo-rounded.png', 'README.md', 'API.md', 'CHANGELOG.md', 'LICENSE'
+    'lib/**/*', 'exe/*', 'assets/logo-rounded.png', 'README.md', 'API.md', 'CHANGELOG.md', 'LICENSE'
   ]
   spec.files = Dir[*packaged_files].select { |path| File.file?(path) }
   spec.require_paths = ['lib']
+  spec.bindir = 'exe'
+  spec.executables = ['archunit']
 
   spec.add_dependency 'csv', '>= 3.3', '< 4.0'
   spec.add_dependency 'json', '>= 2.7', '< 3.0'

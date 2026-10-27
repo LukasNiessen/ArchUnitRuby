@@ -273,6 +273,47 @@ the same file pair merge into one edge. Import-only edge evidence stays empty fo
 `ArchUnit::Extraction.extract_imports` retains import call locations in both modes. The analysis
 mode participates in graph-cache identity, and `clear_cache: true` rebuilds the symbol index.
 
+## CLI contract (unreleased 1.1 milestone)
+
+The new executable is development-only until a 1.1 release; it is not included in 1.0.0. It wraps
+Checkable rules without changing RSpec/Minitest or the library's default analysis mode.
+
+~~~sh
+archunit init --project .
+archunit check --project . --format json
+archunit check --dependency-analysis imports_and_constants
+archunit explain --config ./trusted-architecture.rb
+~~~
+
+`init` uses exclusive creation and never replaces an existing path. The default configuration is
+`PROJECT/.archunit.rb`; an explicit `--config` path is relative to the invocation directory. The
+project defaults to that working directory. Named declarations are
+`rule('unique name') { completed_checkable }`; the configuration helpers `project_files` / `files`,
+`project_layers` / `layers`, `project_slices`, and `metrics` use the selected root. Rules must be
+non-empty and uniquely named. Every `check` command starts with a fresh graph cache, then shares
+that cache across its rules.
+
+Configuration is trusted executable Ruby, not an isolation boundary. `explain` loads the same Ruby
+configuration but never calls its rules' `check` methods. It reports `configured` and per-rule
+`not_checked`, not an architecture pass. It lists rule names/rationale and settings, not a full
+semantic explanation or focused-path report. Avoid stdout writes in configuration when requesting
+machine-readable output. No target source, Gemfile, or gemspec is automatically executed by the CLI;
+the caller's own Bundler/configuration code retains its normal Ruby behavior.
+
+Exit codes: **0** for a successful informational/init/explain command or all checked rules passing;
+**1** for architecture violations; **2** for argument/configuration/analysis errors. Empty selectors
+remain violations. Text errors go to stderr; JSON diagnostics go to stdout without color. The
+format option applies to init/check/explain and errors; help/version remain plain text.
+
+`--format json` produces one document with `schema_version: 1`, `archunit_version`, `command`,
+`project_root`, `config_path`, `dependency_analysis`, `status`, `rules`, and `summary`. Rule entries
+carry `name`, nullable `rationale`, `status`, and `violations`; each violation carries its `type`,
+shared formatter `message`, and `details`. Summary counts describe completed/listed rules and their
+violations; an analysis error may stop later rules, so a partial summary is never a pass. An error
+adds `error.type`, `error.message`, and nullable `error.rule_name`; a `SourceParseError` also adds
+`error.diagnostics` with path, one-based line/column, and message. Messages/details are for people,
+not stable violation fingerprints. The CLI implementation classes are not a new fluent API.
+
 ## Errors and support
 
 Invalid API input raises `ArchUnit::UserError` or `ArgumentError`; library or environment failures

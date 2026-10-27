@@ -44,6 +44,9 @@ jobs:
       - name: Exercise dependency-analysis reproducers
         run: bundle exec ruby scripts/check_dependency_analysis.rb
 
+      - name: Exercise command-line acceptance checks
+        run: bundle exec ruby scripts/check_cli.rb
+
   quality:
     name: Quality and package — Ruby 4.0 on Ubuntu
     runs-on: ubuntu-latest
@@ -137,6 +140,7 @@ jobs:
           gem install pkg/archunit.gem --no-document
           ruby scripts/check_dependency_analysis.rb
           ruby scripts/check_constant_writes.rb
+          ruby scripts/check_cli.rb
           ruby -e "
             require 'json'
             require 'stringio'

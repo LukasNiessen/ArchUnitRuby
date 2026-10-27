@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 (unreleased)
+
+- Add an opt-in `archunit` executable with non-destructive configuration initialization, named
+  Checkable rules, check/explain commands, text or versioned JSON diagnostics, and explicit
+  success/violation/error exit codes. This is development work, not a published 1.1.0 release.
+
 ## 1.0.0 - 2026-10-26
 
 First stable API baseline. The previously unreleased 0.0.2 development work is included here;
